@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="pt" id="html-root">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Avaliação da Aula</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!--
+  SQL — Executar UMA VEZ no Supabase SQL Editor:
+
+  -- Run this in Supabase SQL Editor if reviews aren't saving:
+  create table if not exists reviews (
+    id          uuid default gen_random_uuid() primary key,
+    booking_id  uuid,
+    school_id   text not null,
+    client_name text not null,
+    rating      integer not null check (rating >= 1 and rating <= 5),
+    comment     text,
+    status      text default 'pending',
+    created_at  timestamptz default now()
+  );
+  alter table reviews enable row level security;
+  -- Drop & recreate policies to avoid duplicate errors:
+  drop policy if exists "reviews_insert" on reviews;
+  drop policy if exists "reviews_select" on reviews;
+  drop policy if exists "reviews_update" on reviews;
+  drop policy if exists "allow_all_reviews" on reviews;
+  create policy "allow_all_reviews" on reviews for all using (true) with check (true);
+
+  -- Grant anon access (fixes 42501)
+  grant all on table reviews to anon;
+  grant all on table reviews to authenticated;
+
+  -- Enable Realtime for live admin notifications
+  alter publication supabase_realtime add table reviews;
+  -->
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy:#050D1A; --ocean:#0A2540; --blue:#0070F3; --cyan:#00CFFD;
+      --gold:#C9A84C; --white:#FFFFFF; --gray:#8B9AB0;
+      --border:rgba(255,255,255,.1); --green:#22c55e; --red:#ef4444;
+      color-scheme: dark;
+    }
+    html,body { min-height:100vh; }
+    body {
+      font-family:'Inter',sans-serif; background:var(--navy); color:var(--white);
+      display:flex; flex-direction:column; align-items:center;
+      padding:2rem 1rem; min-height:100vh;
+    }
+
+    .logo { font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--gray); margin-bottom:2rem; text-align:center; }
+    .logo span { color:var(--gold); }
+
+    .card {
+      width:100%; max-width:480px;
+      background:rgba(255,255,255,.04); border:1px solid var(--border);
+      border-radius:20px; padding:2rem; backdrop-filter:blur(20px);
+    }
+
+    .school-name { font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--white); margin-bottom:.25rem; text-align:center; }
+    .lesson-info { color:var(--gray); font-size:.85rem; text-align:center; margin-bottom:1.75rem; line-height:1.5; }
+
+    /* Stars */
+    .stars-row { display:flex; justify-content:center; gap:.5rem; margin-bottom:.75rem; }
+    .star-btn {
+      font-size:2.4rem; background:none; border:none; cursor:pointer;
+      color:rgba(255,255,255,.1); transition:color .15s, transform .12s;
+      line-height:1; padding:0 .1rem;
+    }
+    .star-btn.lit { color:#f59e0b; }
+    .star-btn:hover { transform:scale(1.15); }
+    .star-label { text-align:center; font-size:.85rem; color:var(--gray); min-height:1.2em; margin-bottom:1.5rem; }
+
+    /* Form */
+    .form-group { display:flex; flex-direction:column; gap:.4rem; margin-bottom:1.1rem; }
+    label { font-size:.75rem; font-weight:600; color:var(--gray); text-transform:uppercase; letter-spacing:.05em; }
+    input[type=text], textarea {
+      background:rgba(255,255,255,.06); border:1px solid var(--border);
+      border-radius:10px; padding:.65rem .95rem; color:var(--white);
+      font-family:'Inter',sans-serif; font-size:.92rem; outline:none;
+      transition:border-color .18s; width:100%;
+    }
+    input:focus, textarea:focus { border-color:var(--cyan); background:rgba(0,207,253,.04); }
+    textarea { resize:vertical; min-height:90px; }
+
+    .btn-submit {
+      width:100%; padding:.85rem; background:linear-gradient(135deg,var(--blue),var(--cyan));
+      color:#05101e; border:none; border-radius:12px; font-family:'Inter',sans-serif;
+      font-size:1rem; font-weight:700; cursor:pointer; transition:opacity .2s, transform .15s;
+    }
+    .btn-submit:hover:not(:disabled) { opacity:.92; transform:translateY(-1px); }
+    .btn-submit:disabled { opacity:.45; cursor:not-allowed; }
+
+    /* Loading */
+    #loading { text-align:center; color:var(--gray); padding:2rem; }
+
+    /* Success */
+    #success-screen {
+      display:none; text-align:center; width:100%; max-width:480px;
+      background:rgba(255,255,255,.04); border:1px solid var(--border);
+      border-radius:20px; padding:2.5rem 2rem;
+    }
+    .success-icon { font-size:3.5rem; margin-bottom:1rem; }
+    .success-title { font-size:1.65rem; font-weight:700; margin-bottom:.4rem; }
+    .success-sub { color:var(--gray); font-size:.9rem; line-height:1.55; margin-bottom:1.5rem; }
+    .big-stars { font-size:2rem; color:#f59e0b; letter-spacing:.15rem; }
+
+    /* Error */
+    #error-screen { display:none; text-align:center; width:100%; max-width:480px; padding:2rem; }
+    .error-title { font-size:1.3rem; font-weight:700; color:#fca5a5; margin-bottom:.5rem; }
+    .error-sub { color:var(--gray); font-size:.88rem; }
+
+    /* Already done */
+    #already-screen { display:none; text-align:center; width:100%; max-width:420px; padding:2rem; color:var(--gray); }
+  </style>
+</head>
+<body>
+
+<div class="logo">Surf<span>Book</span></div>
+
+<div id="loading">A carregar...</div>
+
+<div class="card" id="review-card" style="display:none">
+  <div class="school-name" id="school-name">—</div>
+  <div class="lesson-info" id="lesson-info">—</div>
+
+  <div class="stars-row" id="stars-row">
+    <button class="star-btn" data-v="1" onclick="setRating(1)">★</button>
+    <button class="star-btn" data-v="2" onclick="setRating(2)">★</button>
+    <button class="star-btn" data-v="3" onclick="setRating(3)">★</button>
+    <button class="star-btn" data-v="4" onclick="setRating(4)">★</button>
+    <button class="star-btn" data-v="5" onclick="setRating(5)">★</button>
+  </div>
+  <div class="star-label" id="star-label">Selecione uma classificação</div>
+
+  <div class="form-group">
+    <label id="lbl-comment">Comentário <span style="font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></label>
+    <textarea id="f-comment" rows="4"></textarea>
+  </div>
+  <div class="form-group">
+    <label id="lbl-name">O seu nome</label>
+    <input type="text" id="f-name" />
+  </div>
+
+  <button class="btn-submit" id="btn-submit" onclick="submitReview()" disabled>Enviar Avaliação</button>
+</div>
+
+<div id="success-screen">
+  <div class="success-icon">🎉</div>
+  <div class="big-stars" id="success-stars">★★★★★</div>
+  <h1 class="success-title" id="success-title">Obrigado pela avaliação!</h1>
+  <p class="success-sub" id="success-sub">A sua opinião ajuda outros surfistas a escolher e motiva a nossa equipa a continuar a melhorar.</p>
+</div>
+
+<div id="already-screen">
+  <div style="font-size:2.5rem;margin-bottom:1rem">✅</div>
+  <div id="already-msg" style="font-size:.95rem">Já submeteu uma avaliação para esta aula. Obrigado!</div>
+</div>
+
+<div id="error-screen">
+  <div class="error-title" id="error-title">Não foi possível carregar</div>
+  <div class="error-sub" id="error-sub">O link pode estar incorrecto ou expirado.</div>
+</div>
+
+<script>
+  const { createClient } = supabase;
+  const sb = createClient(
+    'https://ubeqidccuvsjhjphybxz.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InViZXFpZGNjdXZzamhqcGh5Ynh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDI0NTYsImV4cCI6MjA5NTkxODQ1Nn0.wyCBBMSuRfxrz935XifGa3Chgv64o4-ACvP5rCj7t1U'
+  );
+
+  // i18n strings
+  const STRINGS = {
+    pt: {
+      loading: 'A carregar...', question: 'Como foi a sua aula?',
+      star_labels: ['','Muito mau','Fraco','Razoável','Bom','Excelente!'],
+      lbl_comment: 'Comentário (opcional)', lbl_name: 'O seu nome',
+      placeholder_comment: 'O que gostou mais? O que podemos melhorar?',
+      btn: 'Enviar Avaliação', success_title: 'Obrigado!',
+      success_sub: 'A sua avaliação foi submetida e será publicada em breve. A sua opinião faz a diferença!',
+      already: 'Já submeteu uma avaliação para esta aula. Obrigado!',
+      err_title: 'Não foi possível carregar', err_sub: 'O link pode estar incorrecto ou expirado.',
+      select_rating: 'Selecione uma classificação',
+    },
+    en: {
+      loading: 'Loading...', question: 'How was your lesson?',
+      star_labels: ['','Very poor','Poor','OK','Good','Excellent!'],
+      lbl_comment: 'Comment (optional)', lbl_name: 'Your name',
+      placeholder_comment: 'What did you enjoy most? What could we improve?',
+      btn: 'Submit Review', success_title: 'Thank you!',
+      success_sub: 'Your review has been submitted and will be published shortly. Your feedback makes a difference!',
+      already: 'You have already reviewed this lesson. Thank you!',
+      err_title: 'Could not load', err_sub: 'The link may be incorrect or expired.',
+      select_rating: 'Select a rating',
+    },
+    fr: {
+      loading: 'Chargement...', question: 'Comment était votre cours?',
+      star_labels: ['','Très mauvais','Mauvais','Correct','Bien','Excellent!'],
+      lbl_comment: 'Commentaire (facultatif)', lbl_name: 'Votre nom',
+      placeholder_comment: 'Qu\'avez-vous le plus aimé? Que pouvons-nous améliorer?',
+      btn: 'Soumettre un avis', success_title: 'Merci!',
+      success_sub: 'Votre avis a été soumis et sera publié prochainement.',
+      already: 'Vous avez déjà soumis un avis pour ce cours. Merci!',
+      err_title: 'Impossible de charger', err_sub: 'Le lien est peut-être incorrect.',
+      select_rating: 'Sélectionnez une note',
+    },
+    de: {
+      loading: 'Laden...', question: 'Wie war dein Surfkurs?',
+      star_labels: ['','Sehr schlecht','Schlecht','In Ordnung','Gut','Ausgezeichnet!'],
+      lbl_comment: 'Kommentar (optional)', lbl_name: 'Dein Name',
+      placeholder_comment: 'Was hat dir am besten gefallen? Was können wir verbessern?',
+      btn: 'Bewertung senden', success_title: 'Danke!',
+      success_sub: 'Deine Bewertung wurde eingereicht und wird bald veröffentlicht.',
+      already: 'Du hast diese Lektion bereits bewertet. Danke!',
+      err_title: 'Laden fehlgeschlagen', err_sub: 'Der Link ist möglicherweise falsch.',
+      select_rating: 'Wähle eine Bewertung',
+    },
+    es: {
+      loading: 'Cargando...', question: '¿Cómo fue tu clase?',
+      star_labels: ['','Muy malo','Malo','Regular','Bueno','¡Excelente!'],
+      lbl_comment: 'Comentario (opcional)', lbl_name: 'Tu nombre',
+      placeholder_comment: '¿Qué disfrutaste más? ¿Qué podemos mejorar?',
+      btn: 'Enviar reseña', success_title: '¡Gracias!',
+      success_sub: 'Tu reseña ha sido enviada y se publicará pronto.',
+      already: 'Ya has enviado una reseña para esta clase. ¡Gracias!',
+      err_title: 'No se pudo cargar', err_sub: 'El enlace puede ser incorrecto.',
+      select_rating: 'Selecciona una puntuación',
+    },
+    nl: {
+      loading: 'Laden...', question: 'Hoe was je les?',
+      star_labels: ['','Zeer slecht','Slecht','Redelijk','Goed','Uitstekend!'],
+      lbl_comment: 'Opmerking (optioneel)', lbl_name: 'Jouw naam',
+      placeholder_comment: 'Wat vond je het leukst? Wat kunnen we verbeteren?',
+      btn: 'Beoordeling insturen', success_title: 'Bedankt!',
+      success_sub: 'Jouw beoordeling is ingediend en wordt binnenkort gepubliceerd.',
+      already: 'Je hebt deze les al beoordeeld. Bedankt!',
+      err_title: 'Kan niet laden', err_sub: 'De link is mogelijk onjuist.',
+      select_rating: 'Selecteer een beoordeling',
+    },
+  };
+
+  let selectedRating = 0;
+  let bookingData = null;
+  let detectedLang = 'pt';
+
+  function t(key) { return (STRINGS[detectedLang] || STRINGS['pt'])[key] || STRINGS['pt'][key]; }
+
+  async function init() {
+    const params = new URLSearchParams(location.search);
+    const bookingId = params.get('b');
+    if (!bookingId) { showError(); return; }
+
+    // Check if already reviewed
+    const { data: existing } = await sb.from('reviews').select('id').eq('booking_id', bookingId).limit(1);
+    if (existing && existing.length > 0) { showAlready(); return; }
+
+    // Load booking
+    const { data: booking, error } = await sb.from('bookings').select('id,school_id,client_name,client_country,language,lesson_type,booking_date,booking_time').eq('id', bookingId).single();
+    if (error || !booking) { showError(); return; }
+
+    bookingData = booking;
+
+    // Detect language
+    const COUNTRY_LANG = {
+      'United Kingdom':'en','USA':'en','Canada':'en','Ireland':'en',
+      'France':'fr','Belgium':'fr','Switzerland':'fr',
+      'Germany':'de','Austria':'de','Spain':'es',
+      'Netherlands':'nl','Brasil':'pt','Brazil':'pt',
+    };
+    detectedLang = booking.language || 'pt';
+    if (booking.client_country) {
+      const cn = booking.client_country.replace(/^\S+\s/, '');
+      if (COUNTRY_LANG[cn]) detectedLang = COUNTRY_LANG[cn];
+    }
+    if (!STRINGS[detectedLang]) detectedLang = 'pt';
+    document.getElementById('html-root').lang = detectedLang;
+
+    // Load school name + email for notification
+    let schoolName  = booking.school_id;
+    let schoolEmail = 'ivocasimiro@gmail.com';
+    try {
+      const { data: school } = await sb.from('schools').select('name,email').eq('id', booking.school_id).single();
+      if (school) { schoolName = school.name || schoolName; schoolEmail = school.email || schoolEmail; }
+    } catch(_) {}
+
+    // Render
+    const [y,m,d] = booking.booking_date.split('-');
+    document.getElementById('school-name').textContent = schoolName;
+    document.getElementById('lesson-info').textContent = `${booking.lesson_type} · ${d}/${m}/${y} ${booking.booking_time}`;
+    document.getElementById('f-name').value = booking.client_name || '';
+    document.getElementById('f-comment').placeholder = t('placeholder_comment');
+    document.getElementById('lbl-comment').textContent = t('lbl_comment');
+    document.getElementById('lbl-name').textContent    = t('lbl_name');
+    document.getElementById('btn-submit').textContent  = t('btn');
+    document.getElementById('star-label').textContent  = t('select_rating');
+    document.title = schoolName + ' — ' + t('question');
+
+    document.getElementById('loading').style.display    = 'none';
+    document.getElementById('review-card').style.display = 'block';
+  }
+
+  function setRating(v) {
+    selectedRating = v;
+    document.querySelectorAll('.star-btn').forEach(b => {
+      b.classList.toggle('lit', +b.dataset.v <= v);
+    });
+    document.getElementById('star-label').textContent = t('star_labels')[v] || '';
+    document.getElementById('btn-submit').disabled = false;
+  }
+
+  async function submitReview() {
+    if (!selectedRating || !bookingData) return;
+    const btn = document.getElementById('btn-submit');
+    btn.disabled = true; btn.textContent = '...';
+    const name     = document.getElementById('f-name').value.trim() || bookingData.client_name || 'Anónimo';
+    const comment  = document.getElementById('f-comment').value.trim() || null;
+    const schoolId = bookingData.school_id || 'escola-teste';
+
+    const { error } = await sb.from('reviews').insert({
+      booking_id:  bookingData.id,
+      school_id:   schoolId,
+      client_name: name,
+      rating:      selectedRating,
+      comment:     comment,
+      status:      'pending',
+    });
+
+    if (error) {
+      console.error('Review insert error:', error);
+      btn.disabled=false; btn.textContent=t('btn');
+      alert('Erro ao submeter (' + (error.code || error.message || 'unknown') + '). Tenta novamente.');
+      return;
+    }
+
+    // Email notification to school owner (fire-and-forget)
+    try {
+      const stars   = '★'.repeat(selectedRating) + '☆'.repeat(5 - selectedRating);
+      const [y,m,d] = (bookingData.booking_date || '').split('-');
+      const dateStr = d && m && y ? `${d}/${m}/${y}` : bookingData.booking_date || '';
+      const msgBody = [
+        `Nova avaliação recebida em ${schoolName}!`,
+        ``,
+        `Cliente: ${name}`,
+        `Aula: ${bookingData.lesson_type || ''} · ${dateStr} ${bookingData.booking_time || ''}`,
+        `Avaliação: ${stars} (${selectedRating}/5)`,
+        comment ? `Comentário: "${comment}"` : '',
+        ``,
+        `Ver no painel: https://auditoria-25b.pages.dev/admin`,
+      ].filter(Boolean).join('\n');
+
+      await fetch(`https://formsubmit.co/ajax/${schoolEmail}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          _subject: `⭐ Nova avaliação de ${name} — ${schoolName}`,
+          _template: 'box',
+          name: 'SurfBook Avaliações',
+          email: 'noreply@surfbook.com',
+          message: msgBody,
+        }),
+      });
+    } catch(_) {}
+
+    document.getElementById('review-card').style.display    = 'none';
+    document.getElementById('success-screen').style.display = 'block';
+    document.getElementById('success-title').textContent    = t('success_title');
+    document.getElementById('success-sub').textContent      = t('success_sub');
+    document.getElementById('success-stars').textContent    = '★'.repeat(selectedRating) + '☆'.repeat(5-selectedRating);
+  }
+
+  function showError() {
+    document.getElementById('loading').style.display    = 'none';
+    document.getElementById('error-screen').style.display = 'block';
+  }
+  function showAlready() {
+    document.getElementById('loading').style.display     = 'none';
+    document.getElementById('already-screen').style.display = 'block';
+    document.getElementById('already-msg').textContent   = t('already');
+  }
+
+  init();
+</script>
+</body>
+</html>
