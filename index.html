@@ -1,0 +1,2546 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Escola Surf Teste · Aulas de Surf · Costa Vicentina</title>
+  <meta name="description" content="Escola de surf na Costa Vicentina. Aulas para todos os níveis, instrutores ISA certificados. Reserva online em minutos via WhatsApp." />
+  <meta name="theme-color" content="#060D1B" />
+  <meta name="color-scheme" content="dark" />
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Escola Surf Teste — Reserva a tua aula" />
+  <meta property="og:description" content="Escola de surf na Costa Vicentina. Aulas para todos os níveis, instrutores ISA certificados. Reserva online em minutos." />
+  <meta property="og:image" content="https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=1200&q=85" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <!-- Fonts & performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="dns-prefetch" href="https://marine-api.open-meteo.com" />
+  <link rel="dns-prefetch" href="https://api.open-meteo.com" />
+  <link rel="dns-prefetch" href="https://formsubmit.co" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --navy:#060D1B;--ocean:#0A2540;--blue:#1A6CF0;--cyan:#00CFFD;
+      --teal:#00A896;--gold:#C9A84C;--white:#FFF;
+      --gray:#8B9AB0;--card:rgba(255,255,255,0.05);--border:rgba(255,255,255,0.1);
+      --green:#22c55e;--red:#ef4444;
+    }
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden}
+
+    /* CONDITIONS BAR */
+    .cb{background:rgba(6,13,27,0.92);border-bottom:1px solid rgba(201,168,76,0.15);padding:.4rem 5%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;font-size:.75rem;color:var(--gray);position:fixed;top:0;left:0;right:0;z-index:200;backdrop-filter:blur(16px)}
+    .ci{display:flex;align-items:center;gap:.35rem}
+    .cv{color:var(--white);font-weight:600}
+    .cg{color:var(--green)}
+    .ls{display:flex;gap:.3rem}
+    .lb{padding:.2rem .55rem;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--gray);font-size:.68rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
+    .lb.active,.lb:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.08)}
+
+    /* NAV */
+    nav{position:fixed;top:33px;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:.9rem 5%;backdrop-filter:blur(24px);background:rgba(6,13,27,0.9);border-bottom:1px solid var(--border)}
+    .logo{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;letter-spacing:.02em}
+    .logo span{color:var(--gold)}
+    nav ul{display:flex;gap:1.8rem;list-style:none}
+    nav a{color:var(--gray);text-decoration:none;font-size:.86rem;font-weight:500;transition:color .2s}
+    nav a:hover{color:var(--white)}
+    nav a.active{color:var(--white);font-weight:600}
+    .nav-cta{background:var(--gold);color:var(--navy)!important;padding:.42rem 1.2rem;border-radius:50px;font-weight:700!important;transition:box-shadow .2s,transform .2s!important}
+    .nav-cta:hover,.nav-cta.active{box-shadow:0 4px 20px rgba(201,168,76,.4);transform:translateY(-1px);color:var(--navy)!important}
+    .hbg{display:none;cursor:pointer;flex-direction:column;gap:5px;background:none;border:none;padding:.3rem}
+    .hbg span{display:block;width:24px;height:2px;background:var(--white);border-radius:2px;transition:all .3s}
+    .hbg.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+    .hbg.open span:nth-child(2){opacity:0}
+    .hbg.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+    .nav-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:98;backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .3s}
+    .nav-overlay.open{opacity:1;pointer-events:all}
+    /* Visitor counter */
+    .vc{display:flex;align-items:center;gap:.35rem;font-size:.75rem;color:var(--gray)}
+    .vc-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:vcpulse 2s infinite;flex-shrink:0}
+    @keyframes vcpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.85)}}
+
+    /* HERO */
+    .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+    .hero-photo{position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1502680390469-be75c86b636f?auto=format&fit=crop&w=1920&q=85') center/cover no-repeat;transform:scale(1.04);transition:transform 10s ease}
+    .hero-photo.loaded{transform:scale(1)}
+    .hero-ov{position:absolute;inset:0;background:linear-gradient(150deg,rgba(6,13,27,.8) 0%,rgba(6,13,27,.45) 55%,rgba(6,13,27,.7) 100%)}
+    .hero-bot{position:absolute;bottom:0;left:0;right:0;height:220px;background:linear-gradient(to top,var(--navy) 0%,transparent 100%)}
+    .hero-content{position:relative;z-index:2;text-align:center;max-width:860px;padding:0 2rem}
+    .hero-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);padding:.38rem 1.1rem;border-radius:50px;font-size:.74rem;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1.8rem}
+    .hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(3.5rem,9vw,7rem);line-height:1.02;margin-bottom:1.6rem;font-weight:700;text-shadow:0 2px 40px rgba(0,0,0,.5)}
+    .hero h1 em{font-style:italic;color:var(--gold)}
+    .hero p{font-size:1.05rem;color:rgba(255,255,255,.8);line-height:1.75;max-width:540px;margin:0 auto 2.8rem;font-weight:300}
+    .hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+    .btn-primary{padding:.9rem 2.2rem;background:var(--gold);color:var(--navy);border:none;border-radius:50px;font-size:.95rem;font-weight:700;cursor:pointer;text-decoration:none;transition:transform .2s,box-shadow .2s;box-shadow:0 4px 24px rgba(201,168,76,.35);font-family:'Inter',sans-serif;display:inline-block}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 36px rgba(201,168,76,.5)}
+    .btn-outline{padding:.9rem 2.2rem;background:transparent;color:white;border:1px solid rgba(255,255,255,.35);border-radius:50px;font-size:.95rem;font-weight:500;cursor:pointer;text-decoration:none;transition:background .2s,border-color .2s;font-family:'Inter',sans-serif;display:inline-block}
+    .btn-outline:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.6)}
+    .hero-stats{display:flex;justify-content:center;margin-top:4rem;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.12);padding-top:2.5rem}
+    .stat{text-align:center;padding:0 2.5rem;border-right:1px solid rgba(255,255,255,.1)}
+    .stat:last-child{border-right:none}
+    .stat-num{font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:700;color:var(--gold);line-height:1}
+    .stat-label{font-size:.71rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.1em;margin-top:.3rem}
+    .scroll-hint{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.4rem;z-index:2;animation:bounce 2.5s infinite}
+    .scroll-hint span{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.35)}
+    .scroll-arrow{width:18px;height:18px;border-right:2px solid rgba(255,255,255,.3);border-bottom:2px solid rgba(255,255,255,.3);transform:rotate(45deg)}
+    @keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(7px)}}
+
+    /* SECTIONS */
+    section{padding:6rem 5%;scroll-margin-top:90px}
+    .section-tag{display:inline-block;font-size:.68rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:.8rem}
+    .section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4.5vw,3rem);line-height:1.12;margin-bottom:1rem;font-weight:700}
+    .section-sub{color:var(--gray);font-size:.97rem;line-height:1.75;max-width:560px}
+    .section-center{text-align:center}
+    .section-center .section-sub{margin:0 auto 3.5rem}
+
+    /* ABOUT */
+    .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:center;max-width:1100px;margin:0 auto}
+    .about-photo-wrap{position:relative;border-radius:24px;overflow:hidden;height:500px}
+    .about-photo-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+    .about-badge{position:absolute;bottom:1.8rem;left:1.8rem;background:var(--gold);color:var(--navy);padding:1rem 1.4rem;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+    .about-badge strong{display:block;font-size:1.5rem;font-weight:700;font-family:'Cormorant Garamond',serif}
+    .about-badge span{font-size:.72rem;font-weight:600;opacity:.85}
+    .features{margin-top:2rem;display:flex;flex-direction:column;gap:1rem}
+    .feature{display:flex;align-items:flex-start;gap:1rem;padding:1.1rem;background:var(--card);border:1px solid var(--border);border-radius:14px;transition:border-color .2s}
+    .feature:hover{border-color:rgba(201,168,76,.3)}
+    .feature-icon{width:44px;height:44px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+    .feature h4{font-size:.9rem;font-weight:600;margin-bottom:.25rem}
+    .feature p{font-size:.81rem;color:var(--gray);line-height:1.55}
+
+    /* BEACHES */
+    .beaches{background:linear-gradient(180deg,var(--navy) 0%,rgba(10,37,64,.5) 100%)}
+    .beaches-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.2rem;max-width:1100px;margin:3.5rem auto 0}
+    .beach-card{border-radius:22px;overflow:hidden;position:relative;height:380px;cursor:pointer}
+    .beach-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform .6s ease}
+    .beach-card:hover .beach-bg{transform:scale(1.06)}
+    .beach-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(6,13,27,.95) 0%,rgba(6,13,27,.4) 55%,rgba(6,13,27,.15) 100%);transition:background .3s}
+    .beach-card:hover .beach-ov{background:linear-gradient(to top,rgba(6,13,27,.98) 0%,rgba(6,13,27,.6) 55%,rgba(6,13,27,.3) 100%)}
+    .beach-body{position:absolute;bottom:0;left:0;right:0;padding:1.6rem}
+    .beach-tag{display:inline-block;font-size:.62rem;font-weight:700;padding:.2rem .65rem;border-radius:50px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.8rem}
+    .tag-beg{background:rgba(34,197,94,.18);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+    .tag-adv{background:rgba(239,68,68,.18);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+    .tag-all{background:rgba(201,168,76,.18);color:var(--gold);border:1px solid rgba(201,168,76,.3)}
+    .beach-body h3{font-family:'Cormorant Garamond',serif;font-size:1.55rem;font-weight:700;margin-bottom:.5rem}
+    .beach-body p{font-size:.8rem;color:rgba(255,255,255,.62);line-height:1.55;margin-bottom:.9rem}
+    .beach-meta{display:flex;gap:.5rem;flex-wrap:wrap}
+    .bm{font-size:.68rem;color:rgba(255,255,255,.48);background:rgba(255,255,255,.06);padding:.17rem .55rem;border-radius:50px;border:1px solid rgba(255,255,255,.1)}
+
+    /* TIDES */
+    .tides{background:linear-gradient(180deg,rgba(10,37,64,.4) 0%,var(--navy) 100%)}
+    .tide-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(138px,1fr));gap:.75rem;max-width:1100px;margin:3.5rem auto 0}
+    .tide-day{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:1.15rem .9rem;text-align:center;transition:transform .2s,border-color .2s}
+    .tide-day:hover{transform:translateY(-3px);border-color:rgba(201,168,76,.3)}
+    .tide-day.today{border-color:rgba(201,168,76,.5);background:rgba(201,168,76,.05)}
+    .tdn{font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--gray);margin-bottom:.3rem}
+    .tdd{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:700;margin-bottom:.9rem}
+    .te{display:flex;align-items:center;justify-content:space-between;gap:.4rem;margin:.3rem 0;font-size:.77rem}
+    .tt{color:var(--white);font-weight:600}
+    .th{color:var(--cyan);font-weight:700}
+    .tl{color:var(--gray);font-weight:700}
+    .tau{color:var(--cyan)}
+    .tad{color:var(--gray)}
+    .surf-score{margin-top:.9rem;padding-top:.7rem;border-top:1px solid var(--border)}
+    .surf-dots{display:flex;justify-content:center;gap:3px;margin-bottom:.3rem}
+    .sd{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.12)}
+    .sd.on{background:var(--green);box-shadow:0 0 5px var(--green)}
+    .sd.mid{background:var(--gold);box-shadow:0 0 5px var(--gold)}
+    .sd.off{background:var(--red)}
+    .surf-label{font-size:.63rem;color:var(--gray)}
+
+    /* GALLERY */
+    .gallery{background:var(--navy);padding:6rem 5%}
+    .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:260px 260px;gap:1rem;max-width:1100px;margin:3.5rem auto 0}
+    .gi{border-radius:18px;overflow:hidden;position:relative;cursor:pointer}
+    .gi:nth-child(1){grid-row:span 2}
+    .gi:nth-child(5){grid-column:span 2}
+    .gi img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s ease}
+    .gi:hover img{transform:scale(1.06)}
+    .gi-ov{position:absolute;inset:0;background:rgba(6,13,27,0);transition:background .3s}
+    .gi:hover .gi-ov{background:rgba(6,13,27,.2)}
+
+    /* LESSONS */
+    .lessons{background:linear-gradient(180deg,var(--navy) 0%,var(--ocean) 50%,var(--navy) 100%)}
+    .lessons-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.3rem;max-width:1100px;margin:3.5rem auto 0}
+    .lesson-card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:2rem;position:relative;overflow:hidden;transition:transform .3s,border-color .3s,box-shadow .3s}
+    .lesson-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--cyan));transform:scaleX(0);transition:transform .3s}
+    .lesson-card:hover{transform:translateY(-6px);border-color:rgba(201,168,76,.3);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+    .lesson-card:hover::before{transform:scaleX(1)}
+    .lesson-card.featured{background:linear-gradient(135deg,rgba(201,168,76,.08),rgba(0,207,253,.05));border-color:rgba(201,168,76,.35)}
+    .lesson-card.featured::before{transform:scaleX(1)}
+    .badge-popular{position:absolute;top:1rem;right:1rem;background:var(--gold);color:var(--navy);font-size:.62rem;font-weight:700;padding:.2rem .65rem;border-radius:50px;text-transform:uppercase;letter-spacing:.06em}
+    .lesson-emoji{font-size:2.4rem;margin-bottom:1rem;display:block}
+    .lesson-card h3{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;margin-bottom:.45rem}
+    .lesson-card p{font-size:.82rem;color:var(--gray);line-height:1.65;margin-bottom:1.3rem}
+    .lesson-meta{display:flex;gap:.55rem;flex-wrap:wrap;margin-bottom:1.3rem}
+    .meta-tag{display:flex;align-items:center;gap:.25rem;font-size:.73rem;color:var(--cyan);background:rgba(0,207,253,.08);border:1px solid rgba(0,207,253,.18);padding:.24rem .62rem;border-radius:50px}
+    .lesson-price{display:flex;align-items:baseline;gap:.35rem}
+    .price-val{font-family:'Cormorant Garamond',serif;font-size:2.1rem;font-weight:700;color:var(--gold)}
+    .price-unit{font-size:.82rem;color:var(--gray)}
+    .includes{margin-top:1.1rem;padding-top:1rem;border-top:1px solid var(--border)}
+    .includes-title{font-size:.67rem;text-transform:uppercase;letter-spacing:.09em;color:var(--gray);margin-bottom:.55rem}
+    .include-item{font-size:.78rem;color:var(--gray);display:flex;align-items:center;gap:.4rem;margin:.25rem 0}
+    .include-item::before{content:'✓';color:var(--gold);font-weight:700}
+
+    /* TESTIMONIALS */
+    .testimonials{background:linear-gradient(180deg,var(--navy) 0%,rgba(10,37,64,.4) 100%)}
+    .reviews-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;max-width:1050px;margin:3.5rem auto 0}
+    .review-card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:2rem;position:relative;transition:transform .3s,border-color .3s}
+    .review-card:hover{transform:translateY(-4px);border-color:rgba(201,168,76,.25)}
+    .rq{font-family:'Cormorant Garamond',serif;font-size:3.5rem;line-height:1;color:var(--gold);opacity:.2;position:absolute;top:1rem;right:1.5rem;font-style:italic}
+    .review-stars{color:var(--gold);font-size:.85rem;margin-bottom:1.2rem;letter-spacing:.08em}
+    .review-text{font-size:.9rem;line-height:1.75;color:rgba(255,255,255,.78);margin-bottom:1.6rem;font-style:italic}
+    .review-author{display:flex;align-items:center;gap:.9rem}
+    .review-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--blue));display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:white;flex-shrink:0}
+    .review-name{font-size:.88rem;font-weight:600}
+    .review-loc{font-size:.74rem;color:var(--gray)}
+
+    /* BOOKING */
+    .booking-wrap{max-width:960px;margin:3.5rem auto 0;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:28px;overflow:hidden}
+    .booking-steps{display:flex;background:rgba(0,0,0,.2);border-bottom:1px solid var(--border)}
+    .step-tab{flex:1;padding:1.1rem .5rem;text-align:center;font-size:.76rem;font-weight:600;color:var(--gray);position:relative;transition:color .2s;cursor:default}
+    .step-tab.active{color:var(--gold)}
+    .step-tab.done{color:var(--teal)}
+    .step-tab::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--gold);transform:scaleX(0);transition:transform .3s}
+    .step-tab.active::after,.step-tab.done::after{transform:scaleX(1)}
+    .step-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:.72rem;font-weight:700;background:rgba(255,255,255,.1);margin-right:.4rem;transition:background .2s}
+    .step-tab.active .step-num{background:var(--gold);color:var(--navy)}
+    .step-tab.done .step-num{background:var(--teal);color:white}
+    .booking-body{padding:2.5rem}
+    .step-panel{display:none}
+    .step-panel.active{display:block;animation:fadeIn .3s ease}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .step-title{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;margin-bottom:.4rem}
+    .step-desc{font-size:.87rem;color:var(--gray);margin-bottom:2rem}
+    .lesson-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:.9rem}
+    .lesson-option{padding:1.3rem;background:var(--card);border:2px solid var(--border);border-radius:16px;cursor:pointer;transition:all .2s;text-align:center}
+    .lesson-option:hover{border-color:rgba(201,168,76,.4);background:rgba(201,168,76,.05)}
+    .lesson-option.selected{border-color:var(--gold);background:rgba(201,168,76,.1)}
+    .lesson-option .opt-icon{font-size:2rem;margin-bottom:.55rem;display:block}
+    .lesson-option .opt-name{font-weight:600;font-size:.88rem;margin-bottom:.25rem}
+    .lesson-option .opt-price{font-size:.75rem;color:var(--gold)}
+    .calendar-wrap{max-width:600px}
+    .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.3rem}
+    .cal-title{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:700}
+    .cal-nav{width:38px;height:38px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--white);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+    .cal-nav:hover{border-color:var(--gold);color:var(--gold)}
+    .cal-days-header{display:grid;grid-template-columns:repeat(7,1fr);gap:.3rem;margin-bottom:.4rem}
+    .cal-dh{text-align:center;font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--gray);padding:.3rem 0}
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.3rem}
+    .cal-cell{min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:10px;font-size:.84rem;font-weight:500;cursor:pointer;transition:all .2s;position:relative;border:1px solid transparent;padding:.3rem .1rem .7rem;gap:1px}
+    .cal-cell.empty{cursor:default}
+    .cal-cell.past{color:rgba(255,255,255,.2);cursor:not-allowed}
+    .cal-cell.available{color:var(--white)}
+    .cal-cell.available:hover{background:rgba(201,168,76,.12);border-color:rgba(201,168,76,.4)}
+    .cal-cell.selected{background:var(--gold);color:var(--navy);font-weight:700;border-color:var(--gold)}
+    .cal-cell.today{border-color:rgba(201,168,76,.5)}
+    .cal-cell .avail-dot{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--green)}
+    .cal-avail{font-size:.56rem;font-weight:700;line-height:1;white-space:nowrap;position:absolute;bottom:3px;left:0;right:0;text-align:center}
+    .cal-avail.ok{color:#22c55e}
+    .cal-avail.low{color:#f59e0b}
+    .cal-avail.full{color:#ef4444;font-size:.5rem}
+    .cal-cell.selected .cal-avail{color:rgba(0,0,0,.65)!important}
+    .cal-temp{font-size:.56rem;font-weight:600;color:rgba(255,180,50,.85);line-height:1;white-space:nowrap;letter-spacing:-.01em}
+    .cal-temp-min{color:rgba(110,200,255,.75);font-weight:500}
+    .cal-cell.selected .cal-temp{color:rgba(0,0,0,.65)}
+    .cal-cell.selected .cal-temp-min{color:rgba(0,0,0,.45)}
+    .cal-cell.past .cal-temp{opacity:.35}
+    .slots-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.9rem}
+    .slot-card{padding:1.2rem;background:var(--card);border:1px solid var(--border);border-radius:14px;cursor:pointer;transition:all .2s;position:relative}
+    .slot-card.available:hover{border-color:rgba(201,168,76,.4);background:rgba(201,168,76,.06)}
+    .slot-card.selected{border-color:var(--gold);background:rgba(201,168,76,.1)}
+    .slot-card.full{opacity:.4;cursor:not-allowed}
+    .slot-time{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;margin-bottom:.4rem}
+    .slot-status{font-size:.75rem;color:var(--gray);display:flex;align-items:center;gap:.35rem}
+    .adi{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+    .available .adi{background:var(--green);box-shadow:0 0 5px var(--green)}
+    .full .adi{background:var(--red)}
+    .slot-badge-full{position:absolute;top:.6rem;right:.6rem;font-size:.6rem;font-weight:700;padding:.15rem .45rem;border-radius:50px;background:rgba(239,68,68,.15);color:var(--red);text-transform:uppercase}
+    .slot-vagas{font-size:.71rem;color:var(--gray);margin-top:.3rem}
+    .booking-summary{background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2);border-radius:16px;padding:1.4rem;margin-bottom:1.5rem}
+    .summary-title{font-size:.72rem;color:var(--gold);text-transform:uppercase;letter-spacing:.09em;margin-bottom:1rem;font-weight:600}
+    .summary-items{display:flex;flex-direction:column;gap:.55rem}
+    .summary-item{display:flex;justify-content:space-between;font-size:.87rem}
+    .summary-item span{color:var(--gray)}
+    .summary-item strong{color:var(--white)}
+    .summary-total{display:flex;justify-content:space-between;margin-top:.8rem;padding-top:.8rem;border-top:1px solid var(--border);font-size:.95rem;font-weight:700}
+    .total-price{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.3rem}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;margin-bottom:1.6rem}
+    .form-group{display:flex;flex-direction:column;gap:.4rem}
+    .form-group.full{grid-column:1/-1}
+    label{font-size:.8rem;font-weight:500;color:var(--gray)}
+    input,select,textarea{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:12px;padding:.85rem 1rem;color:var(--white);font-family:'Inter',sans-serif;font-size:.9rem;transition:border-color .2s;outline:none;width:100%}
+    input::placeholder,textarea::placeholder{color:#3a4a5e}
+    input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+    select option{background:var(--ocean)}
+    textarea{resize:vertical;min-height:80px}
+    .btn-whatsapp{width:100%;padding:1.1rem;background:#25D366;color:white;border:none;border-radius:14px;font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.65rem;transition:transform .2s,box-shadow .2s;box-shadow:0 4px 24px rgba(37,211,102,.3);font-family:'Inter',sans-serif}
+    .btn-whatsapp:hover{transform:translateY(-2px);box-shadow:0 8px 36px rgba(37,211,102,.45)}
+    .nav-btns{display:flex;justify-content:space-between;margin-top:2rem;gap:1rem}
+    .btn-back{padding:.8rem 1.6rem;background:transparent;border:1px solid var(--border);border-radius:12px;color:var(--gray);font-size:.88rem;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s}
+    .btn-back:hover{border-color:rgba(255,255,255,.3);color:var(--white)}
+    .btn-next{flex:1;padding:.85rem 1.6rem;background:var(--gold);border:none;border-radius:12px;color:var(--navy);font-size:.9rem;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:transform .2s,box-shadow .2s;box-shadow:0 4px 18px rgba(201,168,76,.3)}
+    .btn-next:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(201,168,76,.45)}
+    .btn-next:disabled{opacity:.35;cursor:not-allowed;transform:none}
+
+    /* INSTRUCTORS */
+    .instructors-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.3rem;max-width:900px;margin:3.5rem auto 0}
+    .instructor-card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:2rem;text-align:center;transition:transform .3s,border-color .3s}
+    .instructor-card:hover{transform:translateY(-5px);border-color:rgba(201,168,76,.25)}
+    .instructor-avatar{width:86px;height:86px;border-radius:50%;margin:0 auto 1.2rem;display:flex;align-items:center;justify-content:center;font-size:2.5rem;border:2px solid rgba(201,168,76,.2)}
+    .av-blue{background:linear-gradient(135deg,rgba(0,112,243,.25),rgba(0,207,253,.15))}
+    .av-teal{background:linear-gradient(135deg,rgba(0,168,150,.25),rgba(0,112,243,.15))}
+    .instructor-card h3{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:700;margin-bottom:.2rem}
+    .instructor-role{font-size:.76rem;color:var(--gold);margin-bottom:.8rem;letter-spacing:.04em}
+    .instructor-card p{font-size:.81rem;color:var(--gray);line-height:1.65;margin-bottom:1rem}
+    .instructor-tags{display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap}
+    .itag{font-size:.68rem;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);color:var(--gold);padding:.2rem .6rem;border-radius:50px}
+
+    /* FOOTER */
+    footer{background:rgba(0,0,0,.5);border-top:1px solid var(--border);padding:3.5rem 5%}
+    .footer-inner{max-width:1100px;margin:0 auto;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:2.5rem}
+    .footer-logo{font-family:'Cormorant Garamond',serif;font-size:1.45rem;font-weight:700}
+    .footer-logo span{color:var(--gold)}
+    .footer-brand p{font-size:.81rem;color:var(--gray);margin-top:.5rem;line-height:1.65;max-width:260px}
+    .footer-col h4{font-size:.7rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem}
+    .footer-col a{display:block;color:var(--gray);text-decoration:none;font-size:.83rem;margin-bottom:.5rem;transition:color .2s}
+    .footer-col a:hover{color:var(--white)}
+    .footer-bottom{max-width:1100px;margin:2rem auto 0;padding-top:1.5rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+    .footer-bottom p{font-size:.78rem;color:var(--gray)}
+
+    /* RESPONSIVE */
+    @media(max-width:900px){
+      .about-grid{grid-template-columns:1fr;gap:3.5rem}
+      .about-photo-wrap{height:320px}
+      .gallery-grid{grid-template-columns:repeat(2,1fr);grid-template-rows:auto}
+      .gi:nth-child(1){grid-row:span 1}
+      .gi:nth-child(5){grid-column:span 1}
+    }
+    @media(max-width:768px){
+      .cb{display:none}
+      nav{top:0}
+      nav ul{display:none}
+      .hbg{display:flex}
+      .mob-lang-bar{display:flex}
+      .form-grid{grid-template-columns:1fr}
+      .form-group.full{grid-column:1}
+      .booking-steps{flex-wrap:wrap}
+      .step-tab{padding:.7rem .3rem;font-size:.7rem;flex:1 1 25%}
+      .stat{padding:.8rem 1.2rem;border-right:none;border-bottom:1px solid rgba(255,255,255,.1);flex:1 1 50%}
+    }
+    @media(max-width:480px){
+      .cb{justify-content:center}
+      .gallery-grid{grid-template-columns:1fr;grid-template-rows:auto}
+      .gi:nth-child(1),.gi:nth-child(5){grid-row:span 1;grid-column:span 1}
+      .gi{height:240px}
+      section{padding:4.5rem 5%}
+    }
+    /* PERSON ROWS */
+    .person-row{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:14px;padding:1.1rem 1.2rem;margin-bottom:.75rem}
+    .person-row-label{font-size:.69rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:.8rem}
+    .person-row-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem}
+    @media(max-width:700px){.person-row-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:400px){.person-row-grid{grid-template-columns:1fr}}
+
+    /* SKIP LINK */
+    .skip-link{position:fixed;top:-100%;left:1rem;z-index:9999;background:var(--gold);color:var(--navy);padding:.5rem 1.2rem;border-radius:8px;font-weight:700;font-size:.9rem;text-decoration:none;transition:top .15s}
+    .skip-link:focus{top:1rem}
+    /* FOCUS VISIBLE */
+    :focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4px}
+    .cal-cell:focus-visible,.lesson-option:focus-visible,.slot-card:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+    /* MOBILE LANG BAR */
+    .mob-lang-bar{display:none;gap:.4rem;justify-content:center;flex-wrap:wrap;padding:.5rem 5%;background:rgba(6,13,27,0.92);border-bottom:1px solid rgba(255,255,255,.08);position:fixed;top:56px;left:0;right:0;z-index:199}
+    /* MOBILE DRAWER */
+    #mob-drawer{display:none;position:fixed;inset:0;background:#060D1B;z-index:200;flex-direction:column;padding:90px 8% 3rem;overflow-y:auto}
+    #mob-drawer.open{display:flex}
+    #mob-drawer a{color:#fff;font-size:1.5rem;font-weight:700;text-decoration:none;padding:1rem 0;border-bottom:1px solid rgba(255,255,255,.12);font-family:'Inter',sans-serif;letter-spacing:-.01em}
+    #mob-drawer a:last-of-type{border-bottom:none;margin-top:.5rem;background:var(--gold);color:#060D1B;text-align:center;border-radius:50px;padding:.8rem 2rem}
+    .beach-selector{display:flex;gap:.5rem;overflow-x:auto;padding:.5rem 0 1rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem;scrollbar-width:none}
+    .beach-selector::-webkit-scrollbar{display:none}
+    .beach-btn{padding:.45rem 1rem;border-radius:50px;border:1px solid var(--border);background:transparent;color:var(--gray);font-size:.78rem;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;white-space:nowrap}
+    .beach-btn:hover{border-color:rgba(201,168,76,.4);color:var(--white)}
+    .beach-btn.active{background:var(--gold);border-color:var(--gold);color:var(--navy);font-weight:700}
+    .cond-loading{opacity:.5}
+  </style>
+</head>
+<body>
+
+<a class="skip-link" href="#reservar">Saltar para reservas</a>
+<div class="nav-overlay" id="nav-overlay" onclick="closeMenu()"></div>
+
+<!-- CONDITIONS BAR -->
+<div class="cb" role="banner" aria-label="Condições do mar e hora atual">
+  <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center">
+    <div class="ci" style="color:var(--gold);font-weight:600">📍 <span id="cond-beach-name">Meia Praia</span></div>
+    <span aria-hidden="true" style="color:var(--border)">·</span>
+    <div class="ci" aria-label="Ondas">🌊 <span class="cv" id="cond-wave-val" aria-live="polite">—</span> <span id="cond-wave-quality"></span></div>
+    <span aria-hidden="true" style="color:var(--border)">·</span>
+    <div class="ci" aria-label="Vento">💨 <span class="cv" id="cond-wind-val" aria-live="polite">—</span></div>
+    <span aria-hidden="true" style="color:var(--border)">·</span>
+    <div class="ci" aria-label="Temperatura da água">🌡 <span class="cv" id="cond-water-val" aria-live="polite">—</span></div>
+    <span aria-hidden="true" style="color:var(--border)">·</span>
+    <div class="ci" aria-label="Próxima maré"><span id="tide-direction" class="cv">—</span> <span style="opacity:.6;font-size:.7rem" id="tide-next-label">—</span> <span class="cv" id="next-tide-val" style="font-size:.7rem"></span></div>
+    <span aria-hidden="true" style="color:var(--border)">·</span>
+    <div class="ci">🕐 <span data-t="cond_pt"></span>: <span class="cv" id="pt-time">—</span></div>
+    <span aria-hidden="true" style="color:var(--border)">·</span>
+    <div class="vc" aria-label="Visitantes online"><span class="vc-dot" aria-hidden="true"></span>👥 <span id="visitor-count">—</span></div>
+  </div>
+  <div class="ls" role="navigation" aria-label="Selecionar idioma">
+    <button class="lb active" onclick="setLang('pt')" aria-pressed="true" aria-label="Português">PT</button>
+    <button class="lb" onclick="setLang('en')" aria-pressed="false" aria-label="English">EN</button>
+    <button class="lb" onclick="setLang('fr')" aria-pressed="false" aria-label="Français">FR</button>
+    <button class="lb" onclick="setLang('de')" aria-pressed="false" aria-label="Deutsch">DE</button>
+    <button class="lb" onclick="setLang('es')" aria-pressed="false" aria-label="Español">ES</button>
+    <button class="lb" onclick="setLang('nl')" aria-pressed="false" aria-label="Nederlands">NL</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <div class="logo">Escola <span>Surf</span> Teste</div>
+  <ul>
+    <li><a href="#sobre" data-t="nav_sobre"></a></li>
+    <li><a href="#praias" data-t="nav_praias"></a></li>
+    <li><a href="#mares" data-t="nav_mares"></a></li>
+    <li><a href="#aulas" data-t="nav_aulas"></a></li>
+    <li><a href="#reservar" class="nav-cta" data-t="nav_reservar"></a></li>
+  </ul>
+  <button class="hbg" id="hbg-btn" onclick="toggleMenu()" aria-label="Abrir menu" aria-expanded="false" aria-controls="mob-drawer"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- MOBILE DRAWER -->
+<div id="mob-drawer" role="dialog" aria-label="Menu de navegação" aria-hidden="true">
+  <a href="#sobre"   onclick="closeMenu()" data-t="nav_sobre"></a>
+  <a href="#praias"  onclick="closeMenu()" data-t="nav_praias"></a>
+  <a href="#mares"   onclick="closeMenu()" data-t="nav_mares"></a>
+  <a href="#aulas"   onclick="closeMenu()" data-t="nav_aulas"></a>
+  <a href="#reservar" onclick="closeMenu()" data-t="nav_reservar"></a>
+</div>
+
+<!-- MOBILE LANG BAR -->
+<div class="mob-lang-bar" role="navigation" aria-label="Selecionar idioma">
+  <button class="lb active" onclick="setLang('pt')" aria-label="Português">PT</button>
+  <button class="lb" onclick="setLang('en')" aria-label="English">EN</button>
+  <button class="lb" onclick="setLang('fr')" aria-label="Français">FR</button>
+  <button class="lb" onclick="setLang('de')" aria-label="Deutsch">DE</button>
+  <button class="lb" onclick="setLang('es')" aria-label="Español">ES</button>
+  <button class="lb" onclick="setLang('nl')" aria-label="Nederlands">NL</button>
+</div>
+
+<main id="main-content">
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-photo" id="hero-photo"></div>
+  <div class="hero-ov"></div>
+  <div class="hero-bot"></div>
+  <div class="hero-content">
+    <div class="hero-badge">🌊 Escola de Surf · Site de Demonstração</div>
+    <h1><span data-t="hero_line1"></span><br><em><span data-t="hero_line2"></span></em></h1>
+    <p data-t="hero_sub"></p>
+    <div class="hero-btns">
+      <a href="#reservar" class="btn-primary" data-t="hero_cta1"></a>
+      <a href="#aulas" class="btn-outline" data-t="hero_cta2"></a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">500+</div><div class="stat-label" data-t="stat_alunos"></div></div>
+      <div class="stat"><div class="stat-num">12</div><div class="stat-label" data-t="stat_anos"></div></div>
+      <div class="stat"><div class="stat-num">98%</div><div class="stat-label" data-t="stat_sat"></div></div>
+      <div class="stat"><div class="stat-num">ISA</div><div class="stat-label" data-t="stat_cert"></div></div>
+    </div>
+  </div>
+  <div class="scroll-hint"><span>scroll</span><div class="scroll-arrow"></div></div>
+</section>
+
+<!-- ABOUT -->
+<section id="sobre">
+  <div class="about-grid">
+    <div class="about-photo-wrap">
+      <img src="https://images.unsplash.com/photo-1505459668311-8dfac7952bf0?auto=format&fit=crop&w=800&q=80" alt="Surf na Arrifana" loading="lazy" />
+      <div class="about-badge"><strong>⭐ 4.9</strong><span data-t="about_reviews"></span></div>
+    </div>
+    <div>
+      <span class="section-tag" data-t="about_tag"></span>
+      <h2 class="section-title" data-t="about_title"></h2>
+      <p class="section-sub" data-t="about_sub"></p>
+      <div class="features">
+        <div class="feature"><div class="feature-icon">🎓</div><div><h4 data-t="feat1_title"></h4><p data-t="feat1_sub"></p></div></div>
+        <div class="feature"><div class="feature-icon">🏄‍♂️</div><div><h4 data-t="feat2_title"></h4><p data-t="feat2_sub"></p></div></div>
+        <div class="feature"><div class="feature-icon">📍</div><div><h4 data-t="feat3_title"></h4><p data-t="feat3_sub"></p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BEACHES -->
+<section class="beaches" id="praias">
+  <div class="section-center">
+    <span class="section-tag" data-t="beaches_tag"></span>
+    <h2 class="section-title" data-t="beaches_title"></h2>
+    <p class="section-sub" data-t="beaches_sub"></p>
+  </div>
+  <div class="beaches-grid">
+    <div class="beach-card">
+      <div class="beach-bg" style="background-image:url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=700&q=80')"></div>
+      <div class="beach-ov"></div>
+      <div class="beach-body">
+        <span class="beach-tag tag-all" data-t="level_all"></span>
+        <h3>Praia da Arrifana</h3>
+        <p data-t="beach1_desc"></p>
+        <div class="beach-meta"><span class="bm" data-t="beach_wave_type"></span><span class="bm">↗ 1–3m</span><span class="bm" data-t="beach1_wind"></span></div>
+      </div>
+    </div>
+    <div class="beach-card">
+      <div class="beach-bg" style="background-image:url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=700&q=80')"></div>
+      <div class="beach-ov"></div>
+      <div class="beach-body">
+        <span class="beach-tag tag-beg" data-t="level_beg"></span>
+        <h3>Monte Clérigo</h3>
+        <p data-t="beach2_desc"></p>
+        <div class="beach-meta"><span class="bm" data-t="beach_sandy"></span><span class="bm">↗ 0.5–1.5m</span><span class="bm" data-t="beach2_wind"></span></div>
+      </div>
+    </div>
+    <div class="beach-card">
+      <div class="beach-bg" style="background-image:url('https://images.unsplash.com/photo-1455264745730-cb3b0b8a8283?auto=format&fit=crop&w=700&q=80')"></div>
+      <div class="beach-ov"></div>
+      <div class="beach-body">
+        <span class="beach-tag tag-beg" data-t="level_beg"></span>
+        <h3>Praia da Amoreira</h3>
+        <p data-t="beach3_desc"></p>
+        <div class="beach-meta"><span class="bm" data-t="beach_river"></span><span class="bm">↗ 0.5–1m</span><span class="bm" data-t="beach3_wind"></span></div>
+      </div>
+    </div>
+    <div class="beach-card">
+      <div class="beach-bg" style="background-image:url('https://images.unsplash.com/photo-1516566491978-4c8e1cba1bf4?auto=format&fit=crop&w=700&q=80')"></div>
+      <div class="beach-ov"></div>
+      <div class="beach-body">
+        <span class="beach-tag tag-adv" data-t="level_adv"></span>
+        <h3>Praia do Amado</h3>
+        <p data-t="beach4_desc"></p>
+        <div class="beach-meta"><span class="bm" data-t="beach_reef"></span><span class="bm">↗ 1–4m</span><span class="bm" data-t="beach4_wind"></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIDES -->
+<section class="tides" id="mares">
+  <div class="section-center">
+    <span class="section-tag" data-t="tides_tag"></span>
+    <h2 class="section-title" data-t="tides_title"></h2>
+    <p class="section-sub" data-t="tides_sub"></p>
+  </div>
+  <div class="beach-selector" id="beach-selector"></div>
+  <div class="tide-grid" id="tide-grid"></div>
+</section>
+
+<!-- GALLERY -->
+<section class="gallery" id="galeria">
+  <div class="section-center">
+    <span class="section-tag" data-t="gallery_tag"></span>
+    <h2 class="section-title" data-t="gallery_title"></h2>
+    <p class="section-sub" data-t="gallery_sub"></p>
+  </div>
+  <div class="gallery-grid">
+    <div class="gi"><img src="https://images.unsplash.com/photo-1502680390469-be75c86b636f?auto=format&fit=crop&w=800&q=80" alt="Surfista na prancha a apanhar uma onda na Costa Vicentina" loading="lazy" width="800" height="520" /><div class="gi-ov"></div></div>
+    <div class="gi"><img src="https://images.unsplash.com/photo-1488423947859-e24d0a64b8d6?auto=format&fit=crop&w=600&q=80" alt="Vista aérea de praia com ondas" loading="lazy" width="600" height="260" /><div class="gi-ov"></div></div>
+    <div class="gi"><img src="https://images.unsplash.com/photo-1519852476561-2aad874fcce5?auto=format&fit=crop&w=600&q=80" alt="Instrutor a ajudar aluno durante aula de surf" loading="lazy" width="600" height="260" /><div class="gi-ov"></div></div>
+    <div class="gi"><img src="https://images.unsplash.com/photo-1531722569936-825d4eea4575?auto=format&fit=crop&w=600&q=80" alt="Pranchas de surf alinhadas na areia" loading="lazy" width="600" height="260" /><div class="gi-ov"></div></div>
+    <div class="gi"><img src="https://images.unsplash.com/photo-1511593358241-7eea1f3c84e5?auto=format&fit=crop&w=1000&q=80" alt="Ondas perfeitas na Praia da Arrifana ao pôr do sol" loading="lazy" width="1000" height="260" /><div class="gi-ov"></div></div>
+  </div>
+</section>
+
+<!-- LESSONS -->
+<section class="lessons" id="aulas">
+  <div class="section-center">
+    <span class="section-tag" data-t="lessons_tag"></span>
+    <h2 class="section-title" data-t="lessons_title"></h2>
+    <p class="section-sub" data-t="lessons_sub"></p>
+  </div>
+  <div class="lessons-grid">
+    <div class="lesson-card">
+      <span class="lesson-emoji">🌊</span>
+      <h3 data-t="l1_name"></h3><p data-t="l1_desc"></p>
+      <div class="lesson-meta"><span class="meta-tag">⏱ 2h</span><span class="meta-tag">👥 <span data-t="max"></span> 6</span></div>
+      <div class="lesson-price"><span class="price-val">€35</span><span class="price-unit" data-t="per_person"></span></div>
+      <div class="includes"><div class="includes-title" data-t="includes"></div>
+        <div class="include-item" data-t="inc_wetsuit"></div>
+        <div class="include-item" data-t="inc_board"></div>
+        <div class="include-item" data-t="inc_insurance"></div>
+      </div>
+    </div>
+    <div class="lesson-card featured">
+      <div class="badge-popular" data-t="popular"></div>
+      <span class="lesson-emoji">🏄</span>
+      <h3 data-t="l2_name"></h3><p data-t="l2_desc"></p>
+      <div class="lesson-meta"><span class="meta-tag">⏱ 2h</span><span class="meta-tag">👥 <span data-t="max"></span> 4</span></div>
+      <div class="lesson-price"><span class="price-val">€35</span><span class="price-unit" data-t="per_person"></span></div>
+      <div class="includes"><div class="includes-title" data-t="includes"></div>
+        <div class="include-item" data-t="inc_wetsuit"></div>
+        <div class="include-item" data-t="inc_board"></div>
+        <div class="include-item" data-t="inc_insurance"></div>
+      </div>
+    </div>
+    <div class="lesson-card">
+      <span class="lesson-emoji">⭐</span>
+      <h3 data-t="l3_name"></h3><p data-t="l3_desc"></p>
+      <div class="lesson-meta"><span class="meta-tag">⏱ 1h30</span><span class="meta-tag">👤 1</span></div>
+      <div class="lesson-price"><span class="price-val">€65</span><span class="price-unit" data-t="per_session"></span></div>
+      <div class="includes"><div class="includes-title" data-t="includes"></div>
+        <div class="include-item" data-t="inc_wetsuit"></div>
+        <div class="include-item" data-t="inc_board"></div>
+        <div class="include-item" data-t="inc_video"></div>
+      </div>
+    </div>
+    <div class="lesson-card">
+      <span class="lesson-emoji">🌀</span>
+      <h3 data-t="l4_name"></h3><p data-t="l4_desc"></p>
+      <div class="lesson-meta"><span class="meta-tag">⏱ 2h</span><span class="meta-tag">👥 <span data-t="max"></span> 6</span></div>
+      <div class="lesson-price"><span class="price-val">€30</span><span class="price-unit" data-t="per_person"></span></div>
+      <div class="includes"><div class="includes-title" data-t="includes"></div>
+        <div class="include-item" data-t="inc_wetsuit"></div>
+        <div class="include-item" data-t="inc_bodyboard"></div>
+        <div class="include-item" data-t="inc_insurance"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials" id="avaliacoes">
+  <div class="section-center">
+    <span class="section-tag" data-t="reviews_tag"></span>
+    <h2 class="section-title" data-t="reviews_title"></h2>
+    <p class="section-sub" data-t="reviews_sub"></p>
+  </div>
+  <div class="reviews-grid">
+    <div class="review-card">
+      <div class="rq">"</div>
+      <div class="review-stars">★★★★★</div>
+      <p class="review-text">"Experiência incrível! O João é um instrutor fantástico, muito paciente e profissional. Em 2 horas já estava em pé na prancha. A Arrifana é um sítio mágico."</p>
+      <div class="review-author">
+        <div class="review-avatar">M</div>
+        <div><div class="review-name">Margarida Santos</div><div class="review-loc">Lisboa, Portugal · Jun 2025</div></div>
+      </div>
+    </div>
+    <div class="review-card">
+      <div class="rq">"</div>
+      <div class="review-stars">★★★★★</div>
+      <p class="review-text">"Absolutely incredible experience. The instructors are top notch, very professional. The beach is stunning and the waves were perfect for beginners. Highly recommended!"</p>
+      <div class="review-author">
+        <div class="review-avatar">T</div>
+        <div><div class="review-name">Thomas Wagner</div><div class="review-loc">Munich, Germany · Aug 2025</div></div>
+      </div>
+    </div>
+    <div class="review-card">
+      <div class="rq">"</div>
+      <div class="review-stars">★★★★★</div>
+      <p class="review-text">"Cours particulier avec Diogo — exceptionnel ! Il a identifié mes erreurs en quelques minutes et ma progression a été spectaculaire. Je reviendrai l'année prochaine."</p>
+      <div class="review-author">
+        <div class="review-avatar">C</div>
+        <div><div class="review-name">Claire Dubois</div><div class="review-loc">Paris, France · Jul 2025</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOOKING -->
+<section id="reservar" style="background:linear-gradient(180deg,var(--navy) 0%,var(--ocean) 100%)">
+  <div class="section-center">
+    <span class="section-tag" data-t="book_tag"></span>
+    <h2 class="section-title" data-t="book_title"></h2>
+    <p class="section-sub" data-t="book_sub"></p>
+  </div>
+  <div class="booking-wrap">
+    <div class="booking-steps" role="list" aria-label="Passos da reserva">
+      <div class="step-tab active" id="tab-1" role="listitem"><span class="step-num" aria-hidden="true">1</span><span data-t="step1_label"></span></div>
+      <div class="step-tab" id="tab-2" role="listitem"><span class="step-num" aria-hidden="true">2</span><span data-t="step2_label"></span></div>
+      <div class="step-tab" id="tab-3" role="listitem"><span class="step-num" aria-hidden="true">3</span><span data-t="step3_label"></span></div>
+      <div class="step-tab" id="tab-4" role="listitem"><span class="step-num" aria-hidden="true">4</span><span data-t="step4_label"></span></div>
+    </div>
+    <div class="booking-body" aria-live="polite" aria-atomic="false">
+      <!-- STEP 1 -->
+      <div class="step-panel active" id="step-1">
+        <h3 class="step-title" data-t="s1_title"></h3>
+        <p class="step-desc" data-t="s1_desc"></p>
+        <div class="lesson-options">
+          <div class="lesson-option" role="button" tabindex="0" onclick="selectLesson(this,'l1_name',35,35,6)" aria-label="Iniciante €35 por pessoa"><span class="opt-icon">🌊</span><div class="opt-name" data-t="l1_name"></div><div class="opt-price">€35/<span data-t="pp"></span></div></div>
+          <div class="lesson-option" role="button" tabindex="0" onclick="selectLesson(this,'l2_name',35,35,6)" aria-label="Intermédio €35 por pessoa"><span class="opt-icon">🏄</span><div class="opt-name" data-t="l2_name"></div><div class="opt-price">€35/<span data-t="pp"></span></div></div>
+          <div class="lesson-option" role="button" tabindex="0" onclick="selectLesson(this,'l3_name',65,65,1)" aria-label="Aula Privada €65 por sessão"><span class="opt-icon">⭐</span><div class="opt-name" data-t="l3_name"></div><div class="opt-price">€65/<span data-t="ps"></span></div></div>
+          <div class="lesson-option" role="button" tabindex="0" onclick="selectLesson(this,'l4_name',30,30,6)" aria-label="Bodyboard €30 por pessoa"><span class="opt-icon">🌀</span><div class="opt-name" data-t="l4_name"></div><div class="opt-price">€30/<span data-t="pp"></span></div></div>
+        </div>
+        <div class="nav-btns"><div></div><button class="btn-next" id="next-1" onclick="goToStep(2)" disabled data-t="btn_next"></button></div>
+      </div>
+      <!-- STEP 2 -->
+      <div class="step-panel" id="step-2">
+        <h3 class="step-title" data-t="s2_title"></h3>
+        <p class="step-desc" data-t="s2_desc"></p>
+        <div class="calendar-wrap">
+          <div class="cal-header">
+            <button class="cal-nav" onclick="changeMonth(-1)" aria-label="Mês anterior">‹</button>
+            <span class="cal-title" id="cal-month-title" aria-live="polite"></span>
+            <button class="cal-nav" onclick="changeMonth(1)" aria-label="Próximo mês">›</button>
+          </div>
+          <div class="cal-days-header" id="cal-days-header"></div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+        <div class="nav-btns"><button class="btn-back" onclick="goToStep(1)" data-t="btn_back"></button><button class="btn-next" id="next-2" onclick="goToStep(3)" disabled data-t="btn_next"></button></div>
+      </div>
+      <!-- STEP 3 -->
+      <div class="step-panel" id="step-3">
+        <h3 class="step-title" data-t="s3_title"></h3>
+        <p class="step-desc" data-t="s3_desc"></p>
+        <div class="slots-grid" id="slots-grid"></div>
+        <div class="nav-btns"><button class="btn-back" onclick="goToStep(2)" data-t="btn_back"></button><button class="btn-next" id="next-3" onclick="goToStep(4)" disabled data-t="btn_next"></button></div>
+      </div>
+      <!-- STEP 4 -->
+      <div class="step-panel" id="step-4">
+        <h3 class="step-title" data-t="s4_title"></h3>
+        <p class="step-desc" data-t="s4_desc"></p>
+        <div class="booking-summary" id="booking-summary"></div>
+        <div class="form-grid">
+          <div class="form-group"><label for="fname" data-t="f_name"></label><input type="text" id="fname" data-placeholder="f_name_ph" autocomplete="name" required /></div>
+          <div class="form-group"><label for="fphone" data-t="f_phone"></label><input type="tel" id="fphone" data-placeholder="f_phone_ph" autocomplete="tel" required /></div>
+          <div class="form-group"><label for="femail" data-t="f_email"></label><input type="email" id="femail" data-placeholder="f_email_ph" autocomplete="email" /></div>
+          <div class="form-group"><label for="fcountry" data-t="f_country"></label>
+            <select id="fcountry" autocomplete="country-name">
+              <option value="🇵🇹 Portugal">🇵🇹 Portugal</option>
+              <option value="🇬🇧 United Kingdom">🇬🇧 United Kingdom</option>
+              <option value="🇫🇷 France">🇫🇷 France</option>
+              <option value="🇩🇪 Germany">🇩🇪 Germany</option>
+              <option value="🇪🇸 Spain">🇪🇸 Spain</option>
+              <option value="🇳🇱 Netherlands">🇳🇱 Netherlands</option>
+              <option value="🇧🇪 Belgium">🇧🇪 Belgium</option>
+              <option value="🇮🇪 Ireland">🇮🇪 Ireland</option>
+              <option value="🇮🇹 Italy">🇮🇹 Italy</option>
+              <option value="🇨🇭 Switzerland">🇨🇭 Switzerland</option>
+              <option value="🇦🇹 Austria">🇦🇹 Austria</option>
+              <option value="🇸🇪 Sweden">🇸🇪 Sweden</option>
+              <option value="🇩🇰 Denmark">🇩🇰 Denmark</option>
+              <option value="🇳🇴 Norway">🇳🇴 Norway</option>
+              <option value="🇺🇸 USA">🇺🇸 USA</option>
+              <option value="🇨🇦 Canada">🇨🇦 Canada</option>
+              <option value="🇧🇷 Brasil">🇧🇷 Brasil</option>
+              <option value="🌍 Other">🌍 Other</option>
+            </select>
+          </div>
+          <div class="form-group"><label for="fpessoas" data-t="f_pessoas"></label>
+            <select id="fpessoas" onchange="onPessoasChange()">
+              <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+              <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+            </select>
+          </div>
+        </div>
+        <!-- Equipment rows per person — built dynamically -->
+        <div id="equipment-rows"></div>
+        <div class="form-grid" style="margin-top:.8rem">
+          <div class="form-group full"><label for="fnota" data-t="f_nota"></label><textarea id="fnota" data-placeholder="f_nota_ph"></textarea></div>
+        </div>
+        <button class="btn-whatsapp" onclick="reservarWhatsApp()" aria-label="Confirmar reserva via WhatsApp">📱 <span data-t="btn_whatsapp"></span></button>
+        <div class="nav-btns" style="margin-top:1rem"><button class="btn-back" onclick="goToStep(3)" data-t="btn_back"></button><div></div></div>
+      </div>
+      <!-- Confirmation overlay (shown after WA button click) -->
+      <div id="booking-confirm" style="display:none;text-align:center;padding:2.5rem 1rem">
+        <div id="booking-confirm-icon" style="font-size:3rem;margin-bottom:1rem">⏳</div>
+        <div id="booking-confirm-title" style="font-size:1.3rem;font-weight:700;margin-bottom:.5rem"></div>
+        <div id="booking-confirm-msg" style="font-size:.9rem;color:var(--gray);margin-bottom:1.5rem"></div>
+        <button id="booking-confirm-btn" style="display:none;padding:.8rem 2rem;background:var(--gold);border:none;border-radius:10px;color:var(--navy);font-weight:700;cursor:pointer;font-size:.95rem" onclick="resetBookingForm()">➕ Nova Marcação</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INSTRUCTORS -->
+<section id="instrutores" style="background:linear-gradient(180deg,var(--ocean) 0%,var(--navy) 100%)">
+  <div class="section-center">
+    <span class="section-tag" data-t="team_tag"></span>
+    <h2 class="section-title" data-t="team_title"></h2>
+    <p class="section-sub" data-t="team_sub"></p>
+  </div>
+  <div class="instructors-grid">
+    <div class="instructor-card">
+      <div class="instructor-avatar av-blue">🏄‍♂️</div>
+      <h3>João Costa</h3><div class="instructor-role">Head Instructor · ISA Level 2</div>
+      <p data-t="inst1_desc"></p>
+      <div class="instructor-tags"><span class="itag">Longboard</span><span class="itag" data-t="l1_name"></span><span class="itag">Kids</span></div>
+    </div>
+    <div class="instructor-card">
+      <div class="instructor-avatar av-teal">🏄‍♀️</div>
+      <h3>Maria Ferreira</h3><div class="instructor-role">Instrutora · ISA Level 1</div>
+      <p data-t="inst2_desc"></p>
+      <div class="instructor-tags"><span class="itag" data-t="inst2_t1"></span><span class="itag">Bodyboard</span><span class="itag" data-t="l2_name"></span></div>
+    </div>
+    <div class="instructor-card">
+      <div class="instructor-avatar av-blue">🤙</div>
+      <h3>Diogo Martins</h3><div class="instructor-role">Instrutor · ISA Level 1</div>
+      <p data-t="inst3_desc"></p>
+      <div class="instructor-tags"><span class="itag" data-t="l3_name"></span><span class="itag" data-t="inst3_t1"></span><span class="itag">Shortboard</span></div>
+    </div>
+  </div>
+</section>
+
+</main><!-- /main-content -->
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-logo">Escola <span>Surf</span> Teste</div>
+      <p>Site de Demonstração<br>Para Testes e Desenvolvimento</p>
+    </div>
+    <div class="footer-col">
+      <h4 data-t="footer_nav"></h4>
+      <a href="#sobre" data-t="nav_sobre"></a>
+      <a href="#praias" data-t="nav_praias"></a>
+      <a href="#mares" data-t="nav_mares"></a>
+      <a href="#aulas" data-t="nav_aulas"></a>
+      <a href="#reservar" data-t="nav_reservar"></a>
+    </div>
+    <div class="footer-col">
+      <h4 data-t="footer_contact"></h4>
+      <a href="https://wa.me/351962800400" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+      <a href="mailto:ivo@despomar.com">Email</a>
+      <a href="#mares" data-t="nav_mares"></a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 Escola Surf Teste · Site de Demonstração</p>
+    <p data-t="footer_rights"></p>
+  </div>
+</footer>
+
+<script>
+// ── TRANSLATIONS ──────────────────────────────────────────────────────────────
+const LANGS = {
+  pt: {
+    nav_sobre:'Sobre', nav_praias:'Praias', nav_mares:'Marés', nav_aulas:'Aulas', nav_reservar:'Reservar',
+    hero_line1:'Aprende a Surfar', hero_line2:'com Paixão',
+    hero_sub:'Na Costa Vicentina, onde as ondas são perfeitas e a natureza é intocada. Aulas para todos os níveis, instrutores certificados ISA.',
+    hero_cta1:'Reservar Aula', hero_cta2:'Ver Aulas',
+    stat_alunos:'Alunos / ano', stat_anos:'Anos de experiência', stat_sat:'Satisfação', stat_cert:'Certificados',
+    about_tag:'Sobre nós', about_title:'A melhor escola de surf do Algarve',
+    about_sub:'Fundada em 2013 na Praia da Arrifana, somos apaixonados pelo surf e pela natureza da Costa Vicentina. O nosso método garante que qualquer pessoa aprende a surfar em segurança.',
+    about_reviews:'+320 avaliações',
+    feat1_title:'Instrutores ISA Certificados', feat1_sub:'Todos os instrutores têm certificação internacional e formação em primeiros socorros.',
+    feat2_title:'Material de Qualidade', feat2_sub:'Fatos de neoprene, pranchas softop e leashes incluídos em todas as aulas.',
+    feat3_title:'Localização Privilegiada', feat3_sub:'Arrifana tem ondas perfeitas para todos os níveis, no coração do Parque Natural.',
+    beaches_tag:'Costa Vicentina', beaches_title:'As nossas praias', beaches_sub:'Conhece as melhores praias da zona de Aljezur e escolhe onde queres aprender a surfar.',
+    level_all:'Todos os níveis', level_beg:'Iniciante', level_adv:'Avançado',
+    beach1_desc:'A nossa praia principal. Falésia imponente, ondas consistentes durante todo o ano. Perfeita para todos os níveis com diferentes picos.',
+    beach2_desc:'Praia mais protegida do vento norte. Ideal para iniciantes e famílias. Pequena e acolhedora com ondas suaves.',
+    beach3_desc:'Embocadura de rio com barra de areia em constante mudança. Muito calma, ideal para crianças e primeiras experiências.',
+    beach4_desc:'A mais exposta da zona. Ondas poderosas e tubulares. Favorita dos surfistas experientes e palco de campeonatos.',
+    beach_wave_type:'Fundo rochoso', beach_sandy:'Fundo arenoso', beach_river:'Barra de rio', beach_reef:'Fundo misto',
+    beach1_wind:'Vento N ideal', beach2_wind:'Protegida N/NO', beach3_wind:'Vento N ideal', beach4_wind:'Vento N ideal',
+    tides_tag:'Tabela de Marés', tides_title:'Marés · Aljezur', tides_sub:'Condições em tempo real para planeares a tua aula. Melhor surf: 2h antes e depois da preia-mar.',
+    gallery_tag:'Galeria', gallery_title:'A nossa essência', gallery_sub:'Momentos capturados na Costa Vicentina, onde cada onda conta uma história.',
+    lessons_tag:'Modalidades', lessons_title:'Escolhe a tua aula', lessons_sub:'Do primeiro contacto com o oceano até às manobras avançadas.',
+    l1_name:'Iniciante', l1_desc:'Nunca surfaste? Começa aqui. Teoria, segurança, remada e primeiras ondas em pé — tudo em 2 horas.',
+    l2_name:'Intermédio', l2_desc:'Já tens as bases? Aprende a ler as ondas, escolher a posição certa e encadear manobras.',
+    l3_name:'Aula Privada', l3_desc:'Atenção 100% personalizada. Ideal para progressão rápida ou necessidades específicas.',
+    l4_name:'Bodyboard', l4_desc:'Diversão garantida para todas as idades. Aprende a deslizar nas ondas com bodyboard.',
+    max:'Máx.', per_person:'/ pessoa', per_session:'/ sessão', popular:'Popular',
+    includes:'Incluído', inc_wetsuit:'Fato de neoprene', inc_board:'Prancha softop', inc_insurance:'Seguro de acidentes',
+    inc_video:'Análise de vídeo', inc_bodyboard:'Bodyboard + barbatanas',
+    reviews_tag:'Avaliações', reviews_title:'O que dizem de nós', reviews_sub:'Mais de 320 avaliações verificadas de surfistas de todo o mundo.',
+    book_tag:'Marcações', book_title:'Reserva a tua aula', book_sub:'Escolhe a modalidade, o dia e o horário — confirmamos via WhatsApp em minutos.',
+    step1_label:'Modalidade', step2_label:'Data', step3_label:'Horário', step4_label:'Dados',
+    s1_title:'Que tipo de aula queres?', s1_desc:'Seleciona a modalidade mais adequada ao teu nível.',
+    s2_title:'Escolhe o dia', s2_desc:'Seleciona uma data disponível no calendário.',
+    s3_title:'Escolhe o horário', s3_desc:'Vagas disponíveis para o dia selecionado.',
+    s4_title:'Os teus dados', s4_desc:'Preenche para confirmarmos a reserva via WhatsApp.',
+    f_name:'Nome completo *', f_name_ph:'Ex: João Silva', f_phone:'Telemóvel *', f_phone_ph:'+351 912 345 678', f_country:'País',
+    f_email:'Email', f_email_ph:'joao@email.com', f_pessoas:'Nº de pessoas',
+    f_peso:'Peso (kg)', f_altura:'Altura (cm)', f_genero:'Género', f_fato:'Tamanho do fato',
+    f_exp:'Experiência', exp_nunca:'Nunca surfei', exp_ja:'Já surfei', exp_inter:'Intermédio', exp_avanc:'Avançado',
+    g_homem:'Homem', g_mulher:'Mulher', g_crianca:'Criança',
+    f_nota:'Nota (opcional)', f_nota_ph:'Alergias, idades do grupo, nível de experiência...',
+    btn_next:'Próximo →', btn_back:'← Voltar', btn_whatsapp:'Confirmar via WhatsApp',
+    pp:'pessoa', ps:'sessão',
+    slot_available:'vagas disponíveis', slot_full:'Sem vagas', slot_spots:'lugares no total',
+    summary_title:'Resumo da reserva', summary_lesson:'Modalidade', summary_date:'Data',
+    summary_time:'Horário', summary_unit:'Preço unitário', summary_total:'Total estimado',
+    wa_header:'Nova Reserva — Escola Surf Teste',
+    wa_name:'Nome', wa_phone:'Telemóvel', wa_email:'Email', wa_lesson:'Aula',
+    wa_date:'Data', wa_time:'Horário', wa_people:'Pessoas', wa_total:'Total estimado', wa_note:'Nota',
+    wa_weight:'Peso', wa_height:'Altura', wa_gender:'Género', wa_wetsuit:'Fato',
+    wa_closing:'Aguardo confirmação! 🤙',
+    cond_wave:'Ondas', cond_wind:'Vento', cond_water:'Água', cond_tide:'Próxima maré', cond_pt:'Hora PT',
+    team_tag:'Equipa', team_title:'Os nossos instrutores', team_sub:'Profissionais apaixonados pelo surf e pelo ensino.',
+    inst1_desc:'12 anos a ensinar na Arrifana. Campeão regional de longboard 2016 e 2019.',
+    inst2_desc:'Surfista desde os 8 anos. Campeã Nacional Júnior 2018. Especialista surf feminino.',
+    inst2_t1:'Surf feminino', inst3_t1:'Avançado',
+    inst3_desc:'Nasceu em Aljezur, cresceu nas ondas da Arrifana. Especialista em aulas privadas.',
+    footer_nav:'Navegação', footer_contact:'Contacto', footer_rights:'Todos os direitos reservados.',
+    cal_days:['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'],
+    cal_months:['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'],
+    tide_days:['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'],
+    surf_labels:['Fraco','Razoável','Bom','Muito bom','Excelente'],
+  },
+  en: {
+    nav_sobre:'About', nav_praias:'Beaches', nav_mares:'Tides', nav_aulas:'Lessons', nav_reservar:'Book Now',
+    hero_line1:'Learn to Surf', hero_line2:'with Passion',
+    hero_sub:'On the Vicentina Coast, where waves are perfect and nature is untouched. Lessons for all levels, ISA-certified instructors.',
+    hero_cta1:'Book a Lesson', hero_cta2:'See Lessons',
+    stat_alunos:'Students / year', stat_anos:'Years experience', stat_sat:'Satisfaction', stat_cert:'Certified',
+    about_tag:'About us', about_title:'The best surf school in the Algarve',
+    about_sub:'Founded in 2013 at Praia da Arrifana, we are passionate about surf and the Vicentina Coast. Our method ensures everyone learns to surf safely and has fun.',
+    about_reviews:'+320 reviews',
+    feat1_title:'ISA Certified Instructors', feat1_sub:'All instructors hold international certification and first-aid training.',
+    feat2_title:'Quality Equipment', feat2_sub:'Wetsuits, softop boards and leashes included in all lessons.',
+    feat3_title:'Prime Location', feat3_sub:'Arrifana has perfect waves for all levels, in the heart of the Natural Park.',
+    beaches_tag:'Vicentina Coast', beaches_title:'Our beaches', beaches_sub:'Discover the best beaches near Aljezur and choose where you want to learn to surf.',
+    level_all:'All levels', level_beg:'Beginner', level_adv:'Advanced',
+    beach1_desc:'Our main beach. Dramatic cliffs, consistent waves year-round. Perfect for all levels with different peaks.',
+    beach2_desc:'More protected from north wind. Ideal for beginners and families. Small and welcoming with gentle waves.',
+    beach3_desc:'River mouth with constantly shifting sandbar. Very calm, ideal for children and first experiences.',
+    beach4_desc:'The most exposed in the area. Powerful, hollow waves. Favourite of experienced surfers, competition venue.',
+    beach_wave_type:'Rocky bottom', beach_sandy:'Sandy bottom', beach_river:'River mouth', beach_reef:'Mixed bottom',
+    beach1_wind:'N wind ideal', beach2_wind:'Protected N/NW', beach3_wind:'N wind ideal', beach4_wind:'N wind ideal',
+    tides_tag:'Tide Table', tides_title:'Tides · Aljezur', tides_sub:'Real-time conditions to plan your lesson. Best surf: 2h before and after high tide.',
+    gallery_tag:'Gallery', gallery_title:'Our essence', gallery_sub:'Moments captured on the Vicentina Coast, where every wave tells a story.',
+    lessons_tag:'Activities', lessons_title:'Choose your lesson', lessons_sub:'From first contact with the ocean to advanced manoeuvres.',
+    l1_name:'Beginner', l1_desc:"Never surfed? Start here. Theory, safety, paddling and first waves standing up — all in 2 hours.",
+    l2_name:'Intermediate', l2_desc:'Already have the basics? Learn to read waves, choose the right position and chain manoeuvres.',
+    l3_name:'Private Lesson', l3_desc:'100% personalised attention. Ideal for rapid progression or specific needs.',
+    l4_name:'Bodyboard', l4_desc:'Fun guaranteed for all ages. Learn to ride waves with a bodyboard.',
+    max:'Max.', per_person:'/ person', per_session:'/ session', popular:'Popular',
+    includes:'Included', inc_wetsuit:'Wetsuit', inc_board:'Softop board', inc_insurance:'Accident insurance',
+    inc_video:'Video analysis', inc_bodyboard:'Bodyboard + fins',
+    reviews_tag:'Reviews', reviews_title:'What our students say', reviews_sub:'Over 320 verified reviews from surfers around the world.',
+    book_tag:'Bookings', book_title:'Book your lesson', book_sub:'Choose the activity, day and time — we confirm via WhatsApp in minutes.',
+    step1_label:'Activity', step2_label:'Date', step3_label:'Time', step4_label:'Details',
+    s1_title:'What type of lesson?', s1_desc:'Select the most suitable activity for your level.',
+    s2_title:'Choose a day', s2_desc:'Select an available date on the calendar.',
+    s3_title:'Choose a time', s3_desc:'Available slots for the selected day.',
+    s4_title:'Your details', s4_desc:'Fill in to confirm your booking via WhatsApp.',
+    f_name:'Full name *', f_name_ph:'Ex: John Smith', f_phone:'Mobile *', f_phone_ph:'+44 7911 123456', f_country:'Country',
+    f_email:'Email', f_email_ph:'john@email.com', f_pessoas:'Number of people',
+    f_peso:'Weight (kg)', f_altura:'Height (cm)', f_genero:'Gender', f_fato:'Wetsuit size',
+    f_exp:'Experience', exp_nunca:'Never surfed', exp_ja:'Surfed before', exp_inter:'Intermediate', exp_avanc:'Advanced',
+    g_homem:'Man', g_mulher:'Woman', g_crianca:'Child',
+    f_nota:'Note (optional)', f_nota_ph:'Allergies, group ages, experience level...',
+    btn_next:'Next →', btn_back:'← Back', btn_whatsapp:'Confirm via WhatsApp',
+    pp:'person', ps:'session',
+    slot_available:'spots available', slot_full:'No spots', slot_spots:'total spots',
+    summary_title:'Booking summary', summary_lesson:'Activity', summary_date:'Date',
+    summary_time:'Time', summary_unit:'Unit price', summary_total:'Estimated total',
+    wa_header:'New Booking — Escola Surf Teste',
+    wa_name:'Name', wa_phone:'Mobile', wa_email:'Email', wa_lesson:'Lesson',
+    wa_date:'Date', wa_time:'Time', wa_people:'People', wa_total:'Estimated total', wa_note:'Note',
+    wa_weight:'Weight', wa_height:'Height', wa_gender:'Gender', wa_wetsuit:'Wetsuit',
+    wa_closing:'Awaiting confirmation! 🤙',
+    cond_wave:'Waves', cond_wind:'Wind', cond_water:'Water', cond_tide:'Next tide', cond_pt:'PT Time',
+    team_tag:'Team', team_title:'Our instructors', team_sub:'Professionals passionate about surf and teaching.',
+    inst1_desc:'12 years teaching at Arrifana. Regional longboard champion 2016 and 2019.',
+    inst2_desc:"Surfing since age 8. National Junior Champion 2018. Women's surf specialist.",
+    inst2_t1:"Women's surf", inst3_t1:'Advanced',
+    inst3_desc:"Born in Aljezur, grew up on Arrifana's waves. Private lesson specialist.",
+    footer_nav:'Navigation', footer_contact:'Contact', footer_rights:'All rights reserved.',
+    cal_days:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
+    cal_months:['January','February','March','April','May','June','July','August','September','October','November','December'],
+    tide_days:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
+    surf_labels:['Poor','Fair','Good','Very good','Excellent'],
+  },
+  fr: {
+    nav_sobre:'À propos', nav_praias:'Plages', nav_mares:'Marées', nav_aulas:'Cours', nav_reservar:'Réserver',
+    hero_line1:'Apprends à Surfer', hero_line2:'avec Passion',
+    hero_sub:'Sur la Costa Vicentina, où les vagues sont parfaites et la nature est préservée. Cours pour tous les niveaux, instructeurs certifiés ISA.',
+    hero_cta1:'Réserver un cours', hero_cta2:'Voir les cours',
+    stat_alunos:'Élèves / an', stat_anos:"Ans d'expérience", stat_sat:'Satisfaction', stat_cert:'Certifiés',
+    about_tag:'À propos', about_title:"La meilleure école de surf de l'Algarve",
+    about_sub:"Fondée en 2013 à Praia da Arrifana, nous sommes passionnés par le surf et la Costa Vicentina. Notre méthode garantit que tout le monde apprend à surfer en toute sécurité.",
+    about_reviews:'+320 avis',
+    feat1_title:'Instructeurs certifiés ISA', feat1_sub:'Tous nos instructeurs ont une certification internationale et une formation aux premiers secours.',
+    feat2_title:'Matériel de qualité', feat2_sub:'Combinaisons, planches softop et leashes inclus dans tous les cours.',
+    feat3_title:'Emplacement privilégié', feat3_sub:"Arrifana a des vagues parfaites pour tous les niveaux, au cœur du Parc Naturel.",
+    beaches_tag:'Costa Vicentina', beaches_title:'Nos plages', beaches_sub:"Découvrez les meilleures plages de la région d'Aljezur et choisissez où vous voulez apprendre.",
+    level_all:'Tous niveaux', level_beg:'Débutant', level_adv:'Avancé',
+    beach1_desc:"Notre plage principale. Falaises imposantes, vagues régulières toute l'année. Parfaite pour tous les niveaux.",
+    beach2_desc:'Plus protégée du vent du nord. Idéale pour débutants et familles. Petite et accueillante avec des vagues douces.',
+    beach3_desc:'Embouchure de rivière avec barre de sable changeante. Très calme, idéale pour les enfants.',
+    beach4_desc:'La plus exposée de la zone. Vagues puissantes et creuses. Préférée des surfeurs expérimentés.',
+    beach_wave_type:'Fond rocheux', beach_sandy:'Fond sablonneux', beach_river:'Embouchure', beach_reef:'Fond mixte',
+    beach1_wind:'Vent N idéal', beach2_wind:'Protégée N/NO', beach3_wind:'Vent N idéal', beach4_wind:'Vent N idéal',
+    tides_tag:'Table des marées', tides_title:'Marées · Aljezur', tides_sub:'Conditions en temps réel pour planifier votre cours. Meilleur surf : 2h avant et après la marée haute.',
+    gallery_tag:'Galerie', gallery_title:'Notre essence', gallery_sub:'Moments capturés sur la Costa Vicentina, où chaque vague raconte une histoire.',
+    lessons_tag:'Activités', lessons_title:'Choisissez votre cours', lessons_sub:"Du premier contact avec l'océan aux manœuvres avancées.",
+    l1_name:'Débutant', l1_desc:'Jamais surfé ? Commencez ici. Théorie, sécurité, rame et premières vagues debout — tout en 2 heures.',
+    l2_name:'Intermédiaire', l2_desc:'Vous avez les bases ? Apprenez à lire les vagues et à enchaîner les manœuvres.',
+    l3_name:'Cours Privé', l3_desc:'Attention 100% personnalisée. Idéal pour une progression rapide.',
+    l4_name:'Bodyboard', l4_desc:'Amusement garanti pour tous les âges. Apprenez à glisser sur les vagues.',
+    max:'Max.', per_person:'/ pers.', per_session:'/ séance', popular:'Populaire',
+    includes:'Inclus', inc_wetsuit:'Combinaison', inc_board:'Planche softop', inc_insurance:'Assurance accidents',
+    inc_video:'Analyse vidéo', inc_bodyboard:'Bodyboard + palmes',
+    reviews_tag:'Avis', reviews_title:'Ce que disent nos élèves', reviews_sub:'Plus de 320 avis vérifiés de surfeurs du monde entier.',
+    book_tag:'Réservations', book_title:'Réservez votre cours', book_sub:'Choisissez activité, jour et horaire — confirmation via WhatsApp en quelques minutes.',
+    step1_label:'Activité', step2_label:'Date', step3_label:'Horaire', step4_label:'Données',
+    s1_title:'Quel type de cours ?', s1_desc:'Sélectionnez activité la plus adaptée à votre niveau.',
+    s2_title:'Choisissez un jour', s2_desc:'Sélectionnez une date disponible dans le calendrier.',
+    s3_title:'Choisissez un horaire', s3_desc:'Créneaux disponibles pour le jour sélectionné.',
+    s4_title:'Vos coordonnées', s4_desc:'Remplissez pour confirmer votre réservation via WhatsApp.',
+    f_name:'Nom complet *', f_name_ph:'Ex: Jean Dupont', f_phone:'Téléphone *', f_phone_ph:'+33 6 12 34 56 78', f_country:'Pays',
+    f_email:'Email', f_email_ph:'jean@email.com', f_pessoas:'Nombre de personnes',
+    f_peso:'Poids (kg)', f_altura:'Taille (cm)', f_genero:'Genre', f_fato:'Taille combinaison',
+    f_exp:'Expérience', exp_nunca:'Jamais surfé', exp_ja:'Déjà surfé', exp_inter:'Intermédiaire', exp_avanc:'Avancé',
+    g_homem:'Homme', g_mulher:'Femme', g_crianca:'Enfant',
+    f_nota:'Note (optionnel)', f_nota_ph:'Allergies, âges du groupe, niveau...',
+    btn_next:'Suivant →', btn_back:'← Retour', btn_whatsapp:'Confirmer via WhatsApp',
+    pp:'pers.', ps:'séance',
+    slot_available:'places disponibles', slot_full:'Complet', slot_spots:'places au total',
+    summary_title:'Récapitulatif', summary_lesson:'Activité', summary_date:'Date',
+    summary_time:'Horaire', summary_unit:'Prix unitaire', summary_total:'Total estimé',
+    wa_header:'Nouvelle Réservation — Escola Surf Teste',
+    wa_name:'Nom', wa_phone:'Téléphone', wa_email:'Email', wa_lesson:'Cours',
+    wa_date:'Date', wa_time:'Horaire', wa_people:'Personnes', wa_total:'Total estimé', wa_note:'Note',
+    wa_weight:'Poids', wa_height:'Taille', wa_gender:'Genre', wa_wetsuit:'Combinaison',
+    wa_closing:'En attente de confirmation ! 🤙',
+    cond_wave:'Vagues', cond_wind:'Vent', cond_water:'Eau', cond_tide:'Prochaine marée', cond_pt:'Heure PT',
+    team_tag:'Équipe', team_title:'Nos instructeurs', team_sub:"Des professionnels passionnés par le surf et l'enseignement.",
+    inst1_desc:'12 ans à enseigner à Arrifana. Champion régional de longboard 2016 et 2019.',
+    inst2_desc:"Surfeuse depuis l'âge de 8 ans. Championne nationale junior 2018. Spécialiste surf féminin.",
+    inst2_t1:'Surf féminin', inst3_t1:'Avancé',
+    inst3_desc:"Né à Aljezur, a grandi sur les vagues d'Arrifana. Spécialiste cours privés.",
+    footer_nav:'Navigation', footer_contact:'Contact', footer_rights:'Tous droits réservés.',
+    cal_days:['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'],
+    cal_months:['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'],
+    tide_days:['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'],
+    surf_labels:['Faible','Correct','Bon','Très bon','Excellent'],
+  },
+  de: {
+    nav_sobre:'Über uns', nav_praias:'Strände', nav_mares:'Gezeiten', nav_aulas:'Kurse', nav_reservar:'Buchen',
+    hero_line1:'Surfen lernen', hero_line2:'mit Leidenschaft',
+    hero_sub:'An der Costa Vicentina, wo die Wellen perfekt und die Natur unberührt ist. Kurse für alle Levels, ISA-zertifizierte Instruktoren.',
+    hero_cta1:'Kurs buchen', hero_cta2:'Kurse ansehen',
+    stat_alunos:'Schüler / Jahr', stat_anos:'Jahre Erfahrung', stat_sat:'Zufriedenheit', stat_cert:'Zertifiziert',
+    about_tag:'Über uns', about_title:'Die beste Surfschule im Algarve',
+    about_sub:'2013 am Praia da Arrifana gegründet, sind wir leidenschaftliche Surfer und lieben die Costa Vicentina. Unsere Methode stellt sicher, dass jeder sicher surfen lernt.',
+    about_reviews:'+320 Bewertungen',
+    feat1_title:'ISA-zertifizierte Instruktoren', feat1_sub:'Alle Instruktoren haben internationale Zertifizierung und Erste-Hilfe-Ausbildung.',
+    feat2_title:'Hochwertiges Equipment', feat2_sub:'Neoprenanzüge, Softboards und Leashes in allen Kursen inklusive.',
+    feat3_title:'Erstklassige Lage', feat3_sub:'Arrifana hat perfekte Wellen für alle Levels, im Herzen des Naturparks.',
+    beaches_tag:'Costa Vicentina', beaches_title:'Unsere Strände', beaches_sub:'Entdecke die besten Strände rund um Aljezur und wähle, wo du surfen lernen möchtest.',
+    level_all:'Alle Levels', level_beg:'Anfänger', level_adv:'Fortgeschritten',
+    beach1_desc:'Unser Hauptstrand. Imposante Klippen, ganzjährig gleichmäßige Wellen. Perfekt für alle Levels.',
+    beach2_desc:'Mehr vom Nordwind geschützt. Ideal für Anfänger und Familien. Klein und gemütlich mit sanften Wellen.',
+    beach3_desc:'Flussmündung mit ständig wechselnder Sandbank. Sehr ruhig, ideal für Kinder und erste Erfahrungen.',
+    beach4_desc:'Der exponierteste Strand der Region. Kraftvolle, hohle Wellen. Liebling erfahrener Surfer.',
+    beach_wave_type:'Felsuntergrund', beach_sandy:'Sanduntergrund', beach_river:'Flussmündung', beach_reef:'Gemischter Grund',
+    beach1_wind:'N-Wind ideal', beach2_wind:'Geschützt N/NW', beach3_wind:'N-Wind ideal', beach4_wind:'N-Wind ideal',
+    tides_tag:'Gezeitentabelle', tides_title:'Gezeiten · Aljezur', tides_sub:'Echtzeit-Bedingungen zur Kursplanung. Bestes Surfen: 2h vor und nach Hochwasser.',
+    gallery_tag:'Galerie', gallery_title:'Unser Wesen', gallery_sub:'Momente an der Costa Vicentina, wo jede Welle eine Geschichte erzählt.',
+    lessons_tag:'Aktivitäten', lessons_title:'Wähle deinen Kurs', lessons_sub:'Vom ersten Kontakt mit dem Ozean bis zu fortgeschrittenen Manövern.',
+    l1_name:'Anfänger', l1_desc:'Noch nie gesurft? Fang hier an. Theorie, Sicherheit, Paddeln und erste Wellen stehend — alles in 2 Stunden.',
+    l2_name:'Fortgeschrittene', l2_desc:'Hast du die Grundlagen? Lerne Wellen zu lesen und Manöver zu verbinden.',
+    l3_name:'Privatstunde', l3_desc:'100% persönliche Betreuung. Ideal für schnellen Fortschritt.',
+    l4_name:'Bodyboard', l4_desc:'Spaß garantiert für alle Altersgruppen. Lerne auf Wellen zu gleiten.',
+    max:'Max.', per_person:'/ Person', per_session:'/ Einheit', popular:'Beliebt',
+    includes:'Inklusive', inc_wetsuit:'Neoprenanzug', inc_board:'Softboard', inc_insurance:'Unfallversicherung',
+    inc_video:'Videoanalyse', inc_bodyboard:'Bodyboard + Flossen',
+    reviews_tag:'Bewertungen', reviews_title:'Was unsere Schüler sagen', reviews_sub:'Über 320 verifizierte Bewertungen von Surfern aus aller Welt.',
+    book_tag:'Buchungen', book_title:'Kurs buchen', book_sub:'Wähle Aktivität, Tag und Uhrzeit — Bestätigung per WhatsApp in wenigen Minuten.',
+    step1_label:'Aktivität', step2_label:'Datum', step3_label:'Uhrzeit', step4_label:'Daten',
+    s1_title:'Welche Art von Kurs?', s1_desc:'Wähle die für dein Level geeignetste Aktivität.',
+    s2_title:'Wähle einen Tag', s2_desc:'Wähle ein verfügbares Datum im Kalender.',
+    s3_title:'Wähle eine Uhrzeit', s3_desc:'Verfügbare Plätze für den ausgewählten Tag.',
+    s4_title:'Deine Daten', s4_desc:'Ausfüllen zur Buchungsbestätigung per WhatsApp.',
+    f_name:'Vollständiger Name *', f_name_ph:'z.B. Hans Müller', f_phone:'Handy *', f_phone_ph:'+49 151 12345678', f_country:'Land',
+    f_email:'E-Mail', f_email_ph:'hans@email.com', f_pessoas:'Personenanzahl',
+    f_peso:'Gewicht (kg)', f_altura:'Größe (cm)', f_genero:'Typ', f_fato:'Neoprenanzuggröße',
+    f_exp:'Erfahrung', exp_nunca:'Noch nie gesurft', exp_ja:'Schon gesurft', exp_inter:'Mittelstufe', exp_avanc:'Fortgeschritten',
+    g_homem:'Herren', g_mulher:'Damen', g_crianca:'Kind',
+    f_nota:'Notiz (optional)', f_nota_ph:'Allergien, Gruppenalter, Erfahrungslevel...',
+    btn_next:'Weiter →', btn_back:'← Zurück', btn_whatsapp:'Per WhatsApp bestätigen',
+    pp:'Pers.', ps:'Einheit',
+    slot_available:'Plätze verfügbar', slot_full:'Ausgebucht', slot_spots:'Plätze gesamt',
+    summary_title:'Buchungsübersicht', summary_lesson:'Aktivität', summary_date:'Datum',
+    summary_time:'Uhrzeit', summary_unit:'Stückpreis', summary_total:'Geschätzter Gesamtpreis',
+    wa_header:'Neue Buchung — Escola Surf Teste',
+    wa_name:'Name', wa_phone:'Handy', wa_email:'E-Mail', wa_lesson:'Kurs',
+    wa_date:'Datum', wa_time:'Uhrzeit', wa_people:'Personen', wa_total:'Geschätzte Gesamtsumme', wa_note:'Notiz',
+    wa_weight:'Gewicht', wa_height:'Größe', wa_gender:'Typ', wa_wetsuit:'Neoprenanzug',
+    wa_closing:'Warte auf Bestätigung! 🤙',
+    cond_wave:'Wellen', cond_wind:'Wind', cond_water:'Wasser', cond_tide:'Nächste Tide', cond_pt:'PT Zeit',
+    team_tag:'Team', team_title:'Unsere Instruktoren', team_sub:'Leidenschaftliche Profis für Surf und Unterricht.',
+    inst1_desc:'12 Jahre Unterricht in Arrifana. Regionaler Longboard-Meister 2016 und 2019.',
+    inst2_desc:'Surft seit dem 8. Lebensjahr. Nationaler Juniorenmeister 2018. Spezialistin für Frauensurfen.',
+    inst2_t1:'Frauensurfen', inst3_t1:'Fortgeschritten',
+    inst3_desc:'In Aljezur geboren, auf Arrifanas Wellen aufgewachsen. Spezialist für Privatstunden.',
+    footer_nav:'Navigation', footer_contact:'Kontakt', footer_rights:'Alle Rechte vorbehalten.',
+    cal_days:['So','Mo','Di','Mi','Do','Fr','Sa'],
+    cal_months:['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'],
+    tide_days:['So','Mo','Di','Mi','Do','Fr','Sa'],
+    surf_labels:['Schwach','Mäßig','Gut','Sehr gut','Ausgezeichnet'],
+  },
+  es: {
+    nav_sobre:'Sobre nosotros', nav_praias:'Playas', nav_mares:'Mareas', nav_aulas:'Clases', nav_reservar:'Reservar',
+    hero_line1:'Aprende a Surfear', hero_line2:'con Pasión',
+    hero_sub:'En la Costa Vicentina, donde las olas son perfectas y la naturaleza es salvaje. Clases para todos los niveles, instructores certificados ISA.',
+    hero_cta1:'Reservar Clase', hero_cta2:'Ver Clases',
+    stat_alunos:'Alumnos / año', stat_anos:'Años de experiencia', stat_sat:'Satisfacción', stat_cert:'Certificados',
+    about_tag:'Sobre nosotros', about_title:'La mejor escuela de surf del Algarve',
+    about_sub:'Fundada en 2013 en Praia da Arrifana, somos apasionados del surf y de la Costa Vicentina. Nuestro método garantiza que cualquier persona aprenda a surfear con seguridad.',
+    about_reviews:'+320 opiniones',
+    feat1_title:'Instructores ISA Certificados', feat1_sub:'Todos los instructores tienen certificación internacional y formación en primeros auxilios.',
+    feat2_title:'Material de Calidad', feat2_sub:'Trajes de neopreno, tablas softop y leashes incluidos en todas las clases.',
+    feat3_title:'Ubicación Privilegiada', feat3_sub:'Arrifana tiene olas perfectas para todos los niveles, en el corazón del Parque Natural.',
+    beaches_tag:'Costa Vicentina', beaches_title:'Nuestras playas', beaches_sub:'Descubre las mejores playas de la zona de Aljezur y elige dónde quieres aprender a surfear.',
+    level_all:'Todos los niveles', level_beg:'Principiante', level_adv:'Avanzado',
+    beach1_desc:'Nuestra playa principal. Acantilados impresionantes, olas consistentes todo el año. Perfecta para todos los niveles.',
+    beach2_desc:'Más protegida del viento norte. Ideal para principiantes y familias. Pequeña y acogedora con olas suaves.',
+    beach3_desc:'Desembocadura de río con barra de arena en constante cambio. Muy tranquila, ideal para niños.',
+    beach4_desc:'La más expuesta de la zona. Olas potentes y tubulares. Favorita de surfistas experimentados.',
+    beach_wave_type:'Fondo rocoso', beach_sandy:'Fondo arenoso', beach_river:'Desembocadura', beach_reef:'Fondo mixto',
+    beach1_wind:'Viento N ideal', beach2_wind:'Protegida N/NO', beach3_wind:'Viento N ideal', beach4_wind:'Viento N ideal',
+    tides_tag:'Tabla de Mareas', tides_title:'Mareas · Aljezur', tides_sub:'Condiciones en tiempo real para planear tu clase. Mejor surf: 2h antes y después de la pleamar.',
+    gallery_tag:'Galería', gallery_title:'Nuestra esencia', gallery_sub:'Momentos capturados en la Costa Vicentina, donde cada ola cuenta una historia.',
+    lessons_tag:'Actividades', lessons_title:'Elige tu clase', lessons_sub:'Desde el primer contacto con el océano hasta las maniobras avanzadas.',
+    l1_name:'Principiante', l1_desc:'¿Nunca has surfeado? Empieza aquí. Teoría, seguridad, palada y primeras olas de pie — todo en 2 horas.',
+    l2_name:'Intermedio', l2_desc:'¿Ya tienes las bases? Aprende a leer las olas, elegir la posición correcta y encadenar maniobras.',
+    l3_name:'Clase Privada', l3_desc:'Atención 100% personalizada. Ideal para progresión rápida o necesidades específicas.',
+    l4_name:'Bodyboard', l4_desc:'Diversión garantizada para todas las edades. Aprende a deslizarte en las olas con bodyboard.',
+    max:'Máx.', per_person:'/ persona', per_session:'/ sesión', popular:'Popular',
+    includes:'Incluido', inc_wetsuit:'Traje de neopreno', inc_board:'Tabla softop', inc_insurance:'Seguro de accidentes',
+    inc_video:'Análisis de vídeo', inc_bodyboard:'Bodyboard + aletas',
+    reviews_tag:'Opiniones', reviews_title:'Lo que dicen de nosotros', reviews_sub:'Más de 320 opiniones verificadas de surfistas de todo el mundo.',
+    book_tag:'Reservas', book_title:'Reserva tu clase', book_sub:'Elige la actividad, el día y el horario — confirmamos vía WhatsApp en minutos.',
+    step1_label:'Actividad', step2_label:'Fecha', step3_label:'Horario', step4_label:'Datos',
+    s1_title:'¿Qué tipo de clase?', s1_desc:'Selecciona la actividad más adecuada para tu nivel.',
+    s2_title:'Elige un día', s2_desc:'Selecciona una fecha disponible en el calendario.',
+    s3_title:'Elige un horario', s3_desc:'Plazas disponibles para el día seleccionado.',
+    s4_title:'Tus datos', s4_desc:'Rellena para confirmar tu reserva vía WhatsApp.',
+    f_name:'Nombre completo *', f_name_ph:'Ej: Carlos García', f_phone:'Teléfono *', f_phone_ph:'+34 612 345 678', f_country:'País',
+    f_email:'Email', f_email_ph:'carlos@email.com', f_pessoas:'Número de personas',
+    f_peso:'Peso (kg)', f_altura:'Altura (cm)', f_genero:'Género', f_fato:'Talla de traje',
+    f_exp:'Experiencia', exp_nunca:'Nunca he surfeado', exp_ja:'Ya he surfeado', exp_inter:'Intermedio', exp_avanc:'Avanzado',
+    g_homem:'Hombre', g_mulher:'Mujer', g_crianca:'Niño/a',
+    f_nota:'Nota (opcional)', f_nota_ph:'Alergias, edades del grupo, nivel de experiencia...',
+    btn_next:'Siguiente →', btn_back:'← Volver', btn_whatsapp:'Confirmar vía WhatsApp',
+    pp:'pers.', ps:'sesión',
+    slot_available:'plazas disponibles', slot_full:'Sin plazas', slot_spots:'plazas en total',
+    summary_title:'Resumen de reserva', summary_lesson:'Actividad', summary_date:'Fecha',
+    summary_time:'Horario', summary_unit:'Precio unitario', summary_total:'Total estimado',
+    wa_header:'Nueva Reserva — Escola Surf Teste',
+    wa_name:'Nombre', wa_phone:'Teléfono', wa_email:'Email', wa_lesson:'Clase',
+    wa_date:'Fecha', wa_time:'Horario', wa_people:'Personas', wa_total:'Total estimado', wa_note:'Nota',
+    wa_weight:'Peso', wa_height:'Altura', wa_gender:'Género', wa_wetsuit:'Traje',
+    wa_closing:'¡Espero confirmación! 🤙',
+    cond_wave:'Olas', cond_wind:'Viento', cond_water:'Agua', cond_tide:'Próxima marea', cond_pt:'Hora PT',
+    team_tag:'Equipo', team_title:'Nuestros instructores', team_sub:'Profesionales apasionados por el surf y la enseñanza.',
+    inst1_desc:'12 años enseñando en Arrifana. Campeón regional de longboard 2016 y 2019.',
+    inst2_desc:'Surfeando desde los 8 años. Campeona Nacional Junior 2018. Especialista surf femenino.',
+    inst2_t1:'Surf femenino', inst3_t1:'Avanzado',
+    inst3_desc:'Nacido en Aljezur, creció en las olas de Arrifana. Especialista en clases privadas.',
+    footer_nav:'Navegación', footer_contact:'Contacto', footer_rights:'Todos los derechos reservados.',
+    cal_days:['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],
+    cal_months:['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+    tide_days:['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],
+    surf_labels:['Débil','Aceptable','Bueno','Muy bueno','Excelente'],
+  },
+  nl: {
+    nav_sobre:'Over ons', nav_praias:'Stranden', nav_mares:'Getij', nav_aulas:'Lessen', nav_reservar:'Boeken',
+    hero_line1:'Leer Surfen', hero_line2:'met Passie',
+    hero_sub:'Aan de Costa Vicentina, waar de golven perfect zijn en de natuur ongerept is. Lessen voor alle niveaus, ISA-gecertificeerde instructeurs.',
+    hero_cta1:'Les boeken', hero_cta2:'Lessen bekijken',
+    stat_alunos:'Leerlingen / jaar', stat_anos:'Jaar ervaring', stat_sat:'Tevredenheid', stat_cert:'Gecertificeerd',
+    about_tag:'Over ons', about_title:'De beste surfschool van de Algarve',
+    about_sub:'Opgericht in 2013 aan Praia da Arrifana, zijn wij gepassioneerd door surfen en de Costa Vicentina. Onze methode zorgt ervoor dat iedereen veilig leert surfen.',
+    about_reviews:'+320 beoordelingen',
+    feat1_title:'ISA-gecertificeerde instructeurs', feat1_sub:'Alle instructeurs hebben internationale certificering en EHBO-training.',
+    feat2_title:'Kwaliteitsuitrusting', feat2_sub:'Wetsuits, softboards en leashes inbegrepen in alle lessen.',
+    feat3_title:'Uitstekende locatie', feat3_sub:'Arrifana heeft perfecte golven voor alle niveaus, in het hart van het Natuurpark.',
+    beaches_tag:'Costa Vicentina', beaches_title:'Onze stranden', beaches_sub:'Ontdek de mooiste stranden rondom Aljezur en kies waar je wilt leren surfen.',
+    level_all:'Alle niveaus', level_beg:'Beginner', level_adv:'Gevorderd',
+    beach1_desc:'Ons hoofdstrand. Imposante rotswanden, consistente golven het hele jaar door. Geschikt voor alle niveaus.',
+    beach2_desc:'Meer beschermd tegen noordenwind. Ideaal voor beginners en families. Klein en gastvrij met rustige golven.',
+    beach3_desc:'Riviermonding met steeds veranderende zandbank. Heel kalm, ideaal voor kinderen.',
+    beach4_desc:'Het meest blootgestelde strand van de regio. Krachtige, holle golven. Favoriet van ervaren surfers.',
+    beach_wave_type:'Rotsbodem', beach_sandy:'Zandbodem', beach_river:'Riviermonding', beach_reef:'Gemengde bodem',
+    beach1_wind:'N-wind ideaal', beach2_wind:'Beschermd N/NW', beach3_wind:'N-wind ideaal', beach4_wind:'N-wind ideaal',
+    tides_tag:'Getijdentabel', tides_title:'Getij · Aljezur', tides_sub:'Real-time omstandigheden om je les te plannen. Beste surf: 2u voor en na vloed.',
+    gallery_tag:'Galerij', gallery_title:'Onze essentie', gallery_sub:'Momenten vastgelegd aan de Costa Vicentina, waar elke golf een verhaal vertelt.',
+    lessons_tag:'Activiteiten', lessons_title:'Kies je les', lessons_sub:'Van eerste contact met de oceaan tot geavanceerde manoeuvres.',
+    l1_name:'Beginner', l1_desc:'Nog nooit gesurft? Begin hier. Theorie, veiligheid, peddelen en eerste golven staand — alles in 2 uur.',
+    l2_name:'Gevorderd', l2_desc:'Heb je al de basis? Leer golven lezen, de juiste positie kiezen en manoeuvres aaneenschakelen.',
+    l3_name:'Privéles', l3_desc:'100% persoonlijke aandacht. Ideaal voor snelle progressie of specifieke behoeften.',
+    l4_name:'Bodyboard', l4_desc:'Gegarandeerd plezier voor alle leeftijden. Leer op golven te glijden met een bodyboard.',
+    max:'Max.', per_person:'/ pers.', per_session:'/ sessie', popular:'Populair',
+    includes:'Inbegrepen', inc_wetsuit:'Wetsuit', inc_board:'Softboard', inc_insurance:'Ongevallenverzekering',
+    inc_video:'Video-analyse', inc_bodyboard:'Bodyboard + vinnen',
+    reviews_tag:'Beoordelingen', reviews_title:'Wat onze leerlingen zeggen', reviews_sub:'Meer dan 320 geverifieerde beoordelingen van surfers wereldwijd.',
+    book_tag:'Reserveringen', book_title:'Boek je les', book_sub:'Kies activiteit, dag en tijd — bevestiging via WhatsApp in minuten.',
+    step1_label:'Activiteit', step2_label:'Datum', step3_label:'Tijd', step4_label:'Gegevens',
+    s1_title:'Welk type les?', s1_desc:'Selecteer de meest geschikte activiteit voor jouw niveau.',
+    s2_title:'Kies een dag', s2_desc:'Selecteer een beschikbare datum in de kalender.',
+    s3_title:'Kies een tijd', s3_desc:'Beschikbare plaatsen voor de geselecteerde dag.',
+    s4_title:'Jouw gegevens', s4_desc:'Vul in om je reservering te bevestigen via WhatsApp.',
+    f_name:'Volledige naam *', f_name_ph:'Bijv: Jan de Vries', f_phone:'Mobiel *', f_phone_ph:'+31 6 12345678', f_country:'Land',
+    f_email:'E-mail', f_email_ph:'jan@email.com', f_pessoas:'Aantal personen',
+    f_peso:'Gewicht (kg)', f_altura:'Lengte (cm)', f_genero:'Geslacht', f_fato:'Maat wetsuit',
+    f_exp:'Ervaring', exp_nunca:'Nog nooit gesurft', exp_ja:'Al eerder gesurft', exp_inter:'Gemiddeld', exp_avanc:'Gevorderd',
+    g_homem:'Man', g_mulher:'Vrouw', g_crianca:'Kind',
+    f_nota:'Opmerking (optioneel)', f_nota_ph:'Allergieën, leeftijden groep, ervaringsniveau...',
+    btn_next:'Volgende →', btn_back:'← Terug', btn_whatsapp:'Bevestigen via WhatsApp',
+    pp:'pers.', ps:'sessie',
+    slot_available:'plaatsen beschikbaar', slot_full:'Volgeboekt', slot_spots:'plaatsen totaal',
+    summary_title:'Reserveringsoverzicht', summary_lesson:'Activiteit', summary_date:'Datum',
+    summary_time:'Tijd', summary_unit:'Prijs per persoon', summary_total:'Geschat totaal',
+    wa_header:'Nieuwe Reservering — Escola Surf Teste',
+    wa_name:'Naam', wa_phone:'Mobiel', wa_email:'E-mail', wa_lesson:'Les',
+    wa_date:'Datum', wa_time:'Tijd', wa_people:'Personen', wa_total:'Geschat totaal', wa_note:'Opmerking',
+    wa_weight:'Gewicht', wa_height:'Lengte', wa_gender:'Geslacht', wa_wetsuit:'Wetsuit',
+    wa_closing:'Wacht op bevestiging! 🤙',
+    cond_wave:'Golven', cond_wind:'Wind', cond_water:'Water', cond_tide:'Volgend getij', cond_pt:'PT Tijd',
+    team_tag:'Team', team_title:'Onze instructeurs', team_sub:'Professionals gepassioneerd door surfen en lesgeven.',
+    inst1_desc:'12 jaar lesgeven in Arrifana. Regionaal longboard-kampioen 2016 en 2019.',
+    inst2_desc:"Surft sinds haar 8e. Nationaal Juniorkampioen 2018. Specialiste vrouwensurfen.",
+    inst2_t1:'Vrouwensurfen', inst3_t1:'Gevorderd',
+    inst3_desc:"Geboren in Aljezur, opgegroeid op Arrifana's golven. Specialist privélessen.",
+    footer_nav:'Navigatie', footer_contact:'Contact', footer_rights:'Alle rechten voorbehouden.',
+    cal_days:['Zo','Ma','Di','Wo','Do','Vr','Za'],
+    cal_months:['Januari','Februari','Maart','April','Mei','Juni','Juli','Augustus','September','Oktober','November','December'],
+    tide_days:['Zo','Ma','Di','Wo','Do','Vr','Za'],
+    surf_labels:['Slecht','Matig','Goed','Zeer goed','Uitstekend'],
+  },
+};
+
+let currentLang = 'pt';
+function T(key) { return LANGS[currentLang][key] || LANGS['pt'][key] || key; }
+
+const LANG_DEFAULT_COUNTRY = {
+  pt: '🇵🇹 Portugal',
+  en: '🇬🇧 United Kingdom',
+  fr: '🇫🇷 France',
+  de: '🇩🇪 Germany',
+  es: '🇪🇸 Spain',
+  nl: '🇳🇱 Netherlands',
+};
+
+function setLang(lang) {
+  currentLang = lang;
+  document.documentElement.lang = lang;
+  document.querySelectorAll('.lb').forEach(b => {
+    const isActive = b.textContent.trim() === lang.toUpperCase();
+    b.classList.toggle('active', isActive);
+    b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+  });
+  document.querySelectorAll('[data-t]').forEach(el => {
+    const key = el.dataset.t;
+    const val = T(key);
+    el.textContent = val;
+  });
+  document.querySelectorAll('[data-placeholder]').forEach(el => {
+    el.placeholder = T(el.dataset.placeholder);
+  });
+  // Auto-select country based on language
+  const countrySel = document.getElementById('fcountry');
+  if (countrySel && LANG_DEFAULT_COUNTRY[lang]) {
+    countrySel.value = LANG_DEFAULT_COUNTRY[lang];
+  }
+  buildCalendar();
+  buildTideGrid();
+  if (booking.selectedDateKey) buildSlots(booking.selectedDateKey);
+  if (document.getElementById('step-4').classList.contains('active')) buildSummary();
+}
+
+// ── BEACHES & CONDITIONS ──────────────────────────────────────────────────────
+const BEACHES = [
+  { id:'meia-praia',    name:'Meia Praia',   region:'Lagos',        lat:37.097, lon:-8.713, hw_spring:3.3, hw_neap:2.4, lw_spring:0.2, lw_neap:1.0,  hw_offset_min:0  },
+  { id:'arrifana',      name:'Arrifana',     region:'Aljezur',      lat:37.297, lon:-8.865, hw_spring:3.1, hw_neap:2.2, lw_spring:0.2, lw_neap:0.9,  hw_offset_min:10 },
+  { id:'monte-clerigo', name:'Monte Clérigo',region:'Aljezur',      lat:37.347, lon:-8.856, hw_spring:3.1, hw_neap:2.2, lw_spring:0.2, lw_neap:0.9,  hw_offset_min:12 },
+  { id:'amado',         name:'Amado',        region:'Carrapateira', lat:37.170, lon:-8.907, hw_spring:3.2, hw_neap:2.3, lw_spring:0.2, lw_neap:0.95, hw_offset_min:8  },
+  { id:'amoreira',      name:'Amoreira',     region:'Aljezur',      lat:37.368, lon:-8.852, hw_spring:3.1, hw_neap:2.2, lw_spring:0.2, lw_neap:0.9,  hw_offset_min:15 },
+  { id:'odeceixe',      name:'Odeceixe',     region:'Odemira',      lat:37.440, lon:-8.832, hw_spring:3.0, hw_neap:2.2, lw_spring:0.2, lw_neap:0.9,  hw_offset_min:18 },
+];
+let currentBeachId = 'meia-praia';
+function getBeach(id) { return BEACHES.find(b => b.id === (id || currentBeachId)); }
+
+// ── TIDE MATHS ────────────────────────────────────────────────────────────────
+const LAGOS_CAL_HW_MS  = Date.UTC(2025, 0, 2, 3, 52);    // Lagos HW calibration
+const M2_PERIOD_MS     = 44714143;                         // 12h 25m 14.143s
+const KNOWN_NEW_MOON   = Date.UTC(2025, 0, 30, 5, 36);    // Jan 30 2025
+const LUNAR_PERIOD_MS  = 29530588800;                      // 29.5306 days
+
+function springFactor(ms) {
+  const age = ((ms - KNOWN_NEW_MOON) % LUNAR_PERIOD_MS + LUNAR_PERIOD_MS) % LUNAR_PERIOD_MS / LUNAR_PERIOD_MS;
+  const shifted = (age - 0.051 + 1) % 1; // ~1.5 day lag after syzygy
+  return Math.pow(Math.abs(Math.cos(shifted * 2 * Math.PI)), 0.7);
+}
+
+function tideHts(beach, ms) {
+  const sf = springFactor(ms);
+  return {
+    hw: +(beach.hw_neap + sf * (beach.hw_spring - beach.hw_neap)).toFixed(2),
+    lw: +(beach.lw_neap - sf * (beach.lw_neap  - beach.lw_spring)).toFixed(2),
+  };
+}
+
+function getDayTides(beach, localDate) {
+  // Work in UTC; localDate is midnight local
+  const dayStartUtc = Date.UTC(localDate.getFullYear(), localDate.getMonth(), localDate.getDate()) - 3600000; // -1h buffer
+  const dayEndUtc   = dayStartUtc + 93600000; // 26h window
+  const beachRef    = LAGOS_CAL_HW_MS + beach.hw_offset_min * 60000;
+  // Rewind to last HW before window
+  let hw = beachRef;
+  while (hw > dayStartUtc) hw -= M2_PERIOD_MS;
+  hw += M2_PERIOD_MS;
+  // Collect all turns in window
+  const turns = [];
+  for (let t = hw; t < dayEndUtc; t += M2_PERIOD_MS) {
+    turns.push({ type:'H', ms:t });
+    turns.push({ type:'L', ms:t + M2_PERIOD_MS / 2 });
+  }
+  turns.sort((a,b) => a.ms - b.ms);
+  const { hw:hwH, lw:lwH } = tideHts(beach, (dayStartUtc + dayEndUtc) / 2);
+  const fmt = ms => new Date(ms).toLocaleTimeString('pt-PT',{timeZone:'Europe/Lisbon',hour:'2-digit',minute:'2-digit'});
+  // Filter to events that display as "today" in Lisbon
+  const todayStr = localDate.toLocaleDateString('pt-PT',{timeZone:'Europe/Lisbon'});
+  return turns.filter(t => {
+    const d = new Date(t.ms).toLocaleDateString('pt-PT',{timeZone:'Europe/Lisbon'});
+    return d === todayStr;
+  }).slice(0,4).map(t => ({ type:t.type, time:fmt(t.ms), height:t.type==='H'?hwH:lwH, ms:t.ms }));
+}
+
+function buildBeachSelector() {
+  const sel = document.getElementById('beach-selector');
+  if (!sel) return;
+  if (!sel.children.length) {
+    sel.innerHTML = BEACHES.map(b =>
+      `<button class="beach-btn${b.id===currentBeachId?' active':''}" data-beach="${b.id}" onclick="selectBeach('${b.id}')">
+        ${b.name} <span style="font-size:.7rem;opacity:.65">${b.region}</span>
+      </button>`
+    ).join('');
+  } else {
+    sel.querySelectorAll('.beach-btn').forEach(btn =>
+      btn.classList.toggle('active', btn.dataset.beach === currentBeachId)
+    );
+  }
+}
+
+function selectBeach(id) {
+  currentBeachId = id;
+  const b = getBeach();
+  const nameEl = document.getElementById('cond-beach-name');
+  if (nameEl) nameEl.textContent = b.name;
+  buildBeachSelector();
+  buildTideGrid();
+  updateNextTide();
+  fetchConditions(b);
+}
+
+// ── REAL CONDITIONS (Open-Meteo) ──────────────────────────────────────────────
+function degToCompass(d) {
+  const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSO','SO','OSO','O','ONO','NO','NNO'];
+  return dirs[Math.round(d / 22.5) % 16];
+}
+
+function waveQualityColor(wh) {
+  if (wh == null) return 'var(--gray)';
+  if (wh < 0.4)  return 'var(--gray)';
+  if (wh < 1.0)  return 'var(--green)';
+  if (wh < 2.0)  return 'var(--gold)';
+  if (wh < 3.0)  return '#f97316';
+  return 'var(--red)';
+}
+function waveQualityLabel(wh) {
+  if (wh == null) return '';
+  if (wh < 0.4)  return '●';
+  if (wh < 1.0)  return '● Bom iniciante';
+  if (wh < 2.0)  return '● Intermédio';
+  if (wh < 3.0)  return '● Avançado';
+  return '● Peritos';
+}
+
+async function fetchConditions(beach) {
+  const waveEl    = document.getElementById('cond-wave-val');
+  const waveQEl   = document.getElementById('cond-wave-quality');
+  const windEl    = document.getElementById('cond-wind-val');
+  const waterEl   = document.getElementById('cond-water-val');
+  [waveEl,windEl,waterEl].forEach(el => el && el.classList.add('cond-loading'));
+  try {
+    const [marine, weather] = await Promise.all([
+      fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${beach.lat}&longitude=${beach.lon}&current=wave_height,wave_period,wave_direction,sea_surface_temperature&wind_speed_unit=kmh&timezone=Europe%2FLisbon`).then(r=>r.json()),
+      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${beach.lat}&longitude=${beach.lon}&current=wind_speed_10m,wind_direction_10m&wind_speed_unit=kmh&timezone=Europe%2FLisbon`).then(r=>r.json())
+    ]);
+    const wh  = marine.current?.wave_height;
+    const sst = marine.current?.sea_surface_temperature;
+    const ws  = weather.current?.wind_speed_10m;
+    const wd  = weather.current?.wind_direction_10m;
+    if (waveEl) {
+      waveEl.textContent = wh != null ? `${wh.toFixed(1)}m` : '—';
+      waveEl.style.color = waveQualityColor(wh);
+      waveEl.classList.remove('cond-loading');
+    }
+    if (waveQEl && wh != null) {
+      waveQEl.textContent  = waveQualityLabel(wh);
+      waveQEl.style.color  = waveQualityColor(wh);
+      waveQEl.style.fontSize = '.68rem';
+    }
+    if (windEl) { windEl.textContent  = ws != null ? `${degToCompass(wd)} ${Math.round(ws)}km/h` : '—'; windEl.classList.remove('cond-loading'); }
+    if (waterEl){ waterEl.textContent = sst != null ? `${sst.toFixed(1)}°C` : '—'; waterEl.classList.remove('cond-loading'); }
+  } catch(e) {
+    [waveEl,windEl,waterEl].forEach(el => { if(el){ el.textContent='—'; el.classList.remove('cond-loading'); } });
+  }
+}
+
+// ── TIDE GRID ─────────────────────────────────────────────────────────────────
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+
+function buildTideGrid() {
+  const grid = document.getElementById('tide-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const beach = getBeach();
+  const tDays = T('tide_days');
+  const scoreLabels = T('surf_labels');
+  for (let d = 0; d < 7; d++) {
+    const date = new Date(TODAY); date.setDate(TODAY.getDate() + d);
+    const isToday = d === 0;
+    const dayName = tDays[date.getDay()];
+    const turns = getDayTides(beach, date);
+    const sf = springFactor(date.getTime() + 43200000);
+    const score = Math.min(5, Math.max(1, Math.round(1 + sf * 4)));
+    const scoreIdx = Math.min(score - 1, scoreLabels.length - 1);
+    const dots = Array.from({length:5},(_,j) => {
+      const cls = j < score ? (score >= 4 ? 'on' : score >= 3 ? 'mid' : 'off') : '';
+      return `<span class="sd ${cls}"></span>`;
+    }).join('');
+    let teHtml = '';
+    turns.forEach(t => {
+      const arrow = t.type === 'H' ? '<span class="tau">↑</span>' : '<span class="tad">↓</span>';
+      const cls   = t.type === 'H' ? 'th' : 'tl';
+      teHtml += `<div class="te">${arrow}<span class="tt">${t.time}</span><span class="${cls}">${t.height}m</span></div>`;
+    });
+    if (!teHtml) teHtml = '<div class="te" style="color:var(--gray);font-size:.75rem">—</div>';
+    grid.innerHTML += `
+      <div class="tide-day${isToday?' today':''}">
+        <div class="tdn">${isToday?'<span style="color:var(--gold)">★</span> ':''}${dayName}</div>
+        <div class="tdd">${date.getDate()}/${date.getMonth()+1}</div>
+        ${teHtml}
+        <div class="surf-score"><div class="surf-dots">${dots}</div><div class="surf-label">${scoreLabels[scoreIdx]}</div></div>
+      </div>`;
+  }
+}
+
+function updateNextTide() {
+  const beach = getBeach();
+  const now   = new Date();
+  const todayTurns = getDayTides(beach, TODAY);
+  const tomorrowDate = new Date(TODAY); tomorrowDate.setDate(TODAY.getDate() + 1);
+  const tomorrowTurns = getDayTides(beach, tomorrowDate);
+  const allTurns = [...todayTurns, ...tomorrowTurns];
+  const next = allTurns.find(t => t.ms > now.getTime());
+  const prev = [...allTurns].reverse().find(t => t.ms <= now.getTime());
+
+  const dirEl   = document.getElementById('tide-direction');
+  const labelEl = document.getElementById('tide-next-label');
+  const nextEl  = document.getElementById('next-tide-val');
+
+  if (!next) return;
+
+  // If next event is HW → tide is currently RISING; if LW → FALLING
+  const rising = next.type === 'H';
+  const color  = rising ? 'var(--cyan)' : 'var(--gold)';
+
+  if (dirEl)   { dirEl.textContent  = rising ? '↑ A subir' : '↓ A descer'; dirEl.style.color = color; }
+  if (labelEl) { labelEl.textContent = rising ? '→ PM' : '→ BM'; }
+  if (nextEl)  { nextEl.textContent  = next.time; nextEl.style.color = color; }
+}
+
+function updateClock() {
+  const pt = new Date().toLocaleTimeString('pt-PT', { timeZone:'Europe/Lisbon', hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  const el = document.getElementById('pt-time');
+  if (el) el.textContent = pt;
+}
+
+// ── DEMO THEMES ───────────────────────────────────────────────────────────────
+const DEMO_THEMES = {
+  'escola-teste': {
+    name:'Escola Surf Teste', logo:'Escola <span>Surf</span> Teste',
+    lat:37.297, lon:-8.865,
+    gold:'#C9A84C', rgb:'201,168,76', navy:'#060D1B', ocean:'#0A2540',
+    heroImg:'https://images.unsplash.com/photo-1502680390469-be75c86b636f?auto=format&fit=crop&w=1920&q=85',
+    heroOverlay:'linear-gradient(150deg,rgba(6,13,27,.82) 0%,rgba(6,13,27,.45) 55%,rgba(6,13,27,.72) 100%)',
+    badge:'🌊 Escola de Surf · Site de Demonstração',
+    h1:'Aprenda a <em>surfar</em><br>com confiança',
+    sub:'Experimente a adrenalina das ondas com instrutores certificados ISA. Aulas para todos os níveis na mais bela costa portuguesa.',
+    stats:[['500+','Surfistas'],['12','Anos'],['98%','Satisfação'],['ISA','Certificado']],
+    aboutImg:'https://images.unsplash.com/photo-1505459668311-8dfac7952bf0?auto=format&fit=crop&w=800&q=80',
+    aboutBadge:'⭐ 4.9 · +200 avaliações',
+    aboutTag:'A nossa escola',
+    aboutTitle:'A aventura do surf começa aqui',
+    aboutSub:'Com anos de experiência nas melhores praias do Alentejo, oferecemos aulas personalizadas, equipamento premium e instrutores com certificação internacional.',
+    feat:[['🎓','Instrutores ISA','Certificados pela federação internacional de surf com anos de experiência.'],['🏄','Para todos os níveis','Do zero absoluto ao surfista que quer evoluir a técnica.'],['📍','Localização perfeita','Praia tranquila, ondas consistentes e fácil acesso.']],
+  },
+  'surf-arrifana': {
+    name:'Arrifana Surf School', logo:'Arrifana <span>Surf</span> School',
+    lat:37.297, lon:-8.865,
+    gold:'#10B981', rgb:'16,185,129', navy:'#020E0C', ocean:'#041A12',
+    heroImg:'https://images.unsplash.com/photo-1476158085676-e67f57ed9ed7?auto=format&fit=crop&w=1920&q=85',
+    heroOverlay:'linear-gradient(150deg,rgba(2,14,12,.88) 0%,rgba(2,14,12,.38) 55%,rgba(2,14,12,.78) 100%)',
+    badge:'🌿 Escola Boutique · Arrifana · Costa Vicentina',
+    h1:'Conquiste as ondas<br>do <em>Atlântico</em> selvagem',
+    sub:'Arrifana é uma das praias mais dramáticas e preservadas de Portugal. Falésias de 100 metros, ondas consistentes e grupos de máximo 6 pessoas para atenção real.',
+    stats:[['350+','Surfistas'],['8','Anos'],['99%','Satisfação'],['ISA','Certificado']],
+    aboutImg:'https://images.unsplash.com/photo-1506477331477-33d5d8b3dc85?auto=format&fit=crop&w=800&q=80',
+    aboutBadge:'⭐ 5.0 · +130 avaliações',
+    aboutTag:'A nossa filosofia',
+    aboutTitle:'Pequenos grupos, experiência única',
+    aboutSub:'Na Arrifana não há turismo de massas. Há autenticidade, silêncio e ondas perfeitas. Grupos máximo de 6 surfistas garantem a atenção que mereces para evoluíres rápido.',
+    feat:[['🌿','Máximo 6 pessoas','Atenção total do instrutor — nunca te perdemos no meio da turma.'],['🏔️','Cenário dramático','Falésias de 100m, Costa Vicentina virgem, sem multidões.'],['🐬','Mar Limpo','Parque Natural da Costa Vicentina — as águas mais puras de Portugal.']],
+  },
+  'surf-nazare': {
+    name:'Nazaré Surf Experience', logo:'Nazaré <span>Surf</span> Experience',
+    lat:39.601, lon:-9.070,
+    gold:'#F59E0B', rgb:'245,158,11', navy:'#0D0900', ocean:'#1C1100',
+    heroImg:'https://images.unsplash.com/photo-1444120775320-d20350f7f0f5?auto=format&fit=crop&w=1920&q=85',
+    heroOverlay:'linear-gradient(150deg,rgba(13,9,0,.90) 0%,rgba(13,9,0,.42) 55%,rgba(13,9,0,.82) 100%)',
+    badge:'⚡ Capital das Ondas Gigantes · Nazaré · Portugal',
+    h1:'Onde as lendas<br>do <em>surf</em> nascem',
+    sub:'Nazaré é o berço das maiores ondas do mundo. Garrett McNamara. Records mundiais. E agora, as tuas primeiras ondas neste lugar mágico — a emoção é a mesma.',
+    stats:[['800+','Surfistas'],['15','Anos'],['97%','Satisfação'],['ISA','Certificado']],
+    aboutImg:'https://images.unsplash.com/photo-1531722569936-825d4eaf4d8a?auto=format&fit=crop&w=800&q=80',
+    aboutBadge:'⭐ 4.8 · +350 avaliações',
+    aboutTag:'A nossa história',
+    aboutTitle:'A adrenalina pura de Nazaré',
+    aboutSub:'A Praia Norte recebe recordes mundiais todos os invernos. Mas temos também spots perfeitos para iniciantes. Venha descobrir por que Nazaré atrai surfistas do mundo inteiro.',
+    feat:[['⚡','Ondas lendárias','O mesmo oceano que produziu as maiores ondas do mundo está aqui.'],['📸','Fotografia incluída','Imortalizamos o teu primeiro momento a surfar em Nazaré.'],['🏨','Pacotes completos','Surf + alojamento + transfer desde Lisboa disponíveis.']],
+  },
+  'surf-peniche': {
+    name:'Peniche Surf Academy', logo:'Peniche <span>Surf</span> Academy',
+    lat:39.355, lon:-9.380,
+    gold:'#818CF8', rgb:'129,140,248', navy:'#04040F', ocean:'#080818',
+    heroImg:'https://images.unsplash.com/photo-1465919292275-c60ba49da6ae?auto=format&fit=crop&w=1920&q=85',
+    heroOverlay:'linear-gradient(150deg,rgba(4,4,15,.92) 0%,rgba(4,4,15,.40) 55%,rgba(4,4,15,.80) 100%)',
+    badge:'🎓 Academia ISA · Peniche · Capital Europeia do Surf',
+    h1:'Progressão técnica<br>sem <em>compromissos</em>',
+    sub:'Peniche acolhe o WSL Championship Tour todos os anos — as melhores ondas do circuito mundial. A nossa academia garante evolução real, com análise de vídeo em cada sessão.',
+    stats:[['1.2k+','Alunos'],['20','Anos'],['96%','Progressão'],['WSL','Parceiro']],
+    aboutImg:'https://images.unsplash.com/photo-1516939884836-3b6239a55eda?auto=format&fit=crop&w=800&q=80',
+    aboutBadge:'⭐ 4.9 · +520 avaliações',
+    aboutTag:'Metodologia',
+    aboutTitle:'Academia de alto rendimento',
+    aboutSub:'Análise de vídeo após cada sessão, planos de treino personalizados e instrutores que já formaram campeões nacionais. Peniche não é só uma praia — é o seu laboratório de surf.',
+    feat:[['📹','Análise de vídeo','Gravamos cada sessão e analisamos a tua técnica frame a frame.'],['📋','Plano de treino','Programa individualizado para atingir os teus objetivos.'],['🏆','Instrutores de elite','Formados pelo WSL e pela FPS — a elite do ensino do surf em Portugal.']],
+  },
+  'surf-lagos': {
+    name:'Lagos Surf Club', logo:'Lagos <span>Surf</span> Club',
+    lat:37.097, lon:-8.713,
+    gold:'#FB923C', rgb:'251,146,60', navy:'#0D0600', ocean:'#1A0D00',
+    heroImg:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=85',
+    heroOverlay:'linear-gradient(150deg,rgba(13,6,0,.86) 0%,rgba(13,6,0,.38) 55%,rgba(13,6,0,.76) 100%)',
+    badge:'☀️ Surf & Lifestyle · Lagos · Algarve Dourado',
+    h1:'Sol, ondas e surf<br>no <em>Algarve</em> perfeito',
+    sub:'Lagos combina falésias douradas, águas turquesa e o melhor clima de Portugal. Aprende a surfar com o cenário mais deslumbrante da Europa como pano de fundo.',
+    stats:[['600+','Surfistas'],['10','Anos'],['99%','Satisfação'],['ISA','Certificado']],
+    aboutImg:'https://images.unsplash.com/photo-1559827291-3cd07d93ce11?auto=format&fit=crop&w=800&q=80',
+    aboutBadge:'⭐ 5.0 · +280 avaliações',
+    aboutTag:'Bem-vindo ao Algarve',
+    aboutTitle:'O surf que o Algarve merecia',
+    aboutSub:'Além das praias de turismo, Lagos tem spots de surf incríveis e pouco conhecidos. Grupos familiares, casais e amigos — o pacote perfeito para a vossa aventura algarviana.',
+    feat:[['🌅','Clima perfeito','300 dias de sol por ano e águas até 22°C no verão.'],['👨‍👩‍👧','Para a família toda','Programas para crianças a partir dos 7 anos e adultos de todas as idades.'],['🍹','Lifestyle completo','Yoga ao nascer do sol, SUP ao pôr-do-sol e jantar na praia após a aula.']],
+  },
+  'surf-sagres': {
+    name:'Sagres Wild Surf', logo:'Sagres <span>Wild</span> Surf',
+    lat:37.010, lon:-8.941,
+    gold:'#C084FC', rgb:'192,132,252', navy:'#06030E', ocean:'#0F0820',
+    heroImg:'https://images.unsplash.com/photo-1527089930014-f4ba4ff9c82f?auto=format&fit=crop&w=1920&q=85',
+    heroOverlay:'linear-gradient(150deg,rgba(6,3,14,.92) 0%,rgba(6,3,14,.38) 55%,rgba(6,3,14,.84) 100%)',
+    badge:'🌑 Wild Surf · Sagres · Fim do Mundo',
+    h1:'No fim do mundo<br><em>começa</em> tudo',
+    sub:'Sagres é o ponto mais a sudoeste da Europa. Cabo de São Vicente. Onde os ventos da Costa Vicentina encontram o Atlântico aberto e criam as ondas mais selvagens e autênticas do país.',
+    stats:[['400+','Surfistas'],['7','Anos'],['98%','Satisfação'],['ISA','Certificado']],
+    aboutImg:'https://images.unsplash.com/photo-1484291470158-b8f8d608850d?auto=format&fit=crop&w=800&q=80',
+    aboutBadge:'⭐ 4.9 · +170 avaliações',
+    aboutTag:'A nossa essência',
+    aboutTitle:'Autêntico. Selvagem. Inesquecível.',
+    aboutSub:'Em Sagres não há resorts nem turismo de massa. Há autenticidade pura, por do sol mais dramático da Europa e ondas que te fazem sentir verdadeiramente vivo. Surf como foi inventado.',
+    feat:[['🌑','Fim do mundo real','Cabo de São Vicente — o farol que guiou os navegadores portugueses.'],['🌊','Ondas consistentes','Exposição total ao Atlântico Norte garante surf 350 dias por ano.'],['🔇','Zero turismo de massa','Sagres ainda é um segredo. Partilhamo-lo contigo com orgulho.']],
+  },
+};
+
+const _escolaParam = new URLSearchParams(window.location.search).get('escola') || 'escola-teste';
+const _theme = DEMO_THEMES[_escolaParam] || DEMO_THEMES['escola-teste'];
+
+// ── PWA ICON + MANIFEST per school ────────────────────────────────────────────
+(function(){
+  const n = _theme.navy, g = _theme.gold;
+  function genPWAIcon(sz) {
+    const c = document.createElement('canvas');
+    c.width = c.height = sz;
+    const ctx = c.getContext('2d');
+    const s = sz / 512;
+    // Background
+    ctx.fillStyle = n;
+    const r = sz * 0.17;
+    ctx.beginPath();
+    ctx.moveTo(r,0); ctx.lineTo(sz-r,0); ctx.arcTo(sz,0,sz,r,r);
+    ctx.lineTo(sz,sz-r); ctx.arcTo(sz,sz,sz-r,sz,r);
+    ctx.lineTo(r,sz); ctx.arcTo(0,sz,0,sz-r,r);
+    ctx.lineTo(0,r); ctx.arcTo(0,0,r,0,r);
+    ctx.closePath(); ctx.fill();
+    // Wave 1
+    ctx.strokeStyle = g; ctx.lineWidth = 30*s; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(48*s,310*s); ctx.quadraticCurveTo(130*s,240*s,220*s,275*s); ctx.quadraticCurveTo(310*s,310*s,400*s,230*s); ctx.quadraticCurveTo(445*s,210*s,466*s,234*s); ctx.stroke();
+    // Wave 2 (faded)
+    ctx.globalAlpha = 0.45; ctx.lineWidth = 20*s;
+    ctx.beginPath(); ctx.moveTo(48*s,370*s); ctx.quadraticCurveTo(130*s,300*s,220*s,335*s); ctx.quadraticCurveTo(310*s,370*s,400*s,290*s); ctx.quadraticCurveTo(445*s,270*s,466*s,294*s); ctx.stroke();
+    ctx.globalAlpha = 1;
+    // Surfboard
+    ctx.save(); ctx.translate(265*s,250*s); ctx.rotate(-0.14);
+    ctx.fillStyle = g; ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(-70*s,-13*s,140*s,26*s,13*s);
+    else { ctx.rect(-70*s,-13*s,140*s,26*s); }
+    ctx.fill(); ctx.restore();
+    // Rider
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(280*s,210*s,22*s,0,Math.PI*2); ctx.fill();
+    return c.toDataURL('image/png');
+  }
+  try {
+    const icon180 = genPWAIcon(180);
+    const appleLink = document.createElement('link');
+    appleLink.rel = 'apple-touch-icon'; appleLink.href = icon180;
+    document.head.appendChild(appleLink);
+    const shortName = _theme.name.split(' ').slice(0,2).join(' ');
+    const manifest = { name:_theme.name, short_name:shortName,
+      description:`Reservas de surf — ${_theme.name}`,
+      start_url:`/surf?escola=${_escolaParam}`, display:'standalone',
+      background_color:n, theme_color:g, orientation:'portrait',
+      icons:[
+        { src:genPWAIcon(192), sizes:'192x192', type:'image/png' },
+        { src:genPWAIcon(512), sizes:'512x512', type:'image/png', purpose:'maskable' }
+      ]
+    };
+    const blob = new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
+    const mLink = document.createElement('link');
+    mLink.rel = 'manifest'; mLink.href = URL.createObjectURL(blob);
+    document.head.appendChild(mLink);
+    document.head.insertAdjacentHTML('beforeend',
+      `<meta name="apple-mobile-web-app-capable" content="yes">
+       <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+       <meta name="apple-mobile-web-app-title" content="${shortName}">
+       <meta name="theme-color" content="${n}">`);
+  } catch(_){}
+})();
+
+// ── Apply CSS custom properties immediately ──────────────────────────────────
+const _root = document.documentElement;
+_root.style.setProperty('--gold', _theme.gold);
+_root.style.setProperty('--navy', _theme.navy);
+_root.style.setProperty('--ocean', _theme.ocean);
+
+// Inject targeted CSS overrides for hardcoded rgba(gold) values
+(function(){
+  const s = document.createElement('style');
+  const g = _theme.gold, r = _theme.rgb, n = _theme.navy;
+  s.textContent = `
+    .lb.active,.lb:hover{border-color:${g}!important;color:${g}!important;background:rgba(${r},.08)!important}
+    .btn-primary{background:${g}!important;box-shadow:0 4px 24px rgba(${r},.35)!important;color:${n}!important}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 36px rgba(${r},.5)!important}
+    .nav-cta{background:${g}!important;color:${n}!important}
+    .nav-cta:hover,.nav-cta.active{box-shadow:0 4px 20px rgba(${r},.4)!important;color:${n}!important}
+    .hero-badge{background:rgba(${r},.12)!important;border-color:rgba(${r},.3)!important;color:${g}!important}
+    .hero h1 em{color:${g}!important}
+    .section-tag{color:${g}!important}
+    .stat-num{color:${g}!important}
+    .cb{border-bottom-color:rgba(${r},.15)!important}
+    .about-badge{background:${g}!important;color:${n}!important}
+    .price-card.featured{border-color:rgba(${r},.4)!important}
+    .tag-all{background:rgba(${r},.18)!important;color:${g}!important;border-color:rgba(${r},.3)!important}
+    .footer-logo span,.logo span{color:${g}!important}
+    .hero-ov{background:${_theme.heroOverlay}!important}
+  `;
+  document.head.appendChild(s);
+})();
+
+// ── Apply hero background image immediately ──────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Logo & footer school name
+  document.querySelectorAll('.logo, .footer-logo').forEach(el => { el.innerHTML = _theme.logo; });
+
+  // Hero background
+  const hp = document.getElementById('hero-photo');
+  if (hp) hp.style.backgroundImage = `url('${_theme.heroImg}')`;
+
+  // Hero badge
+  const badge = document.querySelector('.hero-badge');
+  if (badge) badge.textContent = _theme.badge;
+
+  // Apply all text overrides AFTER translations have run
+  setTimeout(() => {
+    // Hero H1 (override data-t content)
+    const h1 = document.querySelector('.hero h1');
+    if (h1) h1.innerHTML = _theme.h1;
+
+    // Hero subtitle
+    const sub = document.querySelector('.hero > .hero-content > p, .hero-content > p');
+    if (sub) sub.textContent = _theme.sub;
+
+    // Hero stats
+    const statNums = document.querySelectorAll('.stat-num');
+    const statLabels = document.querySelectorAll('.stat-label');
+    _theme.stats.forEach(([n,l], i) => {
+      if (statNums[i]) statNums[i].textContent = n;
+      if (statLabels[i]) statLabels[i].textContent = l;
+    });
+
+    // About photo
+    const aboutImg = document.querySelector('.about-photo-wrap img');
+    if (aboutImg) aboutImg.src = _theme.aboutImg;
+
+    // About badge
+    const ab = document.querySelector('.about-badge');
+    if (ab) ab.innerHTML = `<strong>${_theme.aboutBadge.split('·')[0].trim()}</strong><span>${_theme.aboutBadge.split('·')[1]?.trim()||''}</span>`;
+
+    // About section tag, title, subtitle
+    const aboutSection = document.getElementById('sobre');
+    if (aboutSection) {
+      const tag = aboutSection.querySelector('.section-tag');
+      const title = aboutSection.querySelector('.section-title, h2');
+      const desc = aboutSection.querySelector('.section-sub');
+      if (tag) tag.textContent = _theme.aboutTag;
+      if (title) title.textContent = _theme.aboutTitle;
+      if (desc) desc.textContent = _theme.aboutSub;
+
+      // Feature blocks
+      const feats = aboutSection.querySelectorAll('.feature');
+      _theme.feat.forEach(([icon, title, desc], i) => {
+        if (!feats[i]) return;
+        const fi = feats[i].querySelector('.feature-icon');
+        const fh = feats[i].querySelector('h4');
+        const fp = feats[i].querySelector('p');
+        if (fi) fi.textContent = icon;
+        if (fh) fh.textContent = title;
+        if (fp) fp.textContent = desc;
+      });
+    }
+  }, 80);
+});
+
+// ── BOOKING STATE ─────────────────────────────────────────────────────────────
+const booking = { lessonKey:null, lessonPrice:0, lessonPrivate:false, lessonMaxPax:6, selectedDateKey:null, selectedDateStr:null, time:null };
+const SLOT_AVAIL = {};
+let SCHOOL_SLOTS        = ['08:00','10:30','14:00','16:30'];
+let SCHOOL_MAX_SLOT     = 6;
+let SCHOOL_ID_ACTIVE    = _escolaParam;
+let SCHOOL_WORKING_DAYS = null; // null = all days; array [0-6] (0=Sun) when set
+
+// ── WEATHER ───────────────────────────────────────────────────────────────────
+let WEATHER_DATA = {};
+async function loadWeather(lat, lon) {
+  if (!lat || !lon) return;
+  try {
+    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min&timezone=Europe%2FLisbon&forecast_days=16`);
+    const d = await r.json();
+    if (d?.daily?.time) {
+      d.daily.time.forEach((date, i) => {
+        WEATHER_DATA[date] = { max: d.daily.temperature_2m_max[i], min: d.daily.temperature_2m_min[i] };
+      });
+      buildCalendar();
+    }
+  } catch(_) {}
+}
+
+// ── MONTH AVAILABILITY ────────────────────────────────────────────────────────
+let MONTH_AVAIL = {}; // { 'YYYY-MM-DD': remainingSpots }
+async function loadMonthAvailability(year, month) {
+  if (!sb) return;
+  const pad = n => String(n).padStart(2,'0');
+  const startDate = `${year}-${pad(month+1)}-01`;
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const endDate = `${year}-${pad(month+1)}-${pad(daysInMonth)}`;
+  try {
+    const { data } = await sb.from('bookings')
+      .select('booking_date,booking_time,num_people')
+      .eq('school_id', SCHOOL_ID_ACTIVE)
+      .gte('booking_date', startDate)
+      .lte('booking_date', endDate)
+      .in('status', ['pending','confirmed']);
+    // Build per-slot usage map
+    const slotUsed = {};
+    (data || []).forEach(b => {
+      const k = `${b.booking_date}|${b.booking_time}`;
+      slotUsed[k] = (slotUsed[k] || 0) + (b.num_people || 1);
+    });
+    // Calculate remaining capacity per day
+    MONTH_AVAIL = {};
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${year}-${pad(month+1)}-${pad(d)}`;
+      let used = 0;
+      SCHOOL_SLOTS.forEach(slot => { used += slotUsed[`${dateStr}|${slot}`] || 0; });
+      MONTH_AVAIL[dateStr] = Math.max(0, SCHOOL_MAX_SLOT * SCHOOL_SLOTS.length - used);
+    }
+    buildCalendar();
+  } catch(_) {}
+}
+
+// Maps Portuguese lesson names → booking key (default cards)
+const LESSON_KEY_MAP  = { 'Iniciante':'l1_name','Intermédio':'l2_name','Aula Privada':'l3_name','Bodyboard':'l4_name' };
+const LESSON_ICON_MAP = { 'Iniciante':'🌊','Intermédio':'🏄','Aula Privada':'⭐','Bodyboard':'🌀','Stand Up Paddle':'🚣' };
+
+function renderLessonCards(lessonTypes) {
+  const container = document.querySelector('.lesson-options');
+  if (!container || !lessonTypes?.length) return;
+  container.innerHTML = lessonTypes.map(lt => {
+    const key  = LESSON_KEY_MAP[lt.name] || lt.name;
+    const icon = lt.icon || LESSON_ICON_MAP[lt.name] || '🏄';
+    const isDefault  = !!LESSON_KEY_MAP[lt.name];
+    const isPrivate  = lt.max_pax === 1;
+    const nameHtml   = isDefault
+      ? `<div class="opt-name" data-t="${key}"></div>`
+      : `<div class="opt-name">${lt.name}</div>`;
+    const unitKey    = isPrivate ? 'ps' : 'pp';
+    return `<div class="lesson-option" onclick="selectLesson(this,'${key}',${lt.price},${lt.price},${lt.max_pax||6})">
+      <span class="opt-icon">${icon}</span>${nameHtml}
+      <div class="opt-price">€${lt.price}/<span data-t="${unitKey}">${T(unitKey)}</span></div>
+    </div>`;
+  }).join('');
+  // Re-apply translations to data-t elements
+  container.querySelectorAll('[data-t]').forEach(el => { el.textContent = T(el.dataset.t); });
+}
+
+async function loadSchoolConfig() {
+  if (!sb) return;
+  let dbLessonTypes = null;
+  try {
+    // Try full select first; if lesson_types/working_days columns missing, retry without them
+    let data = null;
+    const r1 = await sb.from('schools').select('id,time_slots,max_per_slot,wa_number,school_email,lesson_types,working_days').eq('id', SCHOOL_ID_ACTIVE).maybeSingle();
+    if (!r1.error) {
+      data = r1.data;
+    } else {
+      // Fallback: select only stable columns
+      const r2 = await sb.from('schools').select('id,time_slots,max_per_slot,wa_number').eq('id', SCHOOL_ID_ACTIVE).maybeSingle();
+      if (!r2.error) data = r2.data;
+    }
+    if (data) {
+      if (data.time_slots?.length)  SCHOOL_SLOTS   = data.time_slots;
+      if (data.max_per_slot)        SCHOOL_MAX_SLOT = data.max_per_slot;
+      if (data.working_days?.length) SCHOOL_WORKING_DAYS = data.working_days;
+      if (data.lesson_types?.length) dbLessonTypes  = data.lesson_types;
+    }
+  } catch(_) {}
+  // Lesson types: DB → localStorage fallback → static defaults
+  if (dbLessonTypes?.length) {
+    renderLessonCards(dbLessonTypes);
+  } else {
+    try {
+      const lsLt = localStorage.getItem(`surfbook_ltypes_${SCHOOL_ID_ACTIVE}`);
+      if (lsLt) { const lt = JSON.parse(lsLt); if (lt?.length) renderLessonCards(lt); }
+    } catch(_) {}
+  }
+  // Working days: DB → localStorage fallback
+  if (!SCHOOL_WORKING_DAYS) {
+    try {
+      const lsWd = localStorage.getItem(`surfbook_wdays_${SCHOOL_ID_ACTIVE}`);
+      if (lsWd) { const wd = JSON.parse(lsWd); if (wd?.length) SCHOOL_WORKING_DAYS = wd; }
+    } catch(_) {}
+  }
+  // Slots / max slot: localStorage fallback
+  try {
+    const lsSlots = localStorage.getItem(`surfbook_slots_${SCHOOL_ID_ACTIVE}`);
+    if (lsSlots && !SCHOOL_SLOTS.length) { const s = JSON.parse(lsSlots); if (s?.length) SCHOOL_SLOTS = s; }
+    const lsMax = localStorage.getItem(`surfbook_maxslot_${SCHOOL_ID_ACTIVE}`);
+    if (lsMax) SCHOOL_MAX_SLOT = parseInt(lsMax) || SCHOOL_MAX_SLOT;
+  } catch(_) {}
+if (SCHOOL_WORKING_DAYS) buildCalendar();
+  loadWeather(_theme.lat, _theme.lon);
+  await loadPublicReviews();
+}
+
+// Escapa HTML para prevenir XSS em conteúdo submetido por clientes
+function escapeHtml(str) {
+  return String(str == null ? '' : str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+async function loadPublicReviews() {
+  if (!sb) return;
+  try {
+    const { data } = await sb.from('reviews')
+      .select('client_name,rating,comment,created_at,school_id')
+      .eq('school_id', SCHOOL_ID_ACTIVE)
+      .eq('status', 'published')
+      .order('created_at', { ascending: false })
+      .limit(6);
+    if (!data || data.length === 0) return;
+
+    const grid = document.querySelector('.reviews-grid');
+    if (!grid) return;
+
+    const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    grid.innerHTML = data.map(r => {
+      const name    = escapeHtml(r.client_name || 'Cliente');
+      const initial = escapeHtml((r.client_name || '?')[0].toUpperCase());
+      const stars   = '★'.repeat(r.rating || 5) + '☆'.repeat(5 - (r.rating || 5));
+      const d       = r.created_at ? new Date(r.created_at) : null;
+      const dateLbl = d ? `${months[d.getMonth()]} ${d.getFullYear()}` : '';
+      const comment = r.comment ? `"${escapeHtml(r.comment)}"` : '';
+      return `
+        <div class="review-card">
+          <div class="rq">"</div>
+          <div class="review-stars">${stars}</div>
+          <p class="review-text">${comment}</p>
+          <div class="review-author">
+            <div class="review-avatar">${initial}</div>
+            <div><div class="review-name">${name}</div><div class="review-loc">${dateLbl}</div></div>
+          </div>
+        </div>`;
+    }).join('');
+
+    // Update average badge
+    const avg = (data.reduce((s, r) => s + (r.rating || 5), 0) / data.length).toFixed(1);
+    const badge = document.querySelector('.about-badge strong');
+    if (badge) badge.textContent = `⭐ ${avg}`;
+  } catch(_) {}
+}
+
+function isPastSlot(timeStr, dateKey) {
+  const now = new Date();
+  const todayKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+  if (dateKey !== todayKey) return false;
+  const [h, m] = timeStr.split(':').map(Number);
+  const slotMs = h * 60 + m;
+  const nowMs  = now.getHours() * 60 + now.getMinutes();
+  return slotMs <= nowMs;
+}
+
+function getSlots(dateKey) {
+  if (!SLOT_AVAIL[dateKey]) {
+    SLOT_AVAIL[dateKey] = SCHOOL_SLOTS.map(t => ({ t, used: 0 }));
+  }
+  return SLOT_AVAIL[dateKey];
+}
+
+// ── CALENDAR ──────────────────────────────────────────────────────────────────
+let calYear = TODAY.getFullYear(), calMonth = TODAY.getMonth();
+
+function buildCalendar() {
+  const months = T('cal_months'), daysH = T('cal_days');
+  const titleEl = document.getElementById('cal-month-title');
+  if (titleEl) titleEl.textContent = `${months[calMonth]} ${calYear}`;
+  const hdr = document.getElementById('cal-days-header');
+  if (hdr) hdr.innerHTML = daysH.map(d=>`<div class="cal-dh">${d}</div>`).join('');
+  const grid = document.getElementById('cal-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const first = new Date(calYear, calMonth, 1).getDay();
+  const total = new Date(calYear, calMonth+1, 0).getDate();
+  for (let i=0; i<first; i++) grid.innerHTML += `<div class="cal-cell empty"></div>`;
+  for (let d=1; d<=total; d++) {
+    const date = new Date(calYear, calMonth, d); date.setHours(0,0,0,0);
+    const isPast = date < TODAY;
+    const isToday = date.getTime() === TODAY.getTime();
+    const dow = date.getDay(); // 0=Sun..6=Sat
+    const isClosedDay = SCHOOL_WORKING_DAYS && !SCHOOL_WORKING_DAYS.includes(dow);
+    const key = `${calYear}-${calMonth}-${d}`;
+    const isSelected = booking.selectedDateKey === key;
+    const dateISO = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const wx = WEATHER_DATA[dateISO];
+    const wxHtml = wx ? `<span class="cal-temp">${Math.round(wx.max)}°<span class="cal-temp-min">/${Math.round(wx.min)}°</span></span>` : '';
+    // Availability badge — skip for past/closed days
+    let availHtml = '';
+    if (!isPast && !isClosedDay) {
+      const rem = MONTH_AVAIL[dateISO];
+      if (rem !== undefined) {
+        const totalCap = SCHOOL_MAX_SLOT * SCHOOL_SLOTS.length;
+        if (rem <= 0) {
+          availHtml = `<span class="cal-avail full">Esgot.</span>`;
+        } else {
+          const cls2 = rem <= Math.ceil(totalCap * 0.3) ? 'low' : 'ok';
+          availHtml = `<span class="cal-avail ${cls2}">${rem} vag.</span>`;
+        }
+      } else {
+        availHtml = `<span class="avail-dot"></span>`;
+      }
+    }
+    let cls = 'cal-cell';
+    if (isPast || isClosedDay) cls += ' past';
+    else if (isSelected) cls += ' selected';
+    else cls += ' available';
+    if (isToday && !isPast && !isClosedDay) cls += ' today';
+    const clickable = !isPast && !isClosedDay;
+    grid.innerHTML += `<div class="${cls}" ${clickable?`onclick="selectCalDate('${key}',${d},${calMonth},${calYear})" role="button" tabindex="0" aria-label="${d} de ${T('cal_months')[calMonth]}"`:'aria-hidden="true"'}>${d}${wxHtml}${availHtml}</div>`;
+  }
+}
+
+function changeMonth(dir) {
+  calMonth += dir;
+  if (calMonth < 0) { calMonth=11; calYear--; }
+  if (calMonth > 11) { calMonth=0; calYear++; }
+  MONTH_AVAIL = {};
+  buildCalendar();
+  loadMonthAvailability(calYear, calMonth);
+}
+
+async function selectCalDate(key, d, m, y) {
+  booking.selectedDateKey = key;
+  const months = T('cal_months');
+  booking.selectedDateStr = `${d} ${months[m]} ${y}`;
+  booking.time = null;
+  const btn = document.getElementById('next-2');
+  if (btn) btn.disabled = false;
+  buildCalendar();
+  const usedFromDB = await loadSlotAvailability(key);
+  const slots = getSlots(key);
+  slots.forEach(s => { if (usedFromDB[s.t] !== undefined) s.used = usedFromDB[s.t]; });
+  buildSlots(key);
+}
+
+// ── SLOTS ─────────────────────────────────────────────────────────────────────
+function buildSlots(dateKey) {
+  const grid = document.getElementById('slots-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const maxSlot = SCHOOL_MAX_SLOT;
+  getSlots(dateKey).forEach(s => {
+    const past = isPastSlot(s.t, dateKey);
+    const free = maxSlot - s.used, full = free <= 0 || past, sel = booking.time === s.t;
+    const cls = `slot-card ${full?'full':'available'}${sel?' selected':''}`;
+    const pastLabel = past ? `<div class="slot-badge-full" style="background:rgba(148,163,176,.12);color:var(--gray)">Encerrado</div>` : '';
+    grid.innerHTML += `
+      <div class="${cls}" ${!full?`onclick="selectSlot(this,'${s.t}',${free})" role="button" tabindex="0" aria-label="${s.t} — ${free} ${T('slot_available')}"`:''} ${full?'aria-disabled="true"':''}>${full?`${pastLabel || `<div class="slot-badge-full">${T('slot_full')}</div>`}`:''}
+        <div class="slot-time">${s.t}</div>
+        <div class="slot-status"><span class="adi"></span>${full?(past?`<span style="color:var(--gray)">Encerrado</span>`:`<span style="color:var(--red)">${T('slot_full')}</span>`):`${free} ${T('slot_available')}`}</div>
+        <div class="slot-vagas">${maxSlot} ${T('slot_spots')}</div>
+      </div>`;
+  });
+}
+
+function selectSlot(el, time, freeSpots) {
+  document.querySelectorAll('.slot-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  booking.time = time;
+  booking.freeSlots = freeSpots || 6;
+  const btn = document.getElementById('next-3');
+  if (btn) btn.disabled = false;
+}
+
+function selectLesson(el, key, price, raw, maxPax) {
+  document.querySelectorAll('.lesson-option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  const mp = maxPax != null ? maxPax : SCHOOL_MAX_SLOT;
+  booking.lessonKey = key; booking.lessonPrice = raw; booking.lessonMaxPax = mp; booking.lessonPrivate = (mp === 1);
+  const btn = document.getElementById('next-1');
+  if (btn) btn.disabled = false;
+}
+
+function goToStep(n) {
+  for (let i=1;i<=4;i++) {
+    document.getElementById(`step-${i}`).classList.remove('active');
+    const tab = document.getElementById(`tab-${i}`);
+    tab.classList.remove('active','done');
+    if(i<n) tab.classList.add('done');
+    else if(i===n) tab.classList.add('active');
+  }
+  document.getElementById(`step-${n}`).classList.add('active');
+  if(n===4) { buildSummary(); updatePessoasVisibility(); }
+  const wrap = document.querySelector('.booking-wrap');
+  if (wrap) wrap.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function resetBookingForm() {
+  // Reset booking state
+  booking.lessonKey = null; booking.lessonPrice = 0; booking.lessonPrivate = false; booking.lessonMaxPax = SCHOOL_MAX_SLOT;
+  booking.selectedDateKey = null; booking.selectedDateStr = null; booking.time = null;
+  // Deselect lessons, calendar cells, time slots
+  document.querySelectorAll('.lesson-option').forEach(o => o.classList.remove('selected'));
+  document.querySelectorAll('.cal-cell').forEach(o => o.classList.remove('selected'));
+  document.querySelectorAll('.slot-card').forEach(o => o.classList.remove('selected'));
+  // Disable next buttons
+  ['next-1','next-2','next-3'].forEach(id => { const b = document.getElementById(id); if (b) b.disabled = true; });
+  // Clear form fields
+  ['fname','fphone','femail','fnota'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  const fpessoas = document.getElementById('fpessoas'); if (fpessoas) fpessoas.value = '1';
+  // Reset country to default for current lang
+  const defCountry = LANG_DEFAULT_COUNTRY[currentLang] || '🇵🇹 Portugal';
+  const fcountry = document.getElementById('fcountry'); if (fcountry) fcountry.value = defCountry;
+  // Rebuild equipment for 1 person
+  buildEquipmentRows(1);
+  // Reset calendar to current month
+  calYear = TODAY.getFullYear(); calMonth = TODAY.getMonth();
+  buildCalendar();
+  // Hide confirmation overlay and restore form elements
+  const cd = document.getElementById('booking-confirm'); if (cd) cd.style.display = 'none';
+  const s4 = document.getElementById('step-4');
+  if (s4) s4.querySelectorAll('.booking-summary,.form-grid,#equipment-rows,.btn-whatsapp,.nav-btns').forEach(el => el.style.display = '');
+  goToStep(1);
+}
+
+function buildSummary() {
+  const p = parseInt(document.getElementById('fpessoas')?.value||'1');
+  const total = booking.lessonPrivate ? booking.lessonPrice : booking.lessonPrice * p;
+  const el = document.getElementById('booking-summary');
+  if (!el) return;
+  el.innerHTML = `
+    <div class="summary-title">${T('summary_title')}</div>
+    <div class="summary-items">
+      <div class="summary-item"><span>${T('summary_lesson')}</span><strong>${T(booking.lessonKey)}</strong></div>
+      <div class="summary-item"><span>${T('summary_date')}</span><strong>${booking.selectedDateStr}</strong></div>
+      <div class="summary-item"><span>${T('summary_time')}</span><strong>${booking.time}</strong></div>
+      <div class="summary-item"><span>${T('summary_unit')}</span><strong>€${booking.lessonPrice}</strong></div>
+    </div>
+    <div class="summary-total"><span>${T('summary_total')}</span><span class="total-price">€${total}</span></div>`;
+}
+
+// ── SUPABASE (safe init — never blocks page) ───────────────────────────────────
+let sb = null;
+try {
+  if (typeof supabase !== 'undefined' && supabase.createClient) {
+    sb = supabase.createClient(
+      'https://ubeqidccuvsjhjphybxz.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InViZXFpZGNjdXZzamhqcGh5Ynh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDI0NTYsImV4cCI6MjA5NTkxODQ1Nn0.wyCBBMSuRfxrz935XifGa3Chgv64o4-ACvP5rCj7t1U'
+    );
+  }
+} catch(e) { console.warn('Supabase init failed:', e); }
+
+async function loadSlotAvailability(dateKey) {
+  if (!sb) return {};
+  try {
+    const [year, month, day] = dateKey.split('-').map(Number);
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const { data } = await sb.from('bookings')
+      .select('booking_time, num_people')
+      .eq('booking_date', dateStr)
+      .eq('school_id', SCHOOL_ID_ACTIVE)
+      .neq('status', 'cancelled');
+    const used = {};
+    (data || []).forEach(r => {
+      used[r.booking_time] = (used[r.booking_time] || 0) + (r.num_people || 1);
+    });
+    return used;
+  } catch(e) { return {}; }
+}
+
+// ── WHATSAPP ──────────────────────────────────────────────────────────────────
+const WA_NUMBER = '351962800400';
+
+async function reservarWhatsApp() {
+  const nome    = document.getElementById('fname').value.trim();
+  const tel     = document.getElementById('fphone').value.trim();
+  const email   = document.getElementById('femail').value.trim();
+  const country = document.getElementById('fcountry').value;
+  const pess    = parseInt(document.getElementById('fpessoas').value || '1');
+  const nota    = document.getElementById('fnota').value.trim();
+  if (!nome || !tel) { alert(T('f_name').replace(' *','') + ' / ' + T('f_phone').replace(' *','')); return; }
+
+  // Collect per-person equipment + experience
+  const equipment = [];
+  for (let i = 0; i < pess; i++) {
+    equipment.push({
+      weight:     parseInt(document.getElementById(`fpeso_${i}`)?.value) || null,
+      height:     parseInt(document.getElementById(`faltura_${i}`)?.value) || null,
+      gender:     document.getElementById(`fgenero_${i}`)?.value || null,
+      size:       document.getElementById(`ffato_${i}`)?.value || null,
+      experience: document.getElementById(`fexp_${i}`)?.value || null,
+    });
+  }
+
+  const total = booking.lessonPrivate ? booking.lessonPrice : booking.lessonPrice * pess;
+
+  // ── Build WA message BEFORE any await (mobile browsers block popup after async) ──
+  const genLabel = g => g==='H'?T('g_homem'):g==='M'?T('g_mulher'):g==='C'?T('g_crianca'):'—';
+  const expMap   = { nunca: T('exp_nunca'), ja_surfei: T('exp_ja'), intermedio: T('exp_inter'), avancado: T('exp_avanc') };
+
+  let msg = `*${T('wa_header')}*\n\n`;
+  msg += `*${T('wa_name')}:* ${nome}\n`;
+  if (country) msg += `*${T('f_country')}:* ${country}\n`;
+  msg += `*${T('wa_phone')}:* ${tel}\n`;
+  if (email) msg += `*${T('wa_email')}:* ${email}\n`;
+  msg += `\n*${T('wa_lesson')}:* ${T(booking.lessonKey)}\n`;
+  msg += `*${T('wa_date')}:* ${booking.selectedDateStr}\n`;
+  msg += `*${T('wa_time')}:* ${booking.time}\n`;
+  msg += `*${T('wa_people')}:* ${pess}\n`;
+  msg += `*${T('wa_total')}:* €${total}\n`;
+
+  const hasEquip = equipment.some(p => p.weight || p.gender || p.size);
+  if (hasEquip) {
+    msg += `\n*Equipamento:*\n`;
+    equipment.forEach((p, i) => {
+      const label = PERSON_LABELS[currentLang] || 'Pessoa';
+      const expStr = p.experience ? ` · ${expMap[p.experience] || p.experience}` : '';
+      msg += `  ${label} ${i+1}: ${genLabel(p.gender)} · ${p.weight?p.weight+'kg':'—'} · ${p.height?p.height+'cm':'—'} · ${p.size||'—'}${expStr}\n`;
+    });
+  }
+  if (nota) msg += `\n*${T('wa_note')}:* ${nota}\n`;
+  msg += `\n${T('wa_closing')}`;
+
+  // ── Show confirmation screen (replaces form content) ──
+  const step4 = document.getElementById('step-4');
+  const confirmDiv = document.getElementById('booking-confirm');
+  const formEls = step4 ? [...step4.querySelectorAll('.booking-summary,.form-grid,#equipment-rows,.btn-whatsapp,.nav-btns')] : [];
+  formEls.forEach(el => el.style.display = 'none');
+  if (confirmDiv) {
+    confirmDiv.style.display = 'block';
+    document.getElementById('booking-confirm-icon').textContent = '⏳';
+    document.getElementById('booking-confirm-title').textContent = 'A guardar reserva...';
+    document.getElementById('booking-confirm-msg').textContent = 'O WhatsApp abriu numa nova aba. Volta aqui para ver o resultado.';
+    document.getElementById('booking-confirm-btn').style.display = 'none';
+    const wrap = document.querySelector('.booking-wrap');
+    if (wrap) wrap.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  function showConfirm(ok, title, msg) {
+    if (!confirmDiv) return;
+    document.getElementById('booking-confirm-icon').textContent = ok ? '✅' : '❌';
+    document.getElementById('booking-confirm-title').style.color = ok ? '#86efac' : '#fca5a5';
+    document.getElementById('booking-confirm-title').textContent = title;
+    document.getElementById('booking-confirm-msg').textContent = msg;
+    document.getElementById('booking-confirm-btn').style.display = ok ? 'inline-block' : 'none';
+    if (!ok) {
+      // Show back button on error so user can try again
+      const backBtn = document.createElement('button');
+      backBtn.textContent = '← Tentar novamente';
+      backBtn.style.cssText = 'margin-left:.7rem;padding:.8rem 1.5rem;background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:10px;color:var(--gray);cursor:pointer;font-size:.9rem';
+      backBtn.onclick = () => {
+        formEls.forEach(el => el.style.display = '');
+        confirmDiv.style.display = 'none';
+        const waBtn2 = document.querySelector('.btn-whatsapp');
+        if (waBtn2) { waBtn2.disabled = false; waBtn2.innerHTML = `📱 <span data-t="btn_whatsapp">${T('btn_whatsapp')}</span>`; }
+      };
+      document.getElementById('booking-confirm-btn').after(backBtn);
+    }
+  }
+
+  // ── Open WhatsApp SYNCHRONOUSLY (user gesture still active) ──
+  window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+
+  // ── Save to Supabase + Email notification ────────────────────
+  const waBtn = document.querySelector('.btn-whatsapp');
+
+  // ── Email backup via FormSubmit ──────────────────────────────
+  (async () => {
+    try {
+      // Buscar email sempre directo do Supabase (mais recente) + fallback localStorage
+      let sEmail = '', sEmail2 = '';
+      if (sb) {
+        try {
+          const { data: sd } = await sb.from('schools')
+            .select('school_email,school_email2')
+            .eq('id', SCHOOL_ID_ACTIVE).maybeSingle();
+          if (sd?.school_email)  sEmail  = sd.school_email;
+          if (sd?.school_email2) sEmail2 = sd.school_email2;
+        } catch(_) {}
+      }
+      if (!sEmail) {
+        try {
+          const lsC = JSON.parse(localStorage.getItem(`surfbook_contacts_${SCHOOL_ID_ACTIVE}`) || 'null');
+          if (lsC?.email)  sEmail  = lsC.email;
+          if (lsC?.email2) sEmail2 = lsC.email2;
+        } catch(_) {}
+      }
+
+      const lessonPT = LANGS['pt'][booking.lessonKey] || booking.lessonKey;
+
+      // Equipamento por pessoa (mesmos dados da mensagem WhatsApp)
+      let equipLines = '';
+      if (equipment.some(p => p.weight || p.gender || p.size || p.height || p.experience)) {
+        equipLines = '\nEQUIPAMENTO POR PESSOA\n' + equipment.map((p, i) => {
+          const expStr = p.experience ? ` · ${expMap[p.experience] || p.experience}` : '';
+          return `  Pessoa ${i+1}: ${genLabel(p.gender)} · ${p.weight?p.weight+'kg':'—'} · ${p.height?p.height+'cm':'—'} · Fato ${p.size||'—'}${expStr}`;
+        }).join('\n') + '\n';
+      }
+
+      const emailBody = [
+        '🏄 NOVA MARCAÇÃO',
+        '━━━━━━━━━━━━━━━━━━━━',
+        '',
+        'CLIENTE',
+        `  Nome: ${nome}`,
+        `  Telefone: ${tel}`,
+        email   ? `  Email: ${email}`   : '',
+        country ? `  País: ${country}`  : '',
+        '',
+        'AULA',
+        `  Modalidade: ${lessonPT}`,
+        `  Data: ${booking.selectedDateStr}`,
+        `  Horário: ${booking.time}`,
+        `  Pessoas: ${pess}`,
+        `  Total estimado: €${total}`,
+        equipLines,
+        nota ? `NOTA DO CLIENTE\n  ${nota}` : '',
+        '',
+        '━━━━━━━━━━━━━━━━━━━━',
+        'Recebido via site de reservas.',
+      ].filter(s => s !== '').join('\n');
+
+      const ccList = [sEmail, sEmail2, email].filter(Boolean).join(',');
+      fetch('https://formsubmit.co/ajax/ivocasimiro@gmail.com', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          _subject: `🏄 Nova Marcação: ${nome} — ${lessonPT} ${booking.selectedDateStr}`,
+          message: emailBody,
+          _replyto: email || tel,
+          _cc: ccList || undefined,
+          _template: 'table',
+        })
+      }).catch(() => {});
+    } catch(e) {}
+  })();
+
+  try {
+    const [year, month, day] = booking.selectedDateKey.split('-').map(Number);
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const p0 = equipment[0] || {};
+    if (sb) {
+      const fullRow = {
+        school_id: SCHOOL_ID_ACTIVE, lesson_type:(LANGS.pt[booking.lessonKey]||T(booking.lessonKey)),
+        booking_date:dateStr, booking_time:booking.time, num_people:pess,
+        client_name:nome, client_phone:tel, client_email:email||null,
+        client_country: country || null,
+        client_weight:p0.weight||null, client_height:p0.height||null,
+        client_gender:p0.gender||null, wetsuit_size:p0.size||null,
+        equipment_list: equipment,
+        notes:nota||null, total_price:parseFloat(total)||0,
+        language:currentLang, status:'pending'
+      };
+      let { error } = await sb.from('bookings').insert([fullRow]);
+      // Retry without new columns if schema mismatch
+      if (error && (error.code === '42703' || error.code === 'PGRST204' || error.message?.includes('column'))) {
+        const coreRow = {
+          school_id:fullRow.school_id, lesson_type:fullRow.lesson_type,
+          booking_date:fullRow.booking_date, booking_time:fullRow.booking_time,
+          num_people:fullRow.num_people, client_name:fullRow.client_name,
+          client_phone:fullRow.client_phone, client_email:fullRow.client_email,
+          client_weight:fullRow.client_weight, client_height:fullRow.client_height,
+          client_gender:fullRow.client_gender, wetsuit_size:fullRow.wetsuit_size,
+          notes:fullRow.notes, total_price:fullRow.total_price, status:'pending'
+        };
+        ({ error } = await sb.from('bookings').insert([coreRow]));
+      }
+      if (error) {
+        console.warn('Supabase save error:', error.code, error.message);
+        showConfirm(false, 'Erro ao guardar', `Código: ${error.code} — ${error.message}\n\nO WhatsApp foi aberto. O dono foi notificado.`);
+      } else {
+        showConfirm(true, 'Reserva guardada!', 'Aguarda confirmação por WhatsApp. Clica em "Nova Marcação" quando quiseres marcar mais.');
+        loadMonthAvailability(calYear, calMonth);
+      }
+    } else {
+      showConfirm(false, 'Sem ligação à base de dados', 'O WhatsApp foi aberto. O dono foi notificado por WhatsApp.');
+    }
+  } catch(e) {
+    console.warn('Supabase save failed', e);
+    showConfirm(false, 'Erro inesperado', e.message);
+  }
+  if (waBtn) { waBtn.disabled = false; waBtn.innerHTML = `📱 <span data-t="btn_whatsapp">${T('btn_whatsapp')}</span>`; }
+}
+
+const WETSUIT_SIZES = {
+  H: ['XS','S','SM','M','MT','ML','L','XL','XXL'],
+  M: ['6','8','10','12','14','S','M','L','XL'],
+  C: ['8','10','12','14','16','18','20','22','24'],
+};
+
+const PERSON_LABELS = { pt:'Pessoa', en:'Person', fr:'Personne', de:'Person' };
+
+function buildEquipmentRows(n) {
+  const container = document.getElementById('equipment-rows');
+  if (!container) return;
+  const label = PERSON_LABELS[currentLang] || 'Pessoa';
+  let html = '';
+  for (let i = 0; i < n; i++) {
+    html += `<div class="person-row">
+      <div class="person-row-label">${label} ${i + 1}</div>
+      <div class="person-row-grid">
+        <div class="form-group">
+          <label>${T('f_peso')}</label>
+          <input type="number" id="fpeso_${i}" min="20" max="200" placeholder="kg" />
+        </div>
+        <div class="form-group">
+          <label>${T('f_altura')}</label>
+          <input type="number" id="faltura_${i}" min="80" max="220" placeholder="cm" />
+        </div>
+        <div class="form-group">
+          <label>${T('f_genero')}</label>
+          <select id="fgenero_${i}" onchange="updateWetsuitSizesFor(${i})">
+            <option value="">—</option>
+            <option value="H">${T('g_homem')}</option>
+            <option value="M">${T('g_mulher')}</option>
+            <option value="C">${T('g_crianca')}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>${T('f_fato')}</label>
+          <select id="ffato_${i}"><option value="">—</option></select>
+        </div>
+        <div class="form-group">
+          <label>${T('f_exp')}</label>
+          <select id="fexp_${i}">
+            <option value="">—</option>
+            <option value="nunca">${T('exp_nunca')}</option>
+            <option value="ja_surfei">${T('exp_ja')}</option>
+            <option value="intermedio">${T('exp_inter')}</option>
+            <option value="avancado">${T('exp_avanc')}</option>
+          </select>
+        </div>
+      </div>
+    </div>`;
+  }
+  container.innerHTML = html;
+}
+
+function updateWetsuitSizesFor(i) {
+  const genero = document.getElementById(`fgenero_${i}`)?.value;
+  const sel    = document.getElementById(`ffato_${i}`);
+  if (!sel) return;
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">—</option>';
+  (WETSUIT_SIZES[genero] || []).forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s; opt.textContent = s;
+    if (s === prev) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+function onPessoasChange() {
+  const n = parseInt(document.getElementById('fpessoas')?.value || '1');
+  buildEquipmentRows(n);
+  buildSummary();
+}
+
+function updatePessoasVisibility() {
+  const fp    = document.getElementById('fpessoas');
+  const fpGrp = fp?.closest('.form-group');
+  if (!fp || !fpGrp) return;
+  if (booking.lessonPrivate) {
+    fp.value = '1'; fpGrp.style.opacity = '.4'; fpGrp.style.pointerEvents = 'none';
+  } else {
+    fpGrp.style.opacity = ''; fpGrp.style.pointerEvents = '';
+    const max = Math.min(booking.lessonMaxPax || SCHOOL_MAX_SLOT, booking.freeSlots || SCHOOL_MAX_SLOT);
+    const prev = parseInt(fp.value) || 1;
+    fp.innerHTML = '';
+    for (let i = 1; i <= max; i++) {
+      const o = document.createElement('option');
+      o.value = i; o.textContent = i;
+      if (i === Math.min(prev, max)) o.selected = true;
+      fp.appendChild(o);
+    }
+  }
+  buildEquipmentRows(parseInt(fp.value));
+}
+
+// ── MENU ──────────────────────────────────────────────────────────────────────
+function toggleMenu() {
+  const drawer = document.getElementById('mob-drawer');
+  const btn    = document.getElementById('hbg-btn');
+  if (drawer.classList.contains('open')) { closeMenu(); return; }
+  drawer.classList.add('open');
+  btn.classList.add('open');
+  btn.setAttribute('aria-expanded','true');
+  btn.setAttribute('aria-label','Fechar menu');
+  drawer.setAttribute('aria-hidden','false');
+  document.body.style.overflow = 'hidden';
+  drawer.querySelector('a')?.focus();
+}
+function closeMenu() {
+  const drawer = document.getElementById('mob-drawer');
+  const btn    = document.getElementById('hbg-btn');
+  drawer.classList.remove('open');
+  btn.classList.remove('open');
+  btn.setAttribute('aria-expanded','false');
+  btn.setAttribute('aria-label','Abrir menu');
+  drawer.setAttribute('aria-hidden','true');
+  document.body.style.overflow = '';
+}
+// Fechar menu ao pressionar Escape
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+// Fechar menu ao clicar num link
+document.querySelectorAll('nav a').forEach(a => a.addEventListener('click', closeMenu));
+
+// ── KEYBOARD NAVIGATION ───────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const t = e.target;
+  if (t.classList.contains('lesson-option') || t.classList.contains('slot-card') || t.classList.contains('cal-cell')) {
+    e.preventDefault();
+    t.click();
+  }
+});
+
+// ── ANIMATIONS ────────────────────────────────────────────────────────────────
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.style.opacity='1'; e.target.style.transform='translateY(0)'; }
+  });
+}, {threshold:0.08});
+document.querySelectorAll('.lesson-card,.feature,.instructor-card,.beach-card,.tide-day,.review-card,.gi').forEach(el=>{
+  el.style.opacity='0'; el.style.transform='translateY(24px)'; el.style.transition='opacity .55s ease,transform .55s ease';
+  obs.observe(el);
+});
+
+// ── INIT (always runs, regardless of Supabase) ────────────────────────────────
+buildBeachSelector();
+setLang('pt');
+buildTideGrid();
+buildCalendar();
+updateNextTide();
+loadSchoolConfig(); // loads time_slots + max_per_slot from Supabase, then loadPublicReviews
+loadMonthAvailability(calYear, calMonth);
+updateClock();
+fetchConditions(getBeach());
+
+// ── SERVICE WORKER (PWA offline + instalável) ─────────────────────────────────
+// Network-first: online serve sempre conteúdo fresco; cache só para offline.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+
+setInterval(updateClock, 1000);
+setInterval(updateNextTide, 60000);
+setInterval(() => fetchConditions(getBeach()), 600000); // refresh conditions every 10min
+
+// Hero photo Ken Burns effect
+setTimeout(() => {
+  const hp = document.getElementById('hero-photo');
+  if (hp) hp.classList.add('loaded');
+}, 150);
+
+// ── SCROLL SPY ────────────────────────────────────────────────────────────────
+const NAV_SECTIONS = ['home','sobre','praias','mares','galeria','aulas','avaliacoes','reservar','instrutores'];
+function updateScrollSpy() {
+  const scrollY = window.scrollY + 100;
+  let current = 'home';
+  NAV_SECTIONS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.offsetTop <= scrollY) current = id;
+  });
+  document.querySelectorAll('nav a').forEach(a => {
+    const href = a.getAttribute('href') || '';
+    a.classList.toggle('active', href === '#' + current || (current === 'home' && href === '#home'));
+  });
+}
+window.addEventListener('scroll', updateScrollSpy, { passive: true });
+updateScrollSpy();
+
+function setNavTop() {
+  const cb  = document.querySelector('.cb');
+  const nav = document.getElementById('navbar');
+  if (!cb || !nav || window.innerWidth <= 768) return;
+  nav.style.top = Math.ceil(cb.getBoundingClientRect().height) + 'px';
+}
+window.addEventListener('resize', setNavTop);
+setNavTop();
+
+// ── VISITOR COUNTER ───────────────────────────────────────────────────────────
+(function() {
+  const BASE = 1247;
+  let extra = parseInt(localStorage.getItem('vc_extra') || '0');
+  if (!localStorage.getItem('vc_visited')) {
+    extra++;
+    localStorage.setItem('vc_extra', extra);
+    localStorage.setItem('vc_visited', '1');
+  }
+  const total = BASE + extra;
+  const el = document.getElementById('visitor-count');
+  if (el) el.textContent = total.toLocaleString('pt-PT') + ' visitantes';
+})();
+</script>
+</body>
+</html>
