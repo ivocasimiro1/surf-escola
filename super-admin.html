@@ -1,0 +1,1901 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#050D1A" />
+  <meta name="description" content="Painel Super Administrador — Plataforma Surf Schools by Despomar" />
+  <meta property="og:title" content="Super Admin · Plataforma Surf Schools" />
+  <meta property="og:description" content="Painel de gestão global de escolas de surf — Despomar" />
+  <meta property="og:type" content="website" />
+  <title>Super Admin · Plataforma Surf Schools</title>
+  <link rel="dns-prefetch" href="https://ubeqidccuvsjhjphybxz.supabase.co" />
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2/dist/chartjs-plugin-datalabels.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #050D1A; --ocean: #0A2540; --blue: #0070F3; --cyan: #00CFFD;
+      --teal: #00A896; --gold: #C9A84C; --white: #FFFFFF; --gray: #8B9AB0;
+      --card: rgba(255,255,255,0.05); --border: rgba(255,255,255,0.1);
+      --green: #22c55e; --red: #ef4444; --yellow: #eab308; --orange: #f97316;
+    }
+    html, body { height: 100%; }
+    body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--white); }
+
+    /* ── LOGIN ── */
+    #login-wrap {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(ellipse at 70% 30%, #0A3055 0%, var(--navy) 60%);
+      padding: 1rem;
+    }
+    .login-card {
+      width: 100%; max-width: 420px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(201,168,76,.2);
+      border-radius: 24px; padding: 2.5rem; backdrop-filter: blur(20px);
+    }
+    .login-logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; text-align: center; margin-bottom: .25rem; }
+    .login-logo span { color: var(--gold); }
+    .login-badge {
+      display: inline-flex; align-items: center; gap: .4rem; margin: 0 auto .8rem;
+      background: rgba(201,168,76,.1); border: 1px solid rgba(201,168,76,.3);
+      border-radius: 50px; padding: .25rem .9rem; font-size: .72rem;
+      color: var(--gold); font-weight: 600; letter-spacing: .07em;
+    }
+    .login-badge-wrap { text-align: center; margin-bottom: 1.8rem; }
+    .login-subtitle { text-align: center; color: var(--gray); font-size: .85rem; margin-bottom: 1.5rem; }
+    .login-title { font-size: 1.3rem; font-weight: 700; text-align: center; margin-bottom: 1.5rem; }
+    .form-group { display: flex; flex-direction: column; gap: .4rem; margin-bottom: 1rem; }
+    label { font-size: .82rem; font-weight: 500; color: var(--gray); }
+    input[type="email"], input[type="text"] {
+      background: rgba(255,255,255,0.07); border: 1px solid var(--border); border-radius: 12px;
+      padding: .85rem 1rem; color: var(--white); font-family: 'Inter', sans-serif;
+      font-size: .95rem; outline: none; transition: border-color .2s; width: 100%;
+    }
+    input:focus { border-color: var(--gold); }
+    input::placeholder { color: #4a5a6e; }
+    .btn-login {
+      width: 100%; padding: .95rem; margin-top: .5rem;
+      background: linear-gradient(135deg, #8B6914, var(--gold));
+      border: none; border-radius: 12px; color: var(--navy);
+      font-size: 1rem; font-weight: 700; cursor: pointer;
+      font-family: 'Inter', sans-serif; transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 4px 20px rgba(201,168,76,.3);
+    }
+    .btn-login:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(201,168,76,.45); }
+    .login-error {
+      background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.3);
+      border-radius: 10px; padding: .7rem 1rem; font-size: .85rem;
+      color: #fca5a5; margin-bottom: 1rem; display: none;
+    }
+    .login-error.show { display: block; }
+
+    /* ── DASHBOARD ── */
+    #dash-wrap { min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* Top bar */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem; background: rgba(5,13,26,.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(201,168,76,.2); flex-wrap: wrap; gap: 1rem;
+      position: sticky; top: 0; z-index: 800;
+    }
+    .topbar-logo { font-family: 'Playfair Display', serif; font-size: 1.15rem; display: flex; align-items: center; gap: .6rem; }
+    .topbar-logo span { color: var(--gold); }
+    .crown-badge {
+      background: rgba(201,168,76,.15); border: 1px solid rgba(201,168,76,.3);
+      border-radius: 50px; padding: .2rem .7rem; font-size: .72rem; color: var(--gold); font-weight: 700;
+    }
+    .topbar-right { display: flex; align-items: center; gap: 1rem; }
+    .user-info { text-align: right; }
+    .user-email { font-size: .82rem; font-weight: 600; }
+    .user-role { font-size: .72rem; color: var(--gold); }
+    .btn-logout {
+      padding: .45rem 1rem; background: transparent;
+      border: 1px solid var(--border); border-radius: 8px;
+      color: var(--gray); font-size: .82rem; cursor: pointer;
+      font-family: 'Inter', sans-serif; transition: all .2s;
+    }
+    .btn-logout:hover { border-color: var(--red); color: var(--red); }
+    .btn-proposta {
+      padding: .45rem 1rem; background: rgba(201,168,76,.12);
+      border: 1px solid rgba(201,168,76,.35); border-radius: 8px;
+      color: var(--gold); font-size: .82rem; font-weight: 600; cursor: pointer;
+      font-family: 'Inter', sans-serif; transition: all .2s;
+      text-decoration: none; display: flex; align-items: center; gap: .4rem;
+    }
+    .btn-proposta:hover { background: rgba(201,168,76,.22); border-color: var(--gold); }
+
+    /* Main content */
+    .dash-content { flex: 1; padding: 2rem; max-width: 1280px; width: 100%; margin: 0 auto; }
+
+    /* Centra secções de análise / relatórios com largura legível */
+    #sa-analytics, #sa-reviews-section, #leads-section { max-width: 1100px; margin-left: auto; margin-right: auto; }
+
+    /* Global Stats */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 1.3rem 1.5rem; display: flex; align-items: center; gap: 1rem;
+    }
+    .stat-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;
+    }
+    .si-gold   { background: linear-gradient(135deg, rgba(201,168,76,.3), rgba(201,168,76,.1)); }
+    .si-blue   { background: linear-gradient(135deg, rgba(0,112,243,.3), rgba(0,207,253,.2)); }
+    .si-green  { background: linear-gradient(135deg, rgba(34,197,94,.3), rgba(0,207,253,.15)); }
+    .si-orange { background: linear-gradient(135deg, rgba(249,115,22,.3), rgba(234,179,8,.2)); }
+    .stat-info { flex: 1; }
+    .stat-label { font-size: .75rem; color: var(--gray); text-transform: uppercase; letter-spacing: .07em; }
+    .stat-value { font-size: 1.7rem; font-weight: 700; line-height: 1.2; }
+    .stat-sub { font-size: .72rem; color: var(--gray); margin-top: .2rem; }
+    .rev-card { flex-direction: column !important; align-items: stretch !important; }
+    .rev-period-pills { display: flex; gap: .35rem; flex-wrap: wrap; margin-top: .6rem; padding-top: .55rem; border-top: 1px solid rgba(255,255,255,.06); }
+    .rev-pill { background: transparent; border: 1px solid var(--border); color: var(--gray); font-size: .68rem; font-weight: 600; padding: .22rem .6rem; border-radius: 999px; cursor: pointer; font-family: 'Inter',sans-serif; transition: all .15s; line-height: 1.5; }
+    .rev-pill:hover { border-color: var(--cyan); color: var(--white); }
+    .rev-pill.active { background: rgba(0,207,253,.15); border-color: var(--cyan); color: var(--cyan); }
+
+    /* School tabs */
+    .school-tabs { display: flex; gap: .5rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center; }
+    .school-tab {
+      padding: .5rem 1.2rem; border-radius: 50px; border: 1px solid var(--border);
+      background: transparent; color: var(--gray); font-size: .84rem; font-weight: 500;
+      cursor: pointer; font-family: 'Inter', sans-serif; transition: all .2s; white-space: nowrap;
+    }
+    .school-tab:hover { border-color: rgba(201,168,76,.4); color: var(--white); }
+    .school-tab.active { background: var(--gold); border-color: var(--gold); color: var(--navy); font-weight: 700; }
+    .school-tab.all { border-color: rgba(0,207,253,.3); color: var(--cyan); }
+    .school-tab.all.active { background: var(--cyan); border-color: var(--cyan); color: var(--navy); }
+
+    /* School cards row */
+    .schools-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .school-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 1.4rem;
+      transition: border-color .2s, transform .2s; cursor: pointer;
+    }
+    .school-card:hover { border-color: rgba(201,168,76,.3); transform: translateY(-2px); }
+    .school-card.active-card { border-color: var(--gold); background: rgba(201,168,76,.06); }
+    .sc-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .sc-name { font-size: 1rem; font-weight: 700; }
+    .sc-id { font-size: .72rem; color: var(--gray); font-family: monospace; background: rgba(255,255,255,.06); padding: .15rem .5rem; border-radius: 5px; }
+    .sc-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .6rem; }
+    .sc-stat { text-align: center; }
+    .sc-val { font-size: 1.3rem; font-weight: 700; color: var(--white); line-height: 1; }
+    .sc-lbl { font-size: .67rem; color: var(--gray); text-transform: uppercase; letter-spacing: .07em; margin-top: .2rem; }
+    .sc-commission { color: var(--green); }
+    .sc-revenue { color: var(--cyan); }
+    .sc-links { display: flex; gap: .5rem; margin-top: 1rem; }
+    .sc-link {
+      flex: 1; padding: .4rem .7rem; border-radius: 8px; font-size: .76rem; font-weight: 600;
+      text-align: center; text-decoration: none; border: 1px solid var(--border);
+      color: var(--gray); transition: all .2s; cursor: pointer; background: transparent;
+      font-family: 'Inter', sans-serif;
+    }
+    .sc-link:hover { border-color: rgba(201,168,76,.4); color: var(--white); }
+    .sc-link.site { border-color: rgba(0,207,253,.3); color: var(--cyan); }
+    .sc-link.site:hover { background: rgba(0,207,253,.1); }
+    .sc-pending { display: inline-flex; align-items: center; gap: .3rem; font-size: .72rem; color: #fde047; }
+    .sc-pending::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #fde047; }
+
+    /* Filters */
+    .filters-bar {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 1rem 1.3rem; display: flex; align-items: center; gap: 1rem;
+      flex-wrap: wrap; margin-bottom: 1.5rem;
+    }
+    .filter-group { display: flex; flex-direction: column; gap: .3rem; }
+    .filter-label { font-size: .72rem; color: var(--gray); text-transform: uppercase; letter-spacing: .07em; }
+    select.filter-select, input.filter-input {
+      background: rgba(255,255,255,.08); border: 1px solid var(--border); border-radius: 9px;
+      padding: .55rem .9rem; color: var(--white); font-family: 'Inter', sans-serif;
+      font-size: .88rem; outline: none; transition: border-color .2s; cursor: pointer;
+    }
+    select.filter-select:focus, input.filter-input:focus { border-color: var(--gold); }
+    select.filter-select option { background: var(--ocean); }
+    input.filter-input::placeholder { color: #4a5a6e; }
+    .btn-refresh {
+      padding: .55rem 1.1rem; background: linear-gradient(135deg, var(--blue), var(--cyan));
+      border: none; border-radius: 9px; color: white; font-size: .85rem; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif; transition: transform .2s; margin-left: auto;
+    }
+    .btn-refresh:hover { transform: translateY(-1px); }
+
+    /* Table */
+    .table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+    .table-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.1rem 1.5rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: .5rem;
+    }
+    .table-title { font-size: 1rem; font-weight: 700; }
+    .table-count { font-size: .8rem; color: var(--gray); }
+    .table-scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      padding: .75rem 1rem; text-align: left; font-size: .72rem;
+      text-transform: uppercase; letter-spacing: .08em; color: var(--gray);
+      border-bottom: 1px solid var(--border); white-space: nowrap;
+      background: rgba(0,0,0,.15);
+    }
+    td {
+      padding: .85rem 1rem; font-size: .88rem; border-bottom: 1px solid rgba(255,255,255,.05);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,.03); }
+    td small { font-size: .75rem; color: var(--gray); display: block; margin-top: .15rem; }
+    .col-center { text-align: center; }
+    .col-price { font-weight: 700; color: var(--cyan); white-space: nowrap; }
+    .col-commission { font-weight: 600; color: var(--green); white-space: nowrap; }
+    .empty-row { text-align: center; color: var(--gray); padding: 3rem; }
+    .school-chip {
+      display: inline-block; padding: .2rem .6rem; border-radius: 50px; font-size: .72rem; font-weight: 600;
+      background: rgba(201,168,76,.12); color: var(--gold); border: 1px solid rgba(201,168,76,.25);
+      white-space: nowrap;
+    }
+
+    /* Status badges */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .3rem .75rem; border-radius: 50px; font-size: .75rem; font-weight: 600; white-space: nowrap;
+    }
+    .status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+    .status-pending   { background: rgba(234,179,8,.15);  color: #fde047; border: 1px solid rgba(234,179,8,.3); }
+    .status-pending::before   { background: #fde047; }
+    .status-confirmed { background: rgba(0,207,253,.15);  color: var(--cyan); border: 1px solid rgba(0,207,253,.3); }
+    .status-confirmed::before { background: var(--cyan); }
+    .status-completed { background: rgba(34,197,94,.15);  color: #86efac; border: 1px solid rgba(34,197,94,.3); }
+    .status-completed::before { background: #86efac; }
+    .status-cancelled { background: rgba(239,68,68,.15);  color: #fca5a5; border: 1px solid rgba(239,68,68,.3); }
+    .status-cancelled::before { background: #fca5a5; }
+    .status-suspicious { background: rgba(239,68,68,.25); color: #fca5a5; border: 2px solid #ef4444; animation: pulse-warn 1.5s ease-in-out infinite; }
+    .status-suspicious::before { background: #ef4444; }
+    @keyframes pulse-warn { 0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,.4); } 50% { box-shadow: 0 0 0 5px rgba(239,68,68,0); } }
+    tr.row-suspicious td { background: rgba(239,68,68,.04); }
+    .audit-note { font-size:.7rem; color: #f87171; font-style:italic; margin-top:.2rem; display:block; }
+
+    /* Summary row */
+    .summary-row { background: rgba(201,168,76,.06); border-top: 2px solid rgba(201,168,76,.2) !important; }
+    .summary-row td { font-weight: 700; color: var(--gold); }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 999;
+      padding: .85rem 1.3rem; border-radius: 12px; font-size: .9rem; font-weight: 500;
+      transform: translateY(100px); opacity: 0; transition: transform .3s, opacity .3s; max-width: 320px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast-success { background: rgba(34,197,94,.2); border: 1px solid rgba(34,197,94,.4); color: #86efac; }
+    .toast-error   { background: rgba(239,68,68,.2);  border: 1px solid rgba(239,68,68,.4);  color: #fca5a5; }
+
+    /* Loading */
+    .loading { text-align: center; padding: 3rem; color: var(--gray); }
+    .spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin .8s linear infinite; margin-bottom: 1rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media(max-width: 768px) {
+      .dash-content { padding: 1rem; }
+      .topbar { padding: .8rem 1rem; }
+      .filters-bar { gap: .6rem; }
+      .schools-row { grid-template-columns: 1fr; }
+    }
+
+    /* Commission edit button */
+    .sc-edit-comm-btn { margin-top:.8rem; width:100%; padding:.45rem; background:rgba(201,168,76,.08); border:1px solid rgba(201,168,76,.2); border-radius:8px; color:var(--gold); font-size:.75rem; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif; transition:background .2s; }
+    .sc-edit-comm-btn:hover { background:rgba(201,168,76,.18); }
+
+    /* Analytics charts */
+    .sa-chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap: 1rem; }
+    .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.2rem; }
+    .chart-card-title { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--gold); margin-bottom: .8rem; }
+    .chart-period-bar { margin-bottom: 1rem; }
+    .chart-year-btns { display: flex; gap: .4rem; margin-bottom: .6rem; flex-wrap: wrap; }
+    .sa-year-btn { padding: .3rem .8rem; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--gray); font-size: .78rem; cursor: pointer; font-family: 'Inter',sans-serif; transition: all .15s; }
+    .sa-year-btn.active { background: var(--gold); border-color: var(--gold); color: var(--navy); font-weight: 700; }
+    .sa-month-btns { display: flex; gap: .35rem; flex-wrap: wrap; padding-top: .55rem; border-top: 1px solid rgba(255,255,255,.06); }
+    .sa-month-btn { padding: .22rem .6rem; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--gray); font-size: .72rem; font-weight: 600; cursor: pointer; font-family: 'Inter',sans-serif; transition: all .15s; }
+    .sa-month-btn:hover { border-color: var(--gold); color: var(--white); }
+    .sa-month-btn.active { background: rgba(201,168,76,.15); border-color: var(--gold); color: var(--gold); }
+    .tier-badge { display: inline-block; font-size: .64rem; font-weight: 700; padding: .15rem .5rem; border-radius: 999px; margin-left: .4rem; vertical-align: middle; }
+    .tier-1 { background: rgba(34,197,94,.15); border: 1px solid rgba(34,197,94,.3); color: #86efac; }
+    .tier-2 { background: rgba(0,207,253,.15); border: 1px solid rgba(0,207,253,.3); color: #00CFFD; }
+    .tier-3 { background: rgba(201,168,76,.15); border: 1px solid rgba(201,168,76,.3); color: #F59E0B; }
+    .btn-analytics-sa { background: rgba(201,168,76,.1); border: 1px solid rgba(201,168,76,.25); color: var(--gold); border-radius: 8px; padding: .45rem 1rem; font-size: .8rem; font-weight: 600; cursor: pointer; font-family: 'Inter',sans-serif; }
+    .btn-reviews { background: rgba(201,168,76,.12); border: 1px solid rgba(201,168,76,.3); color: var(--gold); border-radius: 8px; padding: .4rem .9rem; font-size: .78rem; font-weight: 600; cursor: pointer; font-family: 'Inter',sans-serif; margin-left: .5rem; }
+    .lead-filter-btn { background: transparent; border: 1px solid var(--border); color: var(--gray); border-radius: 50px; padding: .2rem .7rem; font-size: .72rem; font-weight: 600; cursor: pointer; font-family: 'Inter',sans-serif; transition: all .15s; }
+    .lead-filter-btn.active { background: rgba(34,197,94,.15); border-color: rgba(34,197,94,.4); color: #86efac; }
+    .lead-card { background: rgba(255,255,255,.04); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: .75rem; }
+    .lead-card.new { border-color: rgba(34,197,94,.3); }
+    .lead-school { font-size:.95rem;font-weight:700;margin-bottom:.2rem }
+    .lead-meta { font-size:.75rem;color:var(--gray);margin-bottom:.7rem }
+    .lead-actions { display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.75rem }
+    .btn-lead-create { background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#86efac;border-radius:8px;padding:.3rem .9rem;font-size:.75rem;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif }
+    .btn-lead-review { background:rgba(0,207,253,.1);border:1px solid rgba(0,207,253,.3);color:var(--cyan);border-radius:8px;padding:.3rem .8rem;font-size:.75rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif }
+    .btn-lead-archive { background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#fca5a5;border-radius:8px;padding:.3rem .7rem;font-size:.75rem;cursor:pointer;font-family:'Inter',sans-serif }
+    .review-card { background: rgba(255,255,255,.04); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: .75rem; }
+    .stars-display { color: #f59e0b; letter-spacing: .1rem; font-size: .95rem; }
+    .stars-display .empty { color: rgba(255,255,255,.15); }
+    .review-meta { font-size: .78rem; color: var(--gray); margin-top: .2rem; }
+    .review-comment { font-size: .88rem; margin-top: .5rem; line-height: 1.55; font-style: italic; }
+    .school-avg-row { display: flex; align-items: center; gap: .75rem; padding: .5rem 0; border-bottom: 1px solid var(--border); }
+    .school-avg-row:last-child { border-bottom: none; }
+    .school-avg-stars { color: #f59e0b; font-size: .88rem; }
+    #reviews-section { margin-bottom: 1.5rem; }
+
+    /* ── FOCO TECLADO ── */
+    :focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+    button:focus-visible,
+    a:focus-visible,
+    select:focus-visible,
+    input:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    /* ── MODAL ── */
+    .modal-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 950;
+      background: rgba(0,0,0,.7);
+      backdrop-filter: blur(5px);
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal-box {
+      background: #0A1929;
+      border-radius: 20px;
+      padding: 1.8rem;
+      width: 100%;
+      max-width: 460px;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .modal-box-wide {
+      max-width: 500px;
+    }
+    /* Cabeçalho do modal — fixo no topo */
+    .modal-head {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: .6rem; flex-shrink: 0;
+    }
+    .modal-head-titles { min-width: 0; }
+    /* Corpo do modal — scroll interno */
+    .modal-body { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    /* Botão fechar (X) e Voltar */
+    .modal-close-x {
+      background: rgba(255,255,255,.06); border: 1px solid var(--border);
+      color: var(--gray); width: 36px; height: 36px; min-width: 36px; border-radius: 9px;
+      font-size: 1.1rem; cursor: pointer; font-family: 'Inter',sans-serif; line-height: 1;
+      display: flex; align-items: center; justify-content: center; transition: all .2s;
+    }
+    .modal-close-x:hover { border-color: var(--red); color: var(--red); }
+    .btn-back {
+      display: inline-flex; align-items: center; gap: .35rem;
+      background: transparent; border: 1px solid var(--border); border-radius: 9px;
+      color: var(--gray); font-size: .82rem; font-weight: 600; padding: .5rem .9rem;
+      cursor: pointer; font-family: 'Inter',sans-serif; transition: all .2s; min-height: 40px;
+    }
+    .btn-back:hover { border-color: var(--gold); color: var(--gold); }
+    .modal-footer { display: flex; gap: .7rem; margin-top: 1.4rem; flex-shrink: 0; flex-wrap: wrap; }
+    .btn-modal-primary {
+      flex: 1; padding: .7rem;
+      border: none; border-radius: 10px;
+      color: #050D1A; font-weight: 700; font-size: .9rem;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+    .btn-modal-cancel {
+      padding: .7rem 1rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--gray);
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+    .modal-section-label {
+      font-size: .72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: .65rem;
+    }
+
+    /* ── SECÇÃO GENÉRICA ── */
+    .section-panel {
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+    }
+    .section-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      gap: .5rem;
+    }
+    .section-panel-title {
+      font-size: .72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .09em;
+    }
+
+    /* ── TIER INPUT ── */
+    .tier-input {
+      width: 100%;
+      padding: .5rem .7rem;
+      background: #0d1f3c;
+      border: 1px solid rgba(167,139,250,.3);
+      border-radius: 8px;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      color-scheme: dark;
+      font-size: .9rem;
+    }
+    .tier-input:disabled {
+      background: rgba(255,255,255,.03);
+      border-color: rgba(255,255,255,.1);
+    }
+
+    /* ── BOTÃO TOGGLE ANALYTICS ── */
+    .toggle-btn-group {
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      flex-wrap: wrap;
+    }
+
+    /* Bloqueia scroll do body quando há modal aberto */
+    body.modal-open { overflow: hidden; }
+
+    /* Área de toque mínima ~40px em botões/links de ação */
+    .btn-login, .btn-logout, .btn-proposta, .btn-refresh, .school-tab,
+    .btn-analytics-sa, .btn-reviews, .sc-link, .sc-edit-comm-btn,
+    .btn-modal-primary, .btn-modal-cancel, .rev-pill, .lead-filter-btn,
+    .btn-lead-create, .btn-lead-review, .btn-lead-archive {
+      min-height: 40px;
+    }
+
+    /* ── MOBILE ── */
+    @media(max-width: 768px) {
+      /* Topbar fixa garantida no topo */
+      .topbar { position: sticky; top: 0; z-index: 800; }
+
+      /* Modais em ecrã inteiro com header/footer fixos e corpo com scroll */
+      .modal-bg { padding: 0; align-items: stretch; justify-content: stretch; }
+      .modal-box, .modal-box-wide {
+        max-width: 100%; max-height: 100%; height: 100%; width: 100%;
+        border-radius: 0; padding: 1rem 1.1rem 0;
+      }
+      .modal-head {
+        position: sticky; top: 0; background: #0A1929; z-index: 2;
+        padding: .2rem 0 .8rem; border-bottom: 1px solid var(--border); margin: 0 -1.1rem .8rem;
+        padding-left: 1.1rem; padding-right: 1.1rem;
+      }
+      .modal-body { padding-bottom: 1rem; }
+      .modal-footer {
+        position: sticky; bottom: 0; background: #0A1929; z-index: 2;
+        margin: 0 -1.1rem; padding: .8rem 1.1rem;
+        border-top: 1px solid var(--border);
+        padding-bottom: calc(.8rem + env(safe-area-inset-bottom));
+      }
+    }
+
+    @media(max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .sc-stats { grid-template-columns: 1fr 1fr 1fr; }
+      .topbar-right { gap: .5rem; }
+      .user-info { display: none; }
+      .filters-bar { flex-direction: column; align-items: stretch; }
+      .filter-group { width: 100%; }
+      .btn-refresh { width: 100%; margin-left: 0; }
+      th, td { padding: .6rem .7rem; }
+
+      /* Tabela de marcações vira cards legíveis */
+      .table-scroll table, .table-scroll thead, .table-scroll tbody,
+      .table-scroll th, .table-scroll td, .table-scroll tr { display: block; }
+      .table-scroll thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+      .table-scroll tr {
+        background: rgba(255,255,255,.03); border: 1px solid var(--border);
+        border-radius: 12px; margin-bottom: .8rem; padding: .6rem .9rem;
+      }
+      .table-scroll tr:hover td { background: transparent; }
+      .table-scroll td {
+        border: none !important; padding: .35rem 0; text-align: right;
+        display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      }
+      .table-scroll td::before {
+        content: attr(data-label); color: var(--gray); font-size: .7rem;
+        text-transform: uppercase; letter-spacing: .06em; font-weight: 600;
+        text-align: left; flex-shrink: 0;
+      }
+      .table-scroll td small { display: inline; margin-top: 0; }
+      .table-scroll td.col-center { justify-content: space-between; }
+      .table-scroll .summary-row { background: rgba(201,168,76,.08); }
+      .table-scroll .summary-row td[colspan] { justify-content: flex-end; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">Surf <span>Schools</span> Platform</div>
+    <div class="login-badge-wrap">
+      <div class="login-badge">👑 Super Administrador</div>
+    </div>
+    <div class="login-error" id="login-error" role="alert" aria-live="assertive"></div>
+
+    <h2 class="login-title">Acesso Restrito</h2>
+    <div class="form-group">
+      <label for="l-email">Email</label>
+      <input type="email" id="l-email" placeholder="ivocasimiro@gmail.com" autocomplete="email" onkeydown="if(event.key==='Enter')doLogin()" />
+    </div>
+    <div class="form-group">
+      <label for="l-pass">Password</label>
+      <input type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" />
+    </div>
+    <button class="btn-login" onclick="doLogin()">Entrar no Painel 👑</button>
+    <p style="text-align:center;margin-top:1rem;font-size:.78rem;color:var(--gray)">
+      Esqueceste? <a href="#" onclick="sendReset();return false" style="color:var(--gold);text-decoration:none">Recuperar password</a>
+    </p>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dash-wrap" style="display:none">
+
+  <div class="topbar">
+    <div class="topbar-logo">
+      Ivo <span>Casimiro</span>
+      <span class="crown-badge">👑 Super Admin</span>
+    </div>
+    <div class="topbar-right">
+      <a class="btn-proposta" href="proposta.html" target="_blank">
+        📄 Proposta Comercial
+      </a>
+      <div class="user-info">
+        <div class="user-email" id="user-email"></div>
+        <div class="user-role">Super Administrador</div>
+      </div>
+      <button class="btn-logout" onclick="logout()" aria-label="Terminar sessão">Sair</button>
+    </div>
+  </div>
+
+  <div class="dash-content">
+
+    <!-- Global Stats -->
+    <div class="stats-grid" id="global-stats">
+      <div class="stat-card">
+        <div class="stat-icon si-gold">🏫</div>
+        <div class="stat-info">
+          <div class="stat-label">Escolas Activas</div>
+          <div class="stat-value" id="gs-schools">—</div>
+          <div class="stat-sub">na plataforma</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon si-blue">📋</div>
+        <div class="stat-info">
+          <div class="stat-label">Marcações Totais</div>
+          <div class="stat-value" id="gs-bookings">—</div>
+          <div class="stat-sub" id="gs-month-label">este mês</div>
+        </div>
+      </div>
+      <div class="stat-card rev-card">
+        <div style="display:flex;align-items:center;gap:1rem;width:100%">
+          <div class="stat-icon si-green">💶</div>
+          <div class="stat-info">
+            <div class="stat-label">Receita Total</div>
+            <div class="stat-value" id="gs-revenue">—</div>
+            <div class="stat-sub" id="gs-rev-label">este mês</div>
+          </div>
+        </div>
+        <div class="rev-period-pills">
+          <button class="rev-pill active" onclick="setSARevPeriod('month',this)">Mês</button>
+          <button class="rev-pill" onclick="setSARevPeriod('week',this)">Semana</button>
+          <button class="rev-pill" onclick="setSARevPeriod('today',this)">Hoje</button>
+          <button class="rev-pill" onclick="setSARevPeriod('year',this)">Ano</button>
+          <button class="rev-pill" onclick="setSARevPeriod('all',this)">Total</button>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon si-orange">🤙</div>
+        <div class="stat-info">
+          <div class="stat-label">As Minhas Comissões</div>
+          <div class="stat-value" id="gs-commission">—</div>
+          <div class="stat-sub" id="gs-comm-label">este mês · a receber</div>
+        </div>
+      </div>
+      <div class="stat-card" id="suspicious-card" style="cursor:pointer;border-color:rgba(239,68,68,.2)" onclick="filterSuspicious()" title="Ver marcações suspeitas" role="button" tabindex="0" aria-label="Ver marcações suspeitas" onkeydown="if(event.key==='Enter'||event.key===' ')filterSuspicious()">
+        <div class="stat-icon" style="background:rgba(239,68,68,.15);color:#ef4444">⚠️</div>
+        <div class="stat-info">
+          <div class="stat-label" style="color:#f87171">Suspeitas</div>
+          <div class="stat-value" id="gs-suspicious" style="color:#ef4444" aria-live="polite">0</div>
+          <div class="stat-sub">concluídas → canceladas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- School Cards -->
+    <div class="schools-row" id="schools-row"></div>
+
+    <!-- School Tabs -->
+    <div class="school-tabs" id="school-tabs"></div>
+
+    <!-- Análise + Avaliações + Candidaturas -->
+    <div class="toggle-btn-group">
+      <button class="btn-analytics-sa" onclick="toggleSAAnalytics()" aria-expanded="false" aria-controls="sa-analytics">📊 Análise Anual</button>
+      <button class="btn-reviews" id="sa-reviews-btn" onclick="toggleSAReviews()" aria-expanded="false" aria-controls="sa-reviews-section">⭐ Ver Avaliações</button>
+      <button class="btn-analytics-sa" id="btn-leads" onclick="toggleLeads()" aria-expanded="false" aria-controls="leads-section" style="color:#86efac;border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.08)">📋 Candidaturas</button>
+    </div>
+
+    <!-- Leads / Candidaturas Section -->
+    <div id="leads-section" style="display:none;margin-bottom:1.5rem" aria-live="polite">
+      <div class="section-panel">
+        <div class="section-panel-header">
+          <div class="section-panel-title" style="color:#86efac">📋 Candidaturas de Escolas</div>
+          <div style="display:flex;gap:.4rem" role="group" aria-label="Filtrar candidaturas">
+            <button onclick="setLeadFilter('new',this)"    class="lead-filter-btn active">Novas</button>
+            <button onclick="setLeadFilter('review',this)" class="lead-filter-btn">Em análise</button>
+            <button onclick="setLeadFilter('all',this)"    class="lead-filter-btn">Todas</button>
+          </div>
+        </div>
+        <div id="leads-list" aria-live="polite"><div style="color:var(--gray);font-size:.85rem">A carregar candidaturas...</div></div>
+      </div>
+    </div>
+
+    <!-- Reviews Section -->
+    <div id="sa-reviews-section" style="display:none;margin-bottom:1.5rem" aria-live="polite">
+      <div class="section-panel">
+        <div class="section-panel-header">
+          <div class="section-panel-title" style="color:var(--gold)">⭐ Avaliações da Plataforma</div>
+          <div id="sa-reviews-avg" style="font-size:1.1rem;font-weight:700;color:#f59e0b" aria-live="polite">—</div>
+        </div>
+        <div id="sa-schools-rating" style="margin-bottom:1.25rem"></div>
+        <div class="section-panel-title" style="color:var(--gray);margin-bottom:.75rem">Avaliações Recentes</div>
+        <div id="sa-reviews-list"></div>
+      </div>
+    </div>
+
+    <!-- Analytics Section -->
+    <div id="sa-analytics" style="display:none;margin-bottom:1.5rem">
+      <div class="chart-period-bar">
+        <div class="chart-year-btns">
+          <button class="sa-year-btn active" id="sa-year-cur" data-year="" onclick="setSAChartYear(new Date().getFullYear())"></button>
+          <button class="sa-year-btn" id="sa-year-prev" data-year="" onclick="setSAChartYear(new Date().getFullYear()-1)"></button>
+          <button class="sa-year-btn" id="sa-year-all" onclick="setSAChartYear('all')">Tudo</button>
+        </div>
+        <div class="sa-month-btns" id="sa-month-btns">
+          <button class="sa-month-btn active" onclick="setSAChartMonth(null,this)">Todos os meses</button>
+          <button class="sa-month-btn" onclick="setSAChartMonth(1,this)">Jan</button>
+          <button class="sa-month-btn" onclick="setSAChartMonth(2,this)">Fev</button>
+          <button class="sa-month-btn" onclick="setSAChartMonth(3,this)">Mar</button>
+          <button class="sa-month-btn" onclick="setSAChartMonth(4,this)">Abr</button>
+          <button class="sa-month-btn" onclick="setSAChartMonth(5,this)">Mai</button>
+          <button class="sa-month-btn" onclick="setSAChartMonth(6,this)">Jun</button>
+          <button class="sa-month-btn" onclick="setSAChartMonth(7,this)">Jul</button>
+          <button class="sa-month-btn" onclick="setSAChartMonth(8,this)">Ago</button>
+          <button class="sa-month-btn" onclick="setSAChartMonth(9,this)">Set</button>
+          <button class="sa-month-btn" onclick="setSAChartMonth(10,this)">Out</button>
+          <button class="sa-month-btn" onclick="setSAChartMonth(11,this)">Nov</button>
+          <button class="sa-month-btn" onclick="setSAChartMonth(12,this)">Dez</button>
+        </div>
+      </div>
+      <div class="sa-chart-grid">
+        <div class="chart-card"><div class="chart-card-title"><span id="sa-chart-monthly-title">Marcações por Mês</span></div><canvas id="sa-chart-monthly" style="max-height:180px"></canvas></div>
+        <div class="chart-card"><div class="chart-card-title"><span id="sa-chart-revenue-title">Receita por Mês (€)</span></div><canvas id="sa-chart-revenue" style="max-height:180px"></canvas></div>
+        <div class="chart-card"><div class="chart-card-title">Por Escola</div><canvas id="sa-chart-schools" style="max-height:180px"></canvas></div>
+        <div class="chart-card"><div class="chart-card-title">Por Nacionalidade</div><canvas id="sa-chart-nationality" style="max-height:220px"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters-bar" role="search" aria-label="Filtros de marcações">
+      <div class="filter-group">
+        <label for="f-month" class="filter-label">Mês</label>
+        <input type="month" id="f-month" class="filter-input" onchange="applyFilters()" />
+      </div>
+      <div class="filter-group">
+        <label for="f-status" class="filter-label">Estado</label>
+        <select id="f-status" class="filter-select" onchange="applyFilters()">
+          <option value="">Todos</option>
+          <option value="pending">Pendente</option>
+          <option value="confirmed">Confirmado</option>
+          <option value="completed">Concluído</option>
+          <option value="cancelled">Cancelado</option>
+          <option value="suspicious">⚠️ Suspeitas</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="f-search" class="filter-label">Pesquisar</label>
+        <input type="text" id="f-search" class="filter-input" placeholder="Nome, telemóvel..." autocomplete="off" oninput="applyFilters()" />
+      </div>
+      <button class="btn-refresh" onclick="loadBookings()" aria-label="Atualizar lista de marcações">↻ Atualizar</button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <div class="table-header">
+        <div>
+          <div class="table-title" id="table-title">Todas as Marcações</div>
+          <div class="table-count" id="table-count" role="status" aria-live="polite"></div>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Data / Hora</th>
+              <th>Escola</th>
+              <th>Modalidade</th>
+              <th>Cliente</th>
+              <th class="col-center">Pess.</th>
+              <th>Preço</th>
+              <th>Comissão %</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="bookings-tbody">
+            <tr><td colspan="9" class="loading"><div class="spinner"></div><br>A carregar...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<!-- Tiers Config Modal (patamares globais default) -->
+<div id="tiers-modal-bg" class="modal-bg" role="dialog" aria-modal="true" aria-labelledby="tiers-modal-title" onclick="if(event.target===this)closeTiersModal()">
+  <div class="modal-box" style="border:1px solid rgba(167,139,250,.25)">
+    <div class="modal-head">
+      <button class="btn-back" onclick="closeTiersModal()" aria-label="Voltar">← Voltar</button>
+      <div class="modal-head-titles" style="text-align:right;flex:1">
+        <h3 id="tiers-modal-title" style="font-size:1rem;font-weight:700;color:#a78bfa">⚙️ Patamares Globais (Default)</h3>
+      </div>
+      <button class="modal-close-x" onclick="closeTiersModal()" aria-label="Fechar">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.8rem;color:var(--gray);margin:.8rem 0 1.2rem">Aplicados a escolas sem patamares personalizados. Ajusta por escola no botão ⚙️ de cada escola.</p>
+      <div id="tiers-rows" style="display:flex;flex-direction:column;gap:.8rem"></div>
+    </div>
+    <div class="modal-footer">
+      <button onclick="saveTiers()" class="btn-modal-primary" style="background:#a78bfa">Guardar</button>
+      <button onclick="resetTiersDefault()" style="padding:.7rem 1rem;background:transparent;border:1px solid rgba(167,139,250,.3);border-radius:10px;color:#a78bfa;cursor:pointer;font-size:.82rem;font-family:Inter,sans-serif">↺ Default</button>
+      <button onclick="closeTiersModal()" class="btn-modal-cancel">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Commission Edit Modal — por escola, guardado no Supabase -->
+<div id="comm-modal-bg" class="modal-bg" role="dialog" aria-modal="true" aria-labelledby="comm-modal-title" onclick="if(event.target===this)closeCommModal()">
+  <div class="modal-box modal-box-wide" style="border:1px solid rgba(201,168,76,.2)">
+    <div class="modal-head">
+      <button class="btn-back" onclick="closeCommModal()" aria-label="Voltar">← Voltar</button>
+      <div class="modal-head-titles" style="text-align:right;flex:1">
+        <h3 id="comm-modal-title" style="font-size:1rem;font-weight:700;color:var(--gold)">⚙️ Comissões da Escola</h3>
+        <div id="comm-school-name" style="font-size:.85rem;font-weight:600;color:var(--white)"></div>
+      </div>
+      <button class="modal-close-x" onclick="closeCommModal()" aria-label="Fechar">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Estatísticas do mês -->
+      <div id="comm-month-stats" style="font-size:.8rem;padding:.6rem .9rem;background:rgba(0,207,253,.07);border:1px solid rgba(0,207,253,.2);border-radius:9px;color:var(--gray);margin:1rem 0 1.2rem;line-height:1.7"></div>
+
+      <!-- Patamares desta escola -->
+      <div class="modal-section-label" style="color:var(--gold)">Patamares desta escola</div>
+      <div id="comm-tiers-rows" style="display:flex;flex-direction:column;gap:.7rem;margin-bottom:1.2rem"></div>
+      <button onclick="addCommTier()" aria-label="Adicionar novo patamar de comissão" style="width:100%;padding:.45rem;background:rgba(201,168,76,.07);border:1px dashed rgba(201,168,76,.3);border-radius:8px;color:var(--gold);font-size:.8rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;margin-bottom:1.2rem;min-height:40px">+ Adicionar patamar</button>
+
+      <!-- Link da Proposta -->
+      <div class="modal-section-label" style="color:var(--cyan)">Link da Proposta</div>
+      <div style="display:flex;gap:.5rem;margin-bottom:1.3rem">
+        <input id="comm-proposta-link" readonly aria-label="URL da proposta comercial" style="flex:1;padding:.55rem .8rem;background:#0d1f3c;border:1px solid var(--border);border-radius:8px;color:var(--gray);font-size:.78rem;font-family:Inter,sans-serif;color-scheme:dark" />
+        <button onclick="copyPropostaLink()" aria-label="Copiar link da proposta" style="padding:.55rem .9rem;background:rgba(0,207,253,.1);border:1px solid rgba(0,207,253,.3);border-radius:8px;color:var(--cyan);font-size:.8rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap;min-height:40px">📋 Copiar</button>
+      </div>
+    </div>
+
+    <div class="modal-footer" style="margin-top:.5rem">
+      <button onclick="saveCommTiers()" class="btn-modal-primary" style="background:var(--gold)">💾 Guardar no Supabase</button>
+      <button onclick="closeCommModal()" class="btn-modal-cancel">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL  = 'https://ubeqidccuvsjhjphybxz.supabase.co';
+  const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InViZXFpZGNjdXZzamhqcGh5Ynh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDI0NTYsImV4cCI6MjA5NTkxODQ1Nn0.wyCBBMSuRfxrz935XifGa3Chgv64o4-ACvP5rCj7t1U';
+  const ADMIN_EMAIL   = 'ivocasimiro@gmail.com';
+
+  const COMM_KEY   = 'surfbook_comm_rates';
+  const TIERS_KEY  = 'surfbook_comm_tiers';
+
+  // Default tiered commission: more lessons/month → lower rate
+  const COMM_TIERS_DEFAULT = [
+    { label: 'Início',      max: 25,       rate: 0.04  },
+    { label: 'Crescimento', max: 60,       rate: 0.03  },
+    { label: 'Volume',      max: Infinity, rate: 0.025 },
+  ];
+
+  function getCommTiers() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(TIERS_KEY));
+      return saved?.length ? saved : COMM_TIERS_DEFAULT;
+    } catch { return COMM_TIERS_DEFAULT; }
+  }
+
+  function getTierForCount(count) {
+    const tiers = getCommTiers();
+    for (let i = 0; i < tiers.length; i++) {
+      if (count <= tiers[i].max) return { ...tiers[i], index: i + 1 };
+    }
+    return { ...tiers[tiers.length - 1], index: tiers.length };
+  }
+
+  function getCommRates() {
+    try { return JSON.parse(localStorage.getItem(COMM_KEY)) || {}; } catch { return {}; }
+  }
+
+  function getSchoolTiers(schoolId) {
+    const school = SCHOOLS.find(s => s.id === schoolId);
+    if (school?.commissionTiers?.length) return school.commissionTiers;
+    return null; // fall back to global
+  }
+
+  function getTierForCountAndSchool(count, schoolId) {
+    const schoolTiers = getSchoolTiers(schoolId);
+    const tiers = schoolTiers || getCommTiers();
+    for (let i = 0; i < tiers.length; i++) {
+      const max = tiers[i].max === null ? Infinity : tiers[i].max;
+      if (count <= max) return { ...tiers[i], index: i + 1 };
+    }
+    return { ...tiers[tiers.length - 1], index: tiers.length };
+  }
+
+  function getCommRate(schoolId) {
+    const overrides = getCommRates();
+    if (overrides[schoolId] !== undefined) return overrides[schoolId];
+    const now = new Date();
+    const monthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    const count = (allBookings || []).filter(b =>
+      b.school_id === schoolId && b.status !== 'cancelled' && b.booking_date?.startsWith(monthKey)
+    ).length;
+    return getTierForCountAndSchool(count, schoolId).rate;
+  }
+
+  function setCommRate(schoolId, rate) {
+    const r = getCommRates();
+    r[schoolId] = rate;
+    localStorage.setItem(COMM_KEY, JSON.stringify(r));
+  }
+
+  function clearCommOverride(schoolId) {
+    const r = getCommRates();
+    delete r[schoolId];
+    localStorage.setItem(COMM_KEY, JSON.stringify(r));
+  }
+
+  const { createClient } = supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let currentUser  = null;
+  let allBookings  = [];
+  let activeSchool = 'all';
+
+  // ── SCHOOL REGISTRY ──────────────────────────────────────────────────────────
+  // Add new schools here when onboarded
+  let SCHOOLS = [
+    {
+      id:    'escola-teste',
+      name:  'Escola Surf Teste',
+      region:'Site de Demonstração',
+      site:  '/surf',
+      admin: '/admin.html',
+      defaultCommission: 0.05,
+    },
+    {
+      id:    'surf-arrifana',
+      name:  'Arrifana Surf School',
+      region:'Arrifana, Aljezur',
+      site:  '/surf?escola=surf-arrifana',
+      admin: '/admin.html?escola=surf-arrifana',
+      defaultCommission: 0.04,
+    },
+    {
+      id:    'surf-nazare',
+      name:  'Nazaré Surf Experience',
+      region:'Nazaré',
+      site:  '/surf?escola=surf-nazare',
+      admin: '/admin.html?escola=surf-nazare',
+      defaultCommission: 0.04,
+    },
+    {
+      id:    'surf-peniche',
+      name:  'Peniche Surf Academy',
+      region:'Peniche',
+      site:  '/surf?escola=surf-peniche',
+      admin: '/admin.html?escola=surf-peniche',
+      defaultCommission: 0.04,
+    },
+    {
+      id:    'surf-lagos',
+      name:  'Lagos Surf Club',
+      region:'Lagos, Algarve',
+      site:  '/surf?escola=surf-lagos',
+      admin: '/admin.html?escola=surf-lagos',
+      defaultCommission: 0.04,
+    },
+    {
+      id:    'surf-sagres',
+      name:  'Sagres Wild Surf',
+      region:'Sagres, Algarve',
+      site:  '/surf?escola=surf-sagres',
+      admin: '/admin.html?escola=surf-sagres',
+      defaultCommission: 0.04,
+    },
+  ];
+
+  async function tryLoadSchools() {
+    try {
+      const { data, error } = await sb.from('schools').select('id,name,city,wa_number,email,status,commission_rate,commission_tiers,created_at,onboarding_completed_at');
+      if (!error && data && data.length) {
+        SCHOOLS = data.map(s => ({
+          id:                s.id,
+          name:              s.name,
+          region:            s.city || '—',
+          site:              s.id === 'escola-teste' ? '/surf' : `/surf?escola=${s.id}`,
+          admin:             s.id === 'escola-teste' ? '/admin.html' : `/admin.html?escola=${s.id}`,
+          defaultCommission: s.commission_rate || 0.04,
+          commissionTiers:   s.commission_tiers || null,
+          status:            s.status || 'active',
+          email:             s.email,
+        }));
+      }
+    } catch(_) { /* table not yet created, use hardcoded fallback */ }
+  }
+
+  const STATUS = {
+    pending:   { label: 'Pendente',   cls: 'status-pending'   },
+    confirmed: { label: 'Confirmado', cls: 'status-confirmed' },
+    completed: { label: 'Concluído',  cls: 'status-completed' },
+    cancelled: { label: 'Cancelado',  cls: 'status-cancelled' },
+  };
+
+  // ── AUTH ──────────────────────────────────────────────────────────────────────
+  async function init() {
+    await tryLoadSchools();
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) { currentUser = session.user; checkAndShowDash(); }
+    sb.auth.onAuthStateChange((_e, session) => {
+      if (session) { currentUser = session.user; checkAndShowDash(); }
+      else         { currentUser = null; showLogin(); }
+    });
+    checkLeadsBadge();
+  }
+
+  function checkAndShowDash() {
+    if (currentUser?.email !== ADMIN_EMAIL) {
+      sb.auth.signOut();
+      const errEl = document.getElementById('login-error');
+      errEl.textContent = 'Acesso restrito ao administrador da plataforma.';
+      errEl.classList.add('show');
+      return;
+    }
+    showDashboard();
+  }
+
+  async function doLogin() {
+    const email  = document.getElementById('l-email').value.trim();
+    const pass   = document.getElementById('l-pass').value;
+    const errEl  = document.getElementById('login-error');
+    errEl.textContent = ''; errEl.classList.remove('show');
+    if (!email || !pass) { errEl.textContent = 'Preenche email e password.'; errEl.classList.add('show'); return; }
+
+    const btn = document.querySelector('.btn-login');
+    btn.textContent = 'A entrar...'; btn.disabled = true;
+    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+    btn.textContent = 'Entrar no Painel 👑'; btn.disabled = false;
+
+    if (error) {
+      errEl.textContent = error.message.includes('Invalid') ? 'Email ou password incorretos.' : error.message;
+      errEl.classList.add('show');
+    }
+  }
+
+  async function sendReset() {
+    const email = document.getElementById('l-email').value.trim();
+    const errEl = document.getElementById('login-error');
+    if (!email) { errEl.textContent = 'Insere o teu email primeiro.'; errEl.classList.add('show'); return; }
+    await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/super-admin.html' });
+    errEl.style.background = 'rgba(34,197,94,.12)'; errEl.style.borderColor = 'rgba(34,197,94,.3)'; errEl.style.color = '#86efac';
+    errEl.textContent = 'Email de recuperação enviado! Verifica a caixa de entrada.';
+    errEl.classList.add('show');
+  }
+
+  async function logout() { await sb.auth.signOut(); showLogin(); }
+
+  function showLogin() {
+    document.getElementById('login-wrap').style.display = 'flex';
+    document.getElementById('dash-wrap').style.display  = 'none';
+  }
+
+  function showDashboard() {
+    document.getElementById('login-wrap').style.display = 'none';
+    document.getElementById('dash-wrap').style.display  = 'block';
+    document.getElementById('user-email').textContent   = currentUser.email;
+    setDefaultFilters();
+    buildSchoolUI();
+    loadBookings();
+  }
+
+  // ── SCHOOL UI ─────────────────────────────────────────────────────────────────
+  function buildSchoolUI() {
+    // Tabs
+    const tabsEl = document.getElementById('school-tabs');
+    tabsEl.innerHTML = `<button class="school-tab all active" onclick="switchSchool('all')">🌍 Todas as Escolas</button>` +
+      SCHOOLS.map(s => `<button class="school-tab" id="tab-${s.id}" onclick="switchSchool('${s.id}')">${s.name}</button>`).join('');
+
+    // Cards
+    const rowEl = document.getElementById('schools-row');
+    rowEl.innerHTML = SCHOOLS.map(s => `
+      <div class="school-card" id="card-${s.id}" onclick="switchSchool('${s.id}')">
+        <div class="sc-top">
+          <div class="sc-name">${s.name}</div>
+          <div class="sc-id">${s.id}</div>
+        </div>
+        <div style="font-size:.78rem;color:var(--gray);margin-bottom:.9rem">📍 ${s.region}</div>
+        <div style="margin-bottom:.6rem;font-size:.72rem;color:var(--gray)"><span class="sc-month-label">Este mês</span> <span id="sc-tier-${s.id}"></span></div>
+        <div class="sc-stats">
+          <div class="sc-stat"><div class="sc-val" id="sc-bookings-${s.id}">—</div><div class="sc-lbl">Aulas</div></div>
+          <div class="sc-stat"><div class="sc-val sc-revenue" id="sc-revenue-${s.id}">—</div><div class="sc-lbl">Receita</div></div>
+          <div class="sc-stat"><div class="sc-val sc-commission" id="sc-commission-${s.id}">—</div><div class="sc-lbl">Comissão</div></div>
+        </div>
+        <div id="sc-tiers-sum-${s.id}" style="display:flex;flex-wrap:wrap;gap:.3rem .5rem;margin-bottom:.7rem;padding:.4rem .6rem;background:rgba(255,255,255,.03);border-radius:8px">
+          ${renderCardTierSummary(s.commissionTiers)}
+        </div>
+        <div class="sc-links">
+          <a href="${s.site}" target="_blank" class="sc-link site" aria-label="Abrir site de ${s.name}">🌊 Site</a>
+          <a href="${s.admin}" target="_blank" class="sc-link" aria-label="Abrir painel admin de ${s.name}">⚙️ Admin</a>
+        </div>
+        <button class="sc-edit-comm-btn" onclick="event.stopPropagation();editCommission('${s.id}')" aria-label="Ajustar comissão de ${s.name}">⚙️ Ajustar Comissão</button>
+      </div>`).join('');
+  }
+
+  function renderCardTierSummary(tiers) {
+    const colors = ['#86efac','#00CFFD','#F59E0B','#a78bfa','#f472b6'];
+    const src = tiers?.length ? tiers : getCommTiers().map(t => ({ ...t, max: t.max === Infinity ? null : t.max }));
+    return src.map((t, i) => {
+      const c    = colors[i % colors.length];
+      const rate = (t.rate * 100).toFixed(1);
+      const lbl  = t.max != null ? `até ${t.max}` : `${src[i-1]?.max ? src[i-1].max+'+' : '∞'}`;
+      return `<span style="font-size:.68rem;white-space:nowrap"><span style="color:${c};font-weight:700">${rate}%</span><span style="color:var(--gray)"> ${t.label} (${lbl})</span></span>`;
+    }).join('<span style="color:rgba(255,255,255,.18)"> · </span>');
+  }
+
+  function switchSchool(id) {
+    activeSchool = id;
+    document.querySelectorAll('.school-tab').forEach(t => t.classList.remove('active'));
+    const tab = id === 'all' ? document.querySelector('.school-tab.all') : document.getElementById(`tab-${id}`);
+    if (tab) tab.classList.add('active');
+    document.querySelectorAll('.school-card').forEach(c => c.classList.remove('active-card'));
+    if (id !== 'all') { const card = document.getElementById(`card-${id}`); if (card) card.classList.add('active-card'); }
+    document.getElementById('table-title').textContent = id === 'all' ? 'Todas as Marcações' : SCHOOLS.find(s=>s.id===id)?.name || id;
+    applyFilters();
+  }
+
+  // ── DATA ──────────────────────────────────────────────────────────────────────
+  async function loadBookings() {
+    document.getElementById('bookings-tbody').innerHTML =
+      `<tr><td colspan="9" class="loading"><div class="spinner"></div><br>A carregar...</td></tr>`;
+
+    const { data, error } = await sb
+      .from('bookings')
+      .select('*')
+      .order('booking_date', { ascending: false })
+      .order('booking_time',  { ascending: true });
+
+    if (error) { showToast('Erro ao carregar marcações', 'error'); return; }
+    allBookings = data || [];
+    updateSchoolCards();
+    applyFilters();
+  }
+
+  function updateSchoolCards() {
+    const now = new Date();
+    const defaultMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    const fMonthEl = document.getElementById('f-month');
+    const monthKey = fMonthEl?.value || defaultMonth;
+    const monthLabel = fMonthEl?.value
+      ? new Date(monthKey + '-15').toLocaleString('pt-PT', { month: 'long', year: 'numeric' })
+      : 'Este mês';
+    document.querySelectorAll('.sc-month-label').forEach(el => { el.textContent = monthLabel; });
+
+    SCHOOLS.forEach(s => {
+      const sBookings = allBookings.filter(b => b.school_id === s.id && b.status !== 'cancelled' && b.booking_date.startsWith(monthKey));
+      const rev  = sBookings.reduce((sum, b) => sum + parseFloat(b.total_price||0), 0);
+      const rate = getCommRate(s.id);
+      const com  = rev * rate;
+      const tier = getTierForCountAndSchool(sBookings.length, s.id);
+      const bEl = document.getElementById(`sc-bookings-${s.id}`);
+      const rEl = document.getElementById(`sc-revenue-${s.id}`);
+      const cEl = document.getElementById(`sc-commission-${s.id}`);
+      const tEl = document.getElementById(`sc-tier-${s.id}`);
+      if (bEl) bEl.textContent = sBookings.length;
+      if (rEl) rEl.textContent = `€${rev.toFixed(0)}`;
+      if (cEl) cEl.textContent = `€${com.toFixed(0)} (${(rate*100).toFixed(1)}%)`;
+      if (tEl) tEl.innerHTML = `<span class="tier-badge tier-${tier.index}">${tier.label}</span>`;
+    });
+
+    document.getElementById('gs-schools').textContent = SCHOOLS.length;
+  }
+
+  // Suspicious = cancelled booking that was previously completed (audit trail in notes)
+  function isSuspicious(b) {
+    return b.status === 'cancelled' && b.notes && /\] completed →/.test(b.notes);
+  }
+
+  function filterSuspicious() {
+    document.getElementById('f-status').value = 'suspicious';
+    document.getElementById('f-month').value  = '';
+    applyFilters();
+    document.getElementById('table-title').textContent = '⚠️ Marcações Suspeitas';
+  }
+
+  function applyFilters() {
+    const month  = document.getElementById('f-month').value;
+    const status = document.getElementById('f-status').value;
+    const search = document.getElementById('f-search').value.toLowerCase();
+
+    let filtered = allBookings;
+    if (activeSchool !== 'all') filtered = filtered.filter(b => b.school_id === activeSchool);
+    if (month)  filtered = filtered.filter(b => b.booking_date.startsWith(month));
+    if (status === 'suspicious') filtered = filtered.filter(isSuspicious);
+    else if (status) filtered = filtered.filter(b => b.status === status);
+    if (search) filtered = filtered.filter(b =>
+      b.client_name.toLowerCase().includes(search) || b.client_phone.includes(search)
+    );
+
+    renderGlobalStats(filtered);
+    renderTable(filtered);
+    updateSchoolCards();
+  }
+
+  let saRevPeriod = 'month';
+
+  function setSARevPeriod(period, btn) {
+    saRevPeriod = period;
+    document.querySelectorAll('.rev-pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    updateSARevCards();
+  }
+
+  function updateSARevCards() {
+    const now = new Date();
+    const pad = n => String(n).padStart(2,'0');
+    const todayStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+    const fMonth = document.getElementById('f-month')?.value || '';
+    let src, label;
+
+    // Filter by selected school first
+    const base = activeSchool === 'all' ? allBookings : allBookings.filter(b => b.school_id === activeSchool);
+    const schoolLabel = activeSchool === 'all' ? '' : ` · ${SCHOOLS.find(s=>s.id===activeSchool)?.name||activeSchool}`;
+
+    // If a specific month is selected in f-month, use it for 'month' period
+    const activePeriod = fMonth ? 'month' : saRevPeriod;
+
+    if (activePeriod === 'today') {
+      src = base.filter(b => b.booking_date === todayStr);
+      label = 'hoje';
+    } else if (activePeriod === 'week') {
+      const d = new Date(now); d.setDate(d.getDate() - 6);
+      const from = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+      src = base.filter(b => b.booking_date >= from && b.booking_date <= todayStr);
+      label = 'últimos 7 dias';
+    } else if (activePeriod === 'month') {
+      const m = fMonth || `${now.getFullYear()}-${pad(now.getMonth()+1)}`;
+      src = base.filter(b => b.booking_date.startsWith(m));
+      label = fMonth ? new Date(m+'-15').toLocaleString('pt-PT',{month:'long',year:'numeric'}) : 'este mês';
+    } else if (activePeriod === 'year') {
+      src = base.filter(b => b.booking_date.startsWith(`${now.getFullYear()}`));
+      label = String(now.getFullYear());
+    } else {
+      src = base;
+      label = 'total histórico';
+    }
+
+    const active = src.filter(b => b.status !== 'cancelled');
+    const rev  = active.reduce((s, b) => s + parseFloat(b.total_price||0), 0);
+    const comm = active.reduce((s, b) => s + parseFloat(b.total_price||0) * getCommRate(b.school_id), 0);
+
+    document.getElementById('gs-revenue').textContent    = `€${rev.toFixed(2)}`;
+    document.getElementById('gs-commission').textContent = `€${comm.toFixed(2)}`;
+    document.getElementById('gs-rev-label').textContent  = label + schoolLabel;
+    document.getElementById('gs-comm-label').textContent = label + schoolLabel + ' · a receber';
+
+    // Update stat card label for bookings count
+    const bookLbl = document.getElementById('gs-month-label');
+    if (bookLbl && schoolLabel) bookLbl.textContent = (label + schoolLabel);
+  }
+
+  function renderGlobalStats(rows) {
+    const active = rows.filter(b => b.status !== 'cancelled');
+    const month  = document.getElementById('f-month').value;
+
+    document.getElementById('gs-bookings').textContent = active.length;
+    updateSARevCards();
+
+    if (month) {
+      const [y, m] = month.split('-');
+      const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      document.getElementById('gs-month-label').textContent = `${months[parseInt(m)-1]} ${y}`;
+    } else {
+      document.getElementById('gs-month-label').textContent = 'todas as datas';
+    }
+
+    // Suspicious count (always from all bookings, not filtered)
+    const suspCount = allBookings.filter(isSuspicious).length;
+    document.getElementById('gs-suspicious').textContent = suspCount;
+    const suspCard = document.getElementById('suspicious-card');
+    if (suspCount > 0) {
+      suspCard.style.borderColor = 'rgba(239,68,68,.6)';
+      suspCard.style.background  = 'rgba(239,68,68,.07)';
+    } else {
+      suspCard.style.borderColor = 'rgba(255,255,255,.1)';
+      suspCard.style.background  = '';
+    }
+  }
+
+  function renderTable(rows) {
+    const tbody   = document.getElementById('bookings-tbody');
+    const countEl = document.getElementById('table-count');
+    countEl.textContent = `${rows.length} registo${rows.length !== 1 ? 's' : ''}`;
+
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="9" class="empty-row">Nenhuma marcação encontrada</td></tr>`;
+      return;
+    }
+
+    let totalRev = 0, totalCom = 0;
+
+    const html = rows.map((b, i) => {
+      const suspicious = isSuspicious(b);
+      const s     = STATUS[b.status] || STATUS.pending;
+      const price = parseFloat(b.total_price||0);
+      const com   = price * getCommRate(b.school_id);
+      if (b.status !== 'cancelled') { totalRev += price; totalCom += com; }
+
+      const [y, m, d] = b.booking_date.split('-');
+      const dateStr   = `${d}/${m}/${y}`;
+      const langFlag  = { pt:'🇵🇹', en:'🇬🇧', fr:'🇫🇷', de:'🇩🇪' }[b.language] || '';
+      const school    = SCHOOLS.find(s => s.id === b.school_id);
+      const schoolName = school ? school.name.replace(' Surf Academy','').replace(' Surf School','') : (b.school_id||'—');
+
+      // Extract last 2 audit lines from notes for suspicious tooltip
+      const auditLines = suspicious && b.notes
+        ? b.notes.split('\n').filter(l => l.startsWith('[')).slice(-3).join(' | ')
+        : '';
+
+      return `<tr class="${suspicious ? 'row-suspicious' : ''}">
+        <td data-label="#" style="color:var(--gray);font-size:.8rem">#${b.booking_ref || (i+1)}</td>
+        <td data-label="Data / Hora"><strong>${dateStr}</strong><small>${b.booking_time}</small></td>
+        <td data-label="Escola"><span class="school-chip">${schoolName}</span></td>
+        <td data-label="Modalidade">${b.lesson_type} ${langFlag}</td>
+        <td data-label="Cliente">${b.client_name}<small>${b.client_phone}${b.client_email ? ' · ' + b.client_email : ''}</small>${b.wetsuit_size||b.client_weight ? `<small style="color:var(--gold)">👕 ${b.wetsuit_size||'—'} · ${b.client_weight?b.client_weight+'kg':'—'} · ${b.client_height?b.client_height+'cm':'—'}</small>` : ''}${suspicious ? `<span class="audit-note" title="${auditLines}">⚠️ ${auditLines}</span>` : ''}</td>
+        <td data-label="Pessoas" class="col-center">${b.num_people}</td>
+        <td data-label="Preço" class="col-price">€${price.toFixed(2)}</td>
+        <td data-label="Comissão" class="col-commission">${suspicious ? `<span style="color:#ef4444;font-weight:700" title="Comissão em risco">€${com.toFixed(2)} ⚠️</span>` : `€${com.toFixed(2)}`}</td>
+        <td data-label="Estado"><span class="status-badge ${suspicious ? 'status-suspicious' : s.cls}">${s.label}${suspicious ? ' ⚠️' : ''}</span></td>
+      </tr>`;
+    }).join('');
+
+    const summaryRow = `<tr class="summary-row">
+      <td colspan="6" style="text-align:right;font-weight:700">TOTAL</td>
+      <td class="col-price">€${totalRev.toFixed(2)}</td>
+      <td class="col-commission">€${totalCom.toFixed(2)}</td>
+      <td></td>
+    </tr>`;
+
+    tbody.innerHTML = html + summaryRow;
+  }
+
+  // ── UTILS ─────────────────────────────────────────────────────────────────────
+  function setDefaultFilters() {
+    const now = new Date();
+    document.getElementById('f-month').value =
+      `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  }
+
+  function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast toast-${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  // ── MODAIS: bloqueio de scroll do body + tecla Escape ────────────────────────
+  function syncModalBodyLock() {
+    const anyOpen = Array.from(document.querySelectorAll('.modal-bg'))
+      .some(m => m.style.display === 'flex');
+    document.body.classList.toggle('modal-open', anyOpen);
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    const open = Array.from(document.querySelectorAll('.modal-bg'))
+      .filter(m => m.style.display === 'flex');
+    if (!open.length) return;
+    if (typeof closeTiersModal === 'function' && document.getElementById('tiers-modal-bg').style.display === 'flex') closeTiersModal();
+    if (typeof closeCommModal === 'function' && document.getElementById('comm-modal-bg').style.display === 'flex') closeCommModal();
+  });
+
+  // ── TIERS CONFIG ──────────────────────────────────────────────────────────────
+  function openTiersModal() {
+    const tiers = getCommTiers();
+    const labels = ['Início', 'Crescimento', 'Volume'];
+    document.getElementById('tiers-rows').innerHTML = tiers.map((t, i) => `
+      <div style="background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.18);border-radius:10px;padding:1rem">
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#a78bfa;margin-bottom:.7rem">Patamar ${i+1} — ${labels[i]||'Patamar '+(i+1)}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
+          <div>
+            <label for="tier-max-${i}" style="font-size:.7rem;color:var(--gray);display:block;margin-bottom:.3rem">${i < tiers.length-1 ? 'Até (aulas/mês)' : 'Acima de (aulas/mês)'}</label>
+            <input type="number" id="tier-max-${i}" class="tier-input" value="${t.max === Infinity ? (tiers[i-1]?.max||60) : t.max}" ${i === tiers.length-1 ? 'disabled placeholder="ilimitado"' : ''} min="1" />
+          </div>
+          <div>
+            <label for="tier-rate-${i}" style="font-size:.7rem;color:var(--gray);display:block;margin-bottom:.3rem">Taxa (%)</label>
+            <input type="number" id="tier-rate-${i}" class="tier-input" value="${(t.rate*100).toFixed(1)}" step="0.5" min="0" max="20" />
+          </div>
+        </div>
+      </div>`).join('');
+    document.getElementById('tiers-modal-bg').style.display = 'flex';
+    syncModalBodyLock();
+  }
+
+  function closeTiersModal() {
+    document.getElementById('tiers-modal-bg').style.display = 'none';
+    syncModalBodyLock();
+  }
+
+  function saveTiers() {
+    const tiers = getCommTiers();
+    const newTiers = tiers.map((t, i) => {
+      const maxEl  = document.getElementById(`tier-max-${i}`);
+      const rateEl = document.getElementById(`tier-rate-${i}`);
+      const rate = parseFloat(rateEl.value) / 100;
+      if (isNaN(rate) || rate < 0) { showToast('Taxa inválida', 'error'); return null; }
+      if (i === tiers.length - 1) return { ...t, rate };
+      const max = parseInt(maxEl.value);
+      if (isNaN(max) || max < 1) { showToast('Limite inválido', 'error'); return null; }
+      return { ...t, max, rate };
+    });
+    if (newTiers.includes(null)) return;
+    // Validate ascending maxes
+    for (let i = 0; i < newTiers.length - 1; i++) {
+      if (newTiers[i].max >= (newTiers[i+1].max === Infinity ? Infinity : newTiers[i+1].max)) {
+        // just ensure ascending
+      }
+    }
+    localStorage.setItem(TIERS_KEY, JSON.stringify(newTiers));
+    closeTiersModal();
+    updateSchoolCards();
+    updateSARevCards();
+    showToast('Patamares guardados', 'success');
+  }
+
+  function resetTiersDefault() {
+    localStorage.removeItem(TIERS_KEY);
+    closeTiersModal();
+    updateSchoolCards();
+    updateSARevCards();
+    showToast('Patamares reposto para valores padrão', 'success');
+  }
+
+  // ── COMMISSION EDITING (per school, saved to Supabase) ───────────────────────
+  let commTiersWorking = []; // working copy while editing
+
+  async function editCommission(schoolId) {
+    const school = SCHOOLS.find(s => s.id === schoolId);
+    document.getElementById('comm-modal-bg').style.display = 'flex';
+    syncModalBodyLock();
+    document.getElementById('comm-modal-bg').dataset.schoolId = schoolId;
+    document.getElementById('comm-school-name').textContent = school?.name || schoolId;
+
+    // Month stats
+    const now = new Date();
+    const monthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    const count = allBookings.filter(b => b.school_id === schoolId && b.status !== 'cancelled' && b.booking_date?.startsWith(monthKey)).length;
+    const rev   = allBookings.filter(b => b.school_id === schoolId && b.status === 'completed'  && b.booking_date?.startsWith(monthKey)).reduce((s,b) => s + parseFloat(b.total_price||0), 0);
+    document.getElementById('comm-month-stats').innerHTML =
+      `Este mês: <strong style="color:#fff">${count} aulas</strong> · Receita: <strong style="color:var(--cyan)">€${rev.toFixed(0)}</strong>`;
+
+    // Load tiers from Supabase first, fall back to global defaults
+    let tiers = null;
+    try {
+      const { data } = await sb.from('schools').select('commission_tiers').eq('id', schoolId).single();
+      if (data?.commission_tiers?.length) tiers = data.commission_tiers;
+    } catch(_) {}
+    if (!tiers) tiers = getCommTiers().map(t => ({ ...t, max: t.max === Infinity ? null : t.max }));
+
+    commTiersWorking = tiers.map(t => ({ ...t }));
+    renderCommTierRows();
+    updatePropostaLink(schoolId, school?.name || '');
+  }
+
+  function renderCommTierRows() {
+    const labels = ['Início','Crescimento','Volume','Fidelidade','Elite'];
+    const colors = ['#86efac','#00CFFD','#F59E0B','#a78bfa','#f472b6'];
+    document.getElementById('comm-tiers-rows').innerHTML = commTiersWorking.map((t, i) => {
+      const isLast = i === commTiersWorking.length - 1;
+      const color  = colors[i % colors.length];
+      const [r, g, b] = color.replace('#','').match(/../g).map(h=>parseInt(h,16));
+      return `
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:.9rem 1rem;position:relative">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem">
+          <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:${color}">Patamar ${i+1}</div>
+          ${commTiersWorking.length > 1 ? `<button onclick="removeCommTier(${i})" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:.8rem;padding:.1rem .3rem;font-family:Inter,sans-serif;opacity:.7" aria-label="Remover patamar ${i+1}" title="Remover patamar">✕</button>` : ''}
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem">
+          <div>
+            <label for="ct-label-${i}" style="font-size:.68rem;color:var(--gray);display:block;margin-bottom:.25rem">Label</label>
+            <input type="text" id="ct-label-${i}" value="${t.label || labels[i] || 'Patamar '+(i+1)}"
+              oninput="commTiersWorking[${i}].label=this.value"
+              style="width:100%;padding:.5rem .6rem;background:#0d1f3c;border:1px solid rgba(255,255,255,.12);border-radius:7px;color:#fff;font-family:Inter,sans-serif;font-size:.83rem;color-scheme:dark" />
+          </div>
+          <div>
+            <label for="ct-max-${i}" style="font-size:.68rem;color:var(--gray);display:block;margin-bottom:.25rem">${isLast ? 'Acima de' : 'Até (aulas/mês)'}</label>
+            <input type="number" id="ct-max-${i}" value="${t.max ?? ''}" ${isLast ? 'disabled placeholder="ilimitado"' : ''} min="1"
+              oninput="commTiersWorking[${i}].max=this.value?parseInt(this.value):null"
+              style="width:100%;padding:.5rem .6rem;background:${isLast?'rgba(255,255,255,.03)':'#0d1f3c'};border:1px solid rgba(255,255,255,.12);border-radius:7px;color:#fff;font-family:Inter,sans-serif;font-size:.83rem;color-scheme:dark" />
+          </div>
+          <div>
+            <label for="ct-rate-${i}" style="font-size:.68rem;color:var(--gray);display:block;margin-bottom:.25rem">Taxa (%)</label>
+            <input type="number" id="ct-rate-${i}" value="${((t.rate||0)*100).toFixed(1)}" step="0.5" min="0" max="30"
+              oninput="commTiersWorking[${i}].rate=parseFloat(this.value)/100||0"
+              style="width:100%;padding:.5rem .6rem;background:#0d1f3c;border:1px solid rgba(${r},${g},${b},.3);border-radius:7px;color:#fff;font-family:Inter,sans-serif;font-size:.83rem;color-scheme:dark;font-weight:700" />
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function addCommTier() {
+    const prev = commTiersWorking[commTiersWorking.length - 1];
+    const newMax = prev?.max ? prev.max + 25 : 25;
+    const newRate = Math.max(0, (prev?.rate || 0.04) - 0.005);
+    // Make previous last tier no longer "last"
+    if (commTiersWorking.length) {
+      commTiersWorking[commTiersWorking.length - 1].max = newMax;
+    }
+    commTiersWorking.push({ label: 'Novo Patamar', max: null, rate: newRate });
+    renderCommTierRows();
+  }
+
+  function removeCommTier(i) {
+    if (commTiersWorking.length <= 1) return;
+    commTiersWorking.splice(i, 1);
+    // Ensure last tier has max=null
+    commTiersWorking[commTiersWorking.length - 1].max = null;
+    renderCommTierRows();
+  }
+
+  function updatePropostaLink(schoolId, schoolName, tiers) {
+    const base   = 'https://auditoria-25b.pages.dev/proposta';
+    const nome   = encodeURIComponent(schoolName || schoolId);
+    const src    = tiers || commTiersWorking;
+    let tiersParam = '';
+    if (src?.length) {
+      try { tiersParam = '&t=' + btoa(JSON.stringify(src)); } catch(_) {}
+    }
+    const url = `${base}?escola=${encodeURIComponent(schoolId)}&nome=${nome}${tiersParam}`;
+    const el  = document.getElementById('comm-proposta-link');
+    if (el) el.value = url;
+  }
+
+  function copyPropostaLink() {
+    const el = document.getElementById('comm-proposta-link');
+    if (!el) return;
+    navigator.clipboard.writeText(el.value).then(() => showToast('Link copiado!', 'success')).catch(() => {
+      el.select(); document.execCommand('copy'); showToast('Link copiado!', 'success');
+    });
+  }
+
+  async function saveCommTiers() {
+    const schoolId = document.getElementById('comm-modal-bg').dataset.schoolId;
+    // Validate
+    for (let i = 0; i < commTiersWorking.length - 1; i++) {
+      if (!commTiersWorking[i].max || commTiersWorking[i].max < 1) {
+        showToast(`Patamar ${i+1}: define o limite de aulas`, 'error'); return;
+      }
+      if (i > 0 && commTiersWorking[i].max <= commTiersWorking[i-1].max) {
+        showToast(`Patamar ${i+1}: limite deve ser maior que o anterior`, 'error'); return;
+      }
+    }
+    for (const t of commTiersWorking) {
+      if (isNaN(t.rate) || t.rate < 0) { showToast('Taxa inválida', 'error'); return; }
+    }
+    // Ensure last max is null (unlimited)
+    commTiersWorking[commTiersWorking.length - 1].max = null;
+
+    const tiersForDB = commTiersWorking.map(t => ({
+      label: t.label,
+      max:   t.max,
+      rate:  t.rate,
+    }));
+    const startRate = commTiersWorking[0]?.rate || 0.04;
+
+    const school = SCHOOLS.find(s => s.id === schoolId);
+    const { error } = await sb.from('schools')
+      .upsert({
+        id:               schoolId,
+        name:             school?.name || schoolId,
+        commission_tiers: tiersForDB,
+        commission_rate:  startRate,
+        updated_at:       new Date().toISOString(),
+      }, { onConflict: 'id' });
+
+    if (error) { showToast('Erro ao guardar: ' + (error.message||error.code), 'error'); return; }
+
+    // Update in-memory school + refresh card tier summary
+    if (school) {
+      school.commissionTiers = tiersForDB;
+      const sumEl = document.getElementById(`sc-tiers-sum-${schoolId}`);
+      if (sumEl) sumEl.innerHTML = renderCardTierSummary(tiersForDB);
+    }
+
+    updatePropostaLink(schoolId, school?.name || '', tiersForDB);
+    showToast('Comissões guardadas no Supabase ✓', 'success');
+    closeCommModal();
+    updateSchoolCards();
+    updateSARevCards();
+  }
+
+  function closeCommModal() {
+    document.getElementById('comm-modal-bg').style.display = 'none';
+    syncModalBodyLock();
+  }
+
+  // Keep these stubs so existing callers don't break
+  function resetCommRate() { closeCommModal(); }
+  function saveCommRate()  { saveCommTiers(); }
+
+  // ── ANNUAL ANALYTICS CHARTS ───────────────────────────────────────────────────
+  // Register datalabels plugin
+  if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
+
+  let saChartYear = new Date().getFullYear();
+  let saChartMonth = null;
+  let saChartInstances = {};
+
+  function toggleSAAnalytics() {
+    const el  = document.getElementById('sa-analytics');
+    const btn = document.querySelector('[aria-controls="sa-analytics"]');
+    const isHidden = el.style.display === 'none' || el.style.display === '';
+    el.style.display = isHidden ? 'block' : 'none';
+    if (btn) btn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+    if (isHidden) {
+      const curY = new Date().getFullYear();
+      const curBtn  = document.getElementById('sa-year-cur');
+      const prevBtn = document.getElementById('sa-year-prev');
+      if (curBtn)  { curBtn.textContent = curY;     curBtn.dataset.year = curY; }
+      if (prevBtn) { prevBtn.textContent = curY - 1; prevBtn.dataset.year = curY - 1; }
+      buildSACharts();
+    }
+  }
+
+  function setSAChartYear(y) {
+    saChartYear = y;
+    saChartMonth = null;
+    document.querySelectorAll('.sa-month-btn').forEach((b,i) => b.classList.toggle('active', i === 0));
+    document.querySelectorAll('.sa-year-btn').forEach(b => {
+      const isAll  = y === 'all' && b.id === 'sa-year-all';
+      const isYear = y !== 'all' && parseInt(b.dataset.year) === y;
+      b.classList.toggle('active', isAll || isYear);
+    });
+    buildSACharts();
+  }
+
+  function setSAChartMonth(m, btn) {
+    saChartMonth = m;
+    document.querySelectorAll('.sa-month-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    buildSACharts();
+  }
+
+  function buildSACharts() {
+    const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+    let data = allBookings.filter(b => b.status !== 'cancelled' && b.booking_date);
+    if (saChartYear !== 'all') data = data.filter(b => b.booking_date.startsWith(String(saChartYear)));
+    if (saChartMonth !== null) {
+      const mm = String(saChartMonth).padStart(2,'0');
+      data = data.filter(b => b.booking_date.split('-')[1] === mm);
+    }
+
+    // Time axis: monthly or daily
+    let timeLabels, timeData, timeRevData, timeTitle, revTitle;
+    if (saChartMonth !== null) {
+      const yr = saChartYear === 'all' ? new Date().getFullYear() : saChartYear;
+      const daysInMonth = new Date(yr, saChartMonth, 0).getDate();
+      timeData    = Array(daysInMonth).fill(0);
+      timeRevData = Array(daysInMonth).fill(0);
+      data.forEach(b => {
+        const d = parseInt(b.booking_date.split('-')[2]) - 1;
+        timeData[d]++;
+        timeRevData[d] += parseFloat(b.total_price) || 0;
+      });
+      timeLabels = Array.from({length: daysInMonth}, (_, i) => i + 1);
+      timeTitle  = `Dias — ${months[saChartMonth - 1]}`;
+      revTitle   = `Receita por Dia (€) — ${months[saChartMonth - 1]}`;
+    } else {
+      timeData    = Array(12).fill(0);
+      timeRevData = Array(12).fill(0);
+      data.forEach(b => {
+        const m = parseInt(b.booking_date.split('-')[1]) - 1;
+        timeData[m]++;
+        timeRevData[m] += parseFloat(b.total_price) || 0;
+      });
+      timeLabels = months;
+      timeTitle  = saChartYear === 'all' ? 'Marcações (Histórico)' : `Marcações — ${saChartYear}`;
+      revTitle   = saChartYear === 'all' ? 'Receita Histórica (€)' : `Receita ${saChartYear} (€)`;
+    }
+    const tEl = document.getElementById('sa-chart-monthly-title'); if (tEl) tEl.textContent = timeTitle;
+    const rEl = document.getElementById('sa-chart-revenue-title'); if (rEl) rEl.textContent = revTitle;
+
+    const natMap = {};
+    data.forEach(b => { const n = (b.client_country||'').replace(/^\S+\s/,'') || 'N/A'; natMap[n] = (natMap[n]||0) + 1; });
+    const topNat = Object.entries(natMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
+
+    const schoolMap = {};
+    SCHOOLS.forEach(s => { schoolMap[s.id] = { name: s.name.replace(' Surf Academy','').replace(' Surf School',''), count: 0 }; });
+    data.forEach(b => { if (schoolMap[b.school_id]) schoolMap[b.school_id].count++; });
+
+    Object.values(saChartInstances).forEach(c => c.destroy());
+    saChartInstances = {};
+
+    const ticks  = { color: '#8B9AB0', font: { size: 10 } };
+    const grid   = { color: 'rgba(255,255,255,0.05)' };
+    const barDL  = { color: '#CBD5E1', font: { size: 10, weight: '600' }, anchor: 'end', align: 'top', offset: 2, formatter: v => v > 0 ? v : '' };
+
+    saChartInstances.monthly = new Chart(document.getElementById('sa-chart-monthly'), {
+      type: 'bar',
+      data: { labels: timeLabels, datasets: [{ label: 'Marcações', data: timeData, backgroundColor: 'rgba(0,207,253,.6)', borderRadius: 4 }] },
+      options: { layout: { padding: { top: 18 } }, plugins: { legend: { display: false }, datalabels: barDL }, scales: { x: {ticks,grid}, y: {ticks,grid} } }
+    });
+
+    saChartInstances.revenue = new Chart(document.getElementById('sa-chart-revenue'), {
+      type: 'line',
+      data: { labels: timeLabels, datasets: [{ label: '€', data: timeRevData.map(v=>+v.toFixed(0)), borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,.1)', tension: .3, fill: true, pointRadius: 3 }] },
+      options: { layout: { padding: { top: 18 } }, plugins: { legend: { display: false },
+        datalabels: { color: '#86efac', font: { size: 9, weight: '600' }, anchor: 'top', align: 'top', offset: 2, formatter: v => v > 0 ? `€${v}` : '' }
+      }, scales: { x: {ticks,grid}, y: {ticks,grid} } }
+    });
+
+    saChartInstances.nationality = new Chart(document.getElementById('sa-chart-nationality'), {
+      type: 'bar',
+      data: { labels: topNat.map(([k])=>k), datasets: [{ data: topNat.map(([,v])=>v), backgroundColor: 'rgba(167,139,250,.7)', borderRadius: 4 }] },
+      options: { indexAxis: 'y', layout: { padding: { right: 28 } }, plugins: { legend: { display: false },
+        datalabels: { ...barDL, anchor: 'end', align: 'right' }
+      }, scales: { x: {ticks,grid}, y: {ticks,grid} } }
+    });
+
+    const schEntries = Object.values(schoolMap);
+    saChartInstances.schools = new Chart(document.getElementById('sa-chart-schools'), {
+      type: 'bar',
+      data: { labels: schEntries.map(s=>s.name), datasets: [{ data: schEntries.map(s=>s.count), backgroundColor: 'rgba(201,168,76,.6)', borderRadius: 4 }] },
+      options: { layout: { padding: { top: 18 } }, plugins: { legend: { display: false }, datalabels: barDL }, scales: { x: {ticks,grid}, y: {ticks,grid} } }
+    });
+  }
+
+  async function toggleSAReviews() {
+    const el  = document.getElementById('sa-reviews-section');
+    const btn = document.getElementById('sa-reviews-btn');
+    if (el.style.display === 'none') {
+      el.style.display = 'block';
+      btn.textContent = '⭐ Fechar Avaliações';
+      btn.setAttribute('aria-expanded', 'true');
+      await loadSAReviews();
+    } else {
+      el.style.display = 'none';
+      btn.textContent = '⭐ Ver Avaliações';
+      btn.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  async function loadSAReviews() {
+    const { data, error } = await sb.from('reviews')
+      .select('*').order('created_at', { ascending: false }).limit(50);
+    if (error || !data) { document.getElementById('sa-reviews-list').innerHTML = '<p style="color:var(--gray);font-size:.85rem">Ainda sem avaliações.</p>'; return; }
+
+    // School averages
+    const bySchool = {};
+    data.forEach(r => {
+      if (!bySchool[r.school_id]) bySchool[r.school_id] = { total: 0, count: 0, name: r.school_id };
+      bySchool[r.school_id].total += r.rating;
+      bySchool[r.school_id].count++;
+    });
+    const schoolAvgs = Object.values(bySchool).map(s => ({ ...s, avg: s.total/s.count }));
+    const overallAvg = data.length ? (data.reduce((s,r)=>s+r.rating,0)/data.length).toFixed(1) : '—';
+
+    document.getElementById('sa-reviews-avg').textContent = `${overallAvg} ★  (${data.length} avaliações)`;
+    document.getElementById('sa-schools-rating').innerHTML = schoolAvgs.map(s => {
+      const school = SCHOOLS.find(sc => sc.id === s.name) || { name: s.name };
+      const stars = '★'.repeat(Math.round(s.avg)) + '☆'.repeat(5-Math.round(s.avg));
+      return `<div class="school-avg-row">
+        <span style="flex:1;font-size:.85rem;font-weight:600">${school.name}</span>
+        <span class="school-avg-stars">${stars}</span>
+        <span style="font-size:.82rem;color:var(--gray);margin-left:.5rem">${s.avg.toFixed(1)} · ${s.count} avaliações</span>
+      </div>`;
+    }).join('');
+
+    const published = data.filter(r => r.status === 'published');
+    const pending   = data.filter(r => r.status === 'pending');
+    const allShow   = [...pending, ...published].slice(0,20);
+    document.getElementById('sa-reviews-list').innerHTML = allShow.map(r => {
+      const stars = '★'.repeat(r.rating) + '☆'.repeat(5-r.rating);
+      const badge = r.status === 'pending' ? `<span style="background:rgba(234,179,8,.15);color:#fde047;border:1px solid rgba(234,179,8,.3);border-radius:50px;padding:.15rem .5rem;font-size:.67rem;font-weight:700">Pendente</span>` :
+                    r.status === 'published' ? `<span style="background:rgba(34,197,94,.12);color:#86efac;border:1px solid rgba(34,197,94,.3);border-radius:50px;padding:.15rem .5rem;font-size:.67rem;font-weight:700">Publicada</span>` : '';
+      const school = SCHOOLS.find(s => s.id === r.school_id);
+      return `<div class="review-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem">
+          <div>
+            <span class="stars-display">${stars}</span>
+            <div class="review-meta">${r.client_name} · ${school?.name||r.school_id} · ${new Date(r.created_at).toLocaleDateString('pt')}</div>
+            ${r.comment ? `<div class="review-comment">"${r.comment}"</div>` : ''}
+          </div>
+          <div style="display:flex;flex-direction:column;gap:.3rem;align-items:flex-end;flex-shrink:0">
+            ${badge}
+          </div>
+        </div>
+      </div>`;
+    }).join('') || '<p style="color:var(--gray);font-size:.85rem">Ainda sem avaliações.</p>';
+  }
+
+  init();
+
+  // ── CANDIDATURAS (LEADS) ─────────────────────────────────────────────────────
+  let leadsOpen = false;
+  let leadsFilter = 'new';
+  let leadsData = [];
+
+  async function toggleLeads() {
+    leadsOpen = !leadsOpen;
+    const sec = document.getElementById('leads-section');
+    const btn = document.getElementById('btn-leads');
+    sec.style.display = leadsOpen ? 'block' : 'none';
+    btn.setAttribute('aria-expanded', leadsOpen ? 'true' : 'false');
+    if (!leadsOpen) {
+      // Repor contagem se houver novas candidaturas
+      const newCount = leadsData.filter(l => l.status === 'new').length;
+      btn.textContent = newCount > 0 ? `📋 Candidaturas (${newCount})` : '📋 Candidaturas';
+    } else {
+      btn.textContent = '📋 Fechar Candidaturas';
+    }
+    if (leadsOpen) await loadLeads();
+  }
+
+  async function loadLeads() {
+    document.getElementById('leads-list').innerHTML = '<div style="color:var(--gray);font-size:.85rem">A carregar...</div>';
+    try {
+      const { data, error } = await sb.from('leads').select('*').order('created_at', { ascending: false });
+      if (error) throw error;
+      leadsData = data || [];
+      renderLeads();
+      const newCount = leadsData.filter(l => l.status === 'new').length;
+      const btn = document.getElementById('btn-leads');
+      if (!leadsOpen && newCount > 0) btn.textContent = `📋 Candidaturas (${newCount})`;
+    } catch(e) {
+      document.getElementById('leads-list').innerHTML = `<p style="color:var(--gray);font-size:.85rem">Erro: ${e.message}</p>`;
+    }
+  }
+
+  function setLeadFilter(f, btn) {
+    leadsFilter = f;
+    document.querySelectorAll('.lead-filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderLeads();
+  }
+
+  function renderLeads() {
+    const filtered = leadsFilter === 'all' ? leadsData
+      : leadsFilter === 'new'    ? leadsData.filter(l => l.status === 'new')
+      : leadsData.filter(l => l.status === 'review');
+
+    if (!filtered.length) {
+      document.getElementById('leads-list').innerHTML = '<p style="color:var(--gray);font-size:.85rem;padding:.5rem 0">Nenhuma candidatura.</p>';
+      return;
+    }
+    const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    document.getElementById('leads-list').innerHTML = filtered.map(l => {
+      const d   = new Date(l.created_at);
+      const dt  = `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+      const types = Array.isArray(l.lesson_types) ? l.lesson_types.join(', ') : (l.lesson_types || '—');
+      const statusColor = l.status === 'new' ? '#86efac' : l.status === 'review' ? '#00CFFD' : 'var(--gray)';
+      return `<div class="lead-card ${l.status === 'new' ? 'new' : ''}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.3rem">
+          <div class="lead-school">🏄 ${l.school_name}</div>
+          <span style="font-size:.67rem;font-weight:700;color:${statusColor};background:rgba(255,255,255,.05);border:1px solid currentColor;border-radius:50px;padding:.1rem .5rem">${l.status === 'new' ? 'Nova' : l.status === 'review' ? 'Em análise' : 'Arquivada'}</span>
+        </div>
+        <div class="lead-meta">
+          👤 ${l.contact_name} · 📧 ${l.email} · 📱 ${l.phone}
+          ${l.location ? ' · 📍 ' + l.location : ''}
+          · ${dt}
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.35rem .7rem;font-size:.78rem;margin-bottom:.4rem">
+          ${l.monthly_lessons ? `<span>📅 ~${l.monthly_lessons} aulas/mês</span>` : ''}
+          ${l.avg_price ? `<span>💶 ~€${l.avg_price}/pessoa</span>` : ''}
+          ${l.typical_hours ? `<span>🕐 ${l.typical_hours}</span>` : ''}
+          ${types !== '—' ? `<span>🎿 ${types}</span>` : ''}
+          ${l.website ? `<span><a href="${l.website}" target="_blank" style="color:var(--cyan)">${l.website}</a></span>` : ''}
+        </div>
+        ${l.notes ? `<div style="font-size:.8rem;color:rgba(255,255,255,.6);font-style:italic;padding:.5rem .7rem;background:rgba(255,255,255,.03);border-radius:7px;margin-bottom:.3rem">"${l.notes}"</div>` : ''}
+        <div class="lead-actions">
+          <button class="btn-lead-create" onclick="createSchoolFromLead('${l.id}','${l.school_name.replace(/'/g,"\\'")}','${l.email}','${l.phone}')">✅ Criar Escola</button>
+          ${l.status === 'new' ? `<button class="btn-lead-review" onclick="updateLeadStatus('${l.id}','review')">👁 Em análise</button>` : ''}
+          <button class="btn-lead-archive" onclick="updateLeadStatus('${l.id}','archived')">✕ Arquivar</button>
+          <a href="mailto:${l.email}?subject=SurfBook — A sua candidatura&body=Olá ${l.contact_name},%0A%0AObrigado pela sua candidatura para a ${l.school_name}!" class="btn-lead-review" style="text-decoration:none">✉️ Email</a>
+          ${l.phone ? `<a href="https://wa.me/${l.phone.replace(/\D/g,'')}" target="_blank" class="btn-lead-review" style="text-decoration:none">💬 WhatsApp</a>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  async function updateLeadStatus(id, status) {
+    const { error } = await sb.from('leads').update({ status }).eq('id', id);
+    if (error) { showToast('Erro: ' + error.message, 'error'); return; }
+    await loadLeads();
+  }
+
+  async function createSchoolFromLead(leadId, schoolName, email, phone) {
+    const schoolId = schoolName.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    const confirm = window.confirm(`Criar escola:\n\nNome: ${schoolName}\nID: ${schoolId}\n\nContinuar?`);
+    if (!confirm) return;
+    const { error } = await sb.from('schools').insert({
+      id:      schoolId,
+      name:    schoolName,
+      email:   email,
+      status:  'pending',
+      commission_rate: 0.04,
+    });
+    if (error) { showToast('Erro ao criar escola: ' + error.message, 'error'); return; }
+    await sb.from('leads').update({ status: 'archived' }).eq('id', leadId);
+    const onboardingUrl = `https://auditoria-25b.pages.dev/onboarding?school=${schoolId}`;
+    showToast(`Escola criada! Envia o link de onboarding.`, 'success');
+    await navigator.clipboard.writeText(onboardingUrl).catch(()=>{});
+    window.open(`mailto:${email}?subject=SurfBook — Acesso ao painel&body=Olá!%0A%0ABem-vindo ao SurfBook!%0A%0AO seu painel está pronto. Configure a sua escola aqui:%0A${onboardingUrl}%0A%0AQualquer dúvida estou disponível.%0A%0AIvo`, '_blank');
+    await loadLeads();
+    tryLoadSchools();
+  }
+
+  // Check for new leads on load (badge)
+  async function checkLeadsBadge() {
+    try {
+      const { count } = await sb.from('leads').select('id', { count: 'exact', head: true }).eq('status', 'new');
+      const btn = document.getElementById('btn-leads');
+      if (count > 0 && btn) btn.textContent = `📋 Candidaturas (${count} nova${count>1?'s':''})`;
+    } catch(_) {}
+  }
+</script>
+</body>
+</html>
