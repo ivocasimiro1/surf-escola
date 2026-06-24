@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configuração da Escola · SurfBook Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!--
+  ═══════════════════════════════════════════════════════════════
+  SQL — Executar UMA VEZ no Supabase SQL Editor antes de usar:
+  ═══════════════════════════════════════════════════════════════
+
+  create table if not exists schools (
+    id                   text primary key,
+    name                 text not null,
+    description          text,
+    description_en       text,
+    logo_url             text,
+    cover_photo_url      text,
+    photos               jsonb default '[]'::jsonb,
+    address              text,
+    city                 text,
+    country              text default 'Portugal',
+    meeting_point        text,
+    google_maps_url      text,
+    contact_name         text,
+    wa_number            text,
+    email                text,
+    phone                text,
+    website              text,
+    available_days       jsonb default '[1,2,3,4,5,6,0]'::jsonb,
+    time_slots           jsonb default '["08:00","10:30","14:00","16:30"]'::jsonb,
+    max_per_slot         integer default 6,
+    lesson_types         jsonb default '[]'::jsonb,
+    instructors          jsonb default '[]'::jsonb,
+    wa_msg_confirm_pt    text,
+    wa_msg_confirm_en    text,
+    wa_msg_cancel_pt     text,
+    wa_msg_cancel_en     text,
+    age_min              integer default 6,
+    weight_max           integer,
+    height_min           integer,
+    cancellation_policy  text,
+    special_notes        text,
+    legal_name           text,
+    nif                  text,
+    bank_iban            text,
+    bank_holder          text,
+    commission_rate      numeric default 0.04,
+    status               text default 'onboarding',
+    created_at           timestamptz default now(),
+    updated_at           timestamptz default now(),
+    onboarding_completed_at timestamptz
+  );
+
+  alter table schools enable row level security;
+  create policy "allow_all_schools" on schools for all using (true) with check (true);
+  ═══════════════════════════════════════════════════════════════
+  -->
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #050D1A; --ocean: #0A2540; --blue: #0070F3; --cyan: #00CFFD;
+      --gold: #C9A84C; --white: #FFFFFF; --gray: #8B9AB0;
+      --card: rgba(255,255,255,0.05); --border: rgba(255,255,255,0.1);
+      --green: #22c55e; --red: #ef4444;
+      color-scheme: dark;
+    }
+    html, body { min-height: 100vh; }
+    body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--white); }
+
+    .header {
+      background: rgba(10,37,64,.85); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border); padding: .9rem 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .logo { font-family: 'Playfair Display', serif; font-size: 1.25rem; }
+    .logo span { color: var(--gold); }
+    .header-sub { font-size: .8rem; color: var(--gray); }
+
+    /* ── Progress ── */
+    .progress-wrap { padding: 1.5rem 2rem .5rem; max-width: 960px; margin: 0 auto; }
+    .progress-steps { display: flex; }
+    .step-dot {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: .3rem;
+      position: relative; counter-increment: step;
+    }
+    .step-dot::before {
+      content: counter(step); width: 2rem; height: 2rem; border-radius: 50%;
+      background: rgba(255,255,255,.06); border: 1.5px solid rgba(255,255,255,.12);
+      color: var(--gray); display: flex; align-items: center; justify-content: center;
+      font-size: .72rem; font-weight: 700; z-index: 1; transition: all .3s;
+    }
+    .step-dot::after {
+      content: ''; position: absolute; top: .96rem; left: 50%; right: -50%;
+      height: 2px; background: rgba(255,255,255,.08); z-index: 0;
+    }
+    .step-dot:last-child::after { display: none; }
+    .progress-steps { counter-reset: step; }
+    .step-dot.active::before { background: var(--cyan); border-color: var(--cyan); color: #05101e; }
+    .step-dot.done::before   { content: '✓'; background: var(--green); border-color: var(--green); color: #fff; }
+    .step-dot.done::after    { background: var(--green); }
+    .step-label { font-size: .62rem; color: var(--gray); text-align: center; max-width: 72px; line-height: 1.3; }
+    .step-dot.active .step-label { color: var(--cyan); }
+
+    /* ── Main ── */
+    .main { max-width: 960px; margin: 0 auto; padding: 2rem 2rem 4rem; }
+    .step-panel { display: none; animation: fadeUp .25s ease; }
+    .step-panel.active { display: block; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .step-title { font-size: 1.65rem; font-weight: 700; margin-bottom: .35rem; }
+    .step-title span { color: var(--cyan); }
+    .step-desc { color: var(--gray); font-size: .88rem; margin-bottom: 1.8rem; line-height: 1.5; }
+
+    /* ── Cards ── */
+    .section-card {
+      background: rgba(255,255,255,.028); border: 1px solid var(--border);
+      border-radius: 14px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem;
+    }
+    .section-card-title {
+      font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em;
+      color: var(--cyan); margin-bottom: 1rem; display: flex; align-items: center; gap: .4rem;
+    }
+
+    /* ── Form ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-grid.cols-1 { grid-template-columns: 1fr; }
+    .form-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .form-group { display: flex; flex-direction: column; gap: .35rem; }
+    .form-group.span-2 { grid-column: span 2; }
+    .form-group.span-3 { grid-column: span 3; }
+    label { font-size: .75rem; font-weight: 600; color: var(--gray); text-transform: uppercase; letter-spacing: .05em; }
+    label .req { color: var(--red); margin-left: .15rem; }
+    label .opt { font-weight: 400; text-transform: none; letter-spacing: 0; margin-left: .3rem; }
+    input[type=text], input[type=email], input[type=tel], input[type=url],
+    input[type=number], input[type=time], textarea, select {
+      background: rgba(255,255,255,.06); border: 1px solid var(--border);
+      border-radius: 10px; padding: .65rem .95rem; color: var(--white);
+      font-family: 'Inter', sans-serif; font-size: .9rem; outline: none;
+      transition: border-color .18s; width: 100%;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--cyan); background: rgba(0,207,253,.04); }
+    textarea { resize: vertical; min-height: 80px; }
+    .hint { font-size: .73rem; color: var(--gray); line-height: 1.4; }
+
+    /* ── Buttons ── */
+    .btn { padding: .65rem 1.4rem; border-radius: 10px; font-family: 'Inter',sans-serif; font-size: .88rem; font-weight: 600; cursor: pointer; border: none; transition: all .18s; display: inline-flex; align-items: center; gap: .4rem; }
+    .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: #05101e; }
+    .btn-primary:hover:not(:disabled) { opacity: .9; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-secondary { background: rgba(255,255,255,.08); border: 1px solid var(--border); color: var(--white); }
+    .btn-secondary:hover { background: rgba(255,255,255,.13); }
+    .btn-add { background: rgba(0,207,253,.09); border: 1px dashed rgba(0,207,253,.35); color: var(--cyan); font-size: .82rem; padding: .45rem .9rem; border-radius: 8px; }
+    .btn-add:hover { background: rgba(0,207,253,.17); }
+    .btn-remove { background: none; border: none; color: #fca5a5; cursor: pointer; font-size: .82rem; padding: .2rem .4rem; border-radius: 6px; }
+    .btn-remove:hover { background: rgba(239,68,68,.12); }
+
+    /* ── Days ── */
+    .days-grid { display: flex; gap: .45rem; flex-wrap: wrap; }
+    .day-check { display: none; }
+    .day-lbl {
+      padding: .38rem .75rem; border-radius: 8px; cursor: pointer;
+      border: 1px solid var(--border); font-size: .8rem; font-weight: 600; color: var(--gray);
+      transition: all .15s; user-select: none;
+    }
+    .day-check:checked + .day-lbl { background: rgba(0,207,253,.14); border-color: var(--cyan); color: var(--cyan); }
+
+    /* ── Slots ── */
+    .slots-list { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .75rem; }
+    .slot-chip {
+      display: flex; align-items: center; gap: .35rem;
+      background: rgba(255,255,255,.06); border: 1px solid var(--border);
+      border-radius: 8px; padding: .3rem .65rem; font-size: .83rem; font-weight: 500;
+    }
+
+    /* ── Lesson table ── */
+    .lesson-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    .lesson-table th {
+      font-size: .68rem; text-transform: uppercase; letter-spacing: .06em;
+      color: var(--gray); font-weight: 600; padding: .45rem .5rem;
+      text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap;
+    }
+    .lesson-table td { padding: .35rem .35rem; vertical-align: middle; }
+    .lesson-table td input { padding: .38rem .55rem; font-size: .83rem; border-radius: 8px; }
+    .lesson-table input[type=number] { width: 72px; }
+
+    /* ── Instructor cards ── */
+    .instr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .instr-card {
+      background: rgba(255,255,255,.04); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1rem; position: relative;
+    }
+    .instr-card .btn-remove { position: absolute; top: .7rem; right: .7rem; }
+
+    /* ── Review ── */
+    .rev-section { margin-bottom: 1.25rem; }
+    .rev-title { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--gold); margin-bottom: .7rem; }
+    .rev-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem .8rem; }
+    .rev-item { display: flex; flex-direction: column; gap: .1rem; }
+    .rev-k { font-size: .7rem; color: var(--gray); }
+    .rev-v { font-size: .84rem; font-weight: 500; word-break: break-word; }
+
+    /* ── Nav ── */
+    .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+
+    /* ── Success ── */
+    #success-screen { display: none; text-align: center; padding: 4rem 1rem; }
+    .success-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .success-title { font-size: 2rem; font-weight: 700; margin-bottom: .5rem; }
+    .success-sub { color: var(--gray); margin-bottom: 2rem; font-size: .95rem; line-height: 1.6; }
+    .next-steps {
+      background: rgba(255,255,255,.04); border: 1px solid var(--border);
+      border-radius: 14px; padding: 1.5rem; max-width: 480px; margin: 0 auto;
+      text-align: left;
+    }
+    .next-steps-title { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--cyan); margin-bottom: .9rem; }
+    .next-step { display: flex; align-items: center; gap: .75rem; padding: .5rem 0; font-size: .88rem; border-bottom: 1px solid rgba(255,255,255,.05); }
+    .next-step:last-child { border-bottom: none; }
+
+    /* ── Info box ── */
+    .info-box {
+      background: rgba(0,207,253,.07); border: 1px solid rgba(0,207,253,.2);
+      border-radius: 10px; padding: .85rem 1rem; margin-bottom: 1.25rem;
+      font-size: .82rem; color: #7dd3fc; line-height: 1.6;
+    }
+
+    /* ── Templates picker ── */
+    #templates-screen { max-width: 960px; margin: 2rem auto; padding: 0 2rem 4rem; }
+    .tpl-title { font-size: 1.7rem; font-weight: 700; margin-bottom: .4rem; }
+    .tpl-title span { color: var(--cyan); }
+    .tpl-desc { color: var(--gray); font-size: .9rem; margin-bottom: 2rem; line-height: 1.5; }
+    .tpl-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 1rem; margin-bottom: 1.25rem; }
+    .tpl-card {
+      background: rgba(255,255,255,.04); border: 1.5px solid var(--border);
+      border-radius: 16px; padding: 1.4rem; cursor: pointer;
+      transition: border-color .2s, background .2s, transform .15s;
+      position: relative; overflow: hidden;
+    }
+    .tpl-card:hover { border-color: var(--cyan); background: rgba(0,207,253,.06); transform: translateY(-2px); }
+    .tpl-card.selected { border-color: var(--cyan); background: rgba(0,207,253,.09); }
+    .tpl-badge {
+      display: inline-block; padding: .18rem .55rem; border-radius: 50px;
+      font-size: .67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em;
+      background: rgba(0,207,253,.15); color: var(--cyan); border: 1px solid rgba(0,207,253,.3);
+      margin-bottom: .75rem;
+    }
+    .tpl-badge.gold   { background: rgba(201,168,76,.15); color: var(--gold);   border-color: rgba(201,168,76,.3); }
+    .tpl-badge.purple { background: rgba(167,139,250,.14); color: #c4b5fd;      border-color: rgba(167,139,250,.3); }
+    .tpl-badge.green  { background: rgba(34,197,94,.12);  color: #86efac;       border-color: rgba(34,197,94,.3); }
+    .tpl-name { font-size: 1.05rem; font-weight: 700; margin-bottom: .35rem; }
+    .tpl-subdesc { font-size: .8rem; color: var(--gray); line-height: 1.5; margin-bottom: .9rem; }
+    .tpl-pills { display: flex; flex-wrap: wrap; gap: .3rem; }
+    .tpl-pill {
+      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 6px; padding: .18rem .55rem; font-size: .72rem; font-weight: 600; color: #cbd5e1;
+    }
+    .tpl-scratch {
+      width: 100%; padding: .75rem; background: transparent; border: 1px dashed rgba(255,255,255,.15);
+      color: var(--gray); border-radius: 12px; font-family: 'Inter',sans-serif; font-size: .88rem;
+      cursor: pointer; transition: all .18s;
+    }
+    .tpl-scratch:hover { border-color: var(--gray); color: var(--white); }
+    .tpl-cta { width: 100%; padding: .85rem; margin-top: 1.25rem; background: linear-gradient(135deg, var(--blue), var(--cyan)); color: #05101e; border: none; border-radius: 12px; font-family: 'Inter',sans-serif; font-size: .95rem; font-weight: 700; cursor: pointer; transition: opacity .18s; }
+    .tpl-cta:hover { opacity: .9; }
+    .tpl-cta:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* ── Toast ── */
+    .toast { position: fixed; bottom: 2rem; right: 2rem; z-index: 999; padding: .85rem 1.3rem; border-radius: 12px; font-size: .88rem; font-weight: 500; transform: translateY(100px); opacity: 0; transition: transform .3s, opacity .3s; max-width: 320px; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast-error   { background: rgba(239,68,68,.95); color: #fff; }
+    .toast-success { background: rgba(34,197,94,.95); color: #fff; }
+
+    @media (max-width: 640px) {
+      .tpl-grid { grid-template-columns: 1fr; }
+      .form-grid, .form-grid.cols-3 { grid-template-columns: 1fr; }
+      .form-group.span-2, .form-group.span-3 { grid-column: span 1; }
+      .instr-grid { grid-template-columns: 1fr; }
+      .rev-grid   { grid-template-columns: 1fr 1fr; }
+      .step-label { display: none; }
+      .main { padding: 1.25rem 1rem 3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">Surf<span>Book</span> <span style="font-family:Inter;font-size:.75rem;color:var(--gray);font-weight:400">Platform</span></div>
+  <div class="header-sub">Configuração da Escola</div>
+</header>
+
+<!-- ══ TEMPLATE PICKER (pré-ecrã) ══════════════════════════════════════ -->
+<div id="templates-screen">
+  <h1 class="tpl-title">Escolha um <span>Ponto de Partida</span></h1>
+  <p class="tpl-desc">Selecione o cenário mais próximo da sua escola — o formulário será pré-preenchido.<br>Pode personalizar tudo a seguir, campo a campo.</p>
+
+  <div class="tpl-grid">
+
+    <div class="tpl-card" onclick="selectTemplate('classica',this)">
+      <div class="tpl-badge">Mais escolhida</div>
+      <div class="tpl-name">Escola de Surf — Clássica</div>
+      <div class="tpl-subdesc">Setup completo para a maioria das escolas. Quatro tipos de aula, horários ao longo do dia.</div>
+      <div class="tpl-pills">
+        <span class="tpl-pill">Iniciante €35</span>
+        <span class="tpl-pill">Intermédio €35</span>
+        <span class="tpl-pill">Privada €65</span>
+        <span class="tpl-pill">Bodyboard €30</span>
+        <span class="tpl-pill">4 horários/dia</span>
+        <span class="tpl-pill">Máx 6/slot</span>
+      </div>
+    </div>
+
+    <div class="tpl-card" onclick="selectTemplate('minima',this)">
+      <div class="tpl-badge" style="background:rgba(34,197,94,.12);color:#86efac;border-color:rgba(34,197,94,.3)">Simples</div>
+      <div class="tpl-name">Escola Mínima</div>
+      <div class="tpl-subdesc">Para começar sem complicar. Apenas o essencial — cresce e adiciona mais depois à medida que precisar.</div>
+      <div class="tpl-pills">
+        <span class="tpl-pill">Aula de Surf €35</span>
+        <span class="tpl-pill">Privada €60</span>
+        <span class="tpl-pill">2 horários/dia</span>
+        <span class="tpl-pill">Máx 8/slot</span>
+      </div>
+    </div>
+
+    <div class="tpl-card" onclick="selectTemplate('premium',this)">
+      <div class="tpl-badge gold">Boutique</div>
+      <div class="tpl-name">Escola Premium</div>
+      <div class="tpl-subdesc">Grupos reduzidos, preços mais altos. Experiência exclusiva para clientes que procuram qualidade acima de tudo.</div>
+      <div class="tpl-pills">
+        <span class="tpl-pill">Privada €90</span>
+        <span class="tpl-pill">Semi-privada €60/p</span>
+        <span class="tpl-pill">Grupo (4pax) €50/p</span>
+        <span class="tpl-pill">Máx 4/slot</span>
+      </div>
+    </div>
+
+    <div class="tpl-card" onclick="selectTemplate('multi',this)">
+      <div class="tpl-badge purple">Multi-actividade</div>
+      <div class="tpl-name">Surf + SUP + Outros</div>
+      <div class="tpl-subdesc">Escola com várias modalidades aquáticas. Mais horários, mais opções, maior diversidade de clientes.</div>
+      <div class="tpl-pills">
+        <span class="tpl-pill">Surf €35</span>
+        <span class="tpl-pill">SUP €35</span>
+        <span class="tpl-pill">Bodyboard €30</span>
+        <span class="tpl-pill">Privada €65</span>
+        <span class="tpl-pill">4 horários/dia</span>
+        <span class="tpl-pill">Máx 8/slot</span>
+      </div>
+    </div>
+
+  </div>
+
+  <button class="tpl-scratch" onclick="startFromScratch()">✦ Começar do zero — preencher tudo manualmente</button>
+  <button class="tpl-cta" id="tpl-continue-btn" onclick="applyTemplateAndStart()" disabled>Continuar com este cenário →</button>
+</div>
+
+<!-- ══ WIZARD (inicialmente oculto) ════════════════════════════════════ -->
+<div id="wizard-wrap" style="display:none">
+<div class="progress-wrap">
+  <div class="progress-steps" id="progress-steps">
+    <div class="step-dot active"><span class="step-label">Identidade</span></div>
+    <div class="step-dot"><span class="step-label">Localização</span></div>
+    <div class="step-dot"><span class="step-label">Contacto</span></div>
+    <div class="step-dot"><span class="step-label">Horários</span></div>
+    <div class="step-dot"><span class="step-label">Aulas</span></div>
+    <div class="step-dot"><span class="step-label">Instrutores</span></div>
+    <div class="step-dot"><span class="step-label">Mensagens</span></div>
+    <div class="step-dot"><span class="step-label">Legal</span></div>
+    <div class="step-dot"><span class="step-label">Revisão</span></div>
+  </div>
+</div>
+
+<main class="main" id="main-content">
+
+  <!-- ══ STEP 1: IDENTIDADE ══════════════════════════════════════ -->
+  <section class="step-panel active" data-step="1">
+    <h1 class="step-title">Identidade da <span>Escola</span></h1>
+    <p class="step-desc">O nome, descrição e imagens que os clientes vão ver no site de reservas.</p>
+
+    <div class="section-card">
+      <div class="section-card-title">📋 Dados Básicos</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nome da Escola <span class="req">*</span></label>
+          <input type="text" id="f-name" placeholder="ex: Surf Nazaré" oninput="autoSlug()" />
+        </div>
+        <div class="form-group">
+          <label>ID / Identificador <span class="req">*</span></label>
+          <input type="text" id="f-id" placeholder="ex: escola-nazare" />
+          <div class="hint">Só letras minúsculas, números e hífens. Não pode ser alterado depois.</div>
+        </div>
+        <div class="form-group span-2">
+          <label>Descrição Curta <span class="opt">(Português)</span></label>
+          <textarea id="f-desc" rows="3" placeholder="Escola de surf na Praia da Nazaré, com instrutores certificados e equipamento profissional. Aulas para todos os níveis."></textarea>
+        </div>
+        <div class="form-group span-2">
+          <label>Short Description <span class="opt">(English)</span></label>
+          <textarea id="f-desc-en" rows="3" placeholder="Surf school at Nazaré beach, certified instructors and professional equipment. Lessons for all levels."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-card-title">🖼️ Imagens</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>URL do Logótipo <span class="opt">(opcional)</span></label>
+          <input type="url" id="f-logo" placeholder="https://..." />
+          <div class="hint">JPG, PNG ou SVG — link directo para o ficheiro</div>
+        </div>
+        <div class="form-group">
+          <label>URL da Foto de Capa <span class="opt">(opcional)</span></label>
+          <input type="url" id="f-cover" placeholder="https://..." />
+          <div class="hint">Foto principal do site · recomendado 1200×600 px</div>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:.75rem">
+        <label>Galeria <span class="opt">(fotos adicionais, uma por linha)</span></label>
+        <div id="photos-list" style="display:flex;flex-direction:column;gap:.45rem;margin-bottom:.6rem"></div>
+        <button class="btn btn-add" type="button" onclick="addPhotoField()">+ Adicionar foto</button>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <div></div>
+      <button class="btn btn-primary" onclick="goStep(2)">Continuar →</button>
+    </div>
+  </section>
+
+  <!-- ══ STEP 2: LOCALIZAÇÃO ═════════════════════════════════════ -->
+  <section class="step-panel" data-step="2">
+    <h1 class="step-title"><span>Localização</span></h1>
+    <p class="step-desc">Onde fica a escola e como os clientes chegam ao ponto de encontro.</p>
+
+    <div class="section-card">
+      <div class="form-grid">
+        <div class="form-group span-2">
+          <label>Morada Completa</label>
+          <input type="text" id="f-address" placeholder="Rua da Praia, 12 — 2450-060" />
+        </div>
+        <div class="form-group">
+          <label>Cidade <span class="req">*</span></label>
+          <input type="text" id="f-city" placeholder="Nazaré" />
+        </div>
+        <div class="form-group">
+          <label>País</label>
+          <input type="text" id="f-country" placeholder="Portugal" value="Portugal" />
+        </div>
+        <div class="form-group span-2">
+          <label>Ponto de Encontro <span class="req">*</span></label>
+          <textarea id="f-meeting" rows="4" placeholder="Praia da Nazaré, junto ao posto de salva-vidas principal (bandeira amarela). Parque de estacionamento gratuito disponível 200 m a norte. Apresentem-se 15 min antes da hora marcada."></textarea>
+          <div class="hint">Este texto aparece na mensagem WhatsApp de confirmação enviada ao cliente.</div>
+        </div>
+        <div class="form-group span-2">
+          <label>Link Google Maps <span class="opt">(opcional)</span></label>
+          <input type="url" id="f-maps" placeholder="https://maps.google.com/..." />
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-secondary" onclick="goStep(1)">← Voltar</button>
+      <button class="btn btn-primary" onclick="goStep(3)">Continuar →</button>
+    </div>
+  </section>
+
+  <!-- ══ STEP 3: CONTACTO ════════════════════════════════════════ -->
+  <section class="step-panel" data-step="3">
+    <h1 class="step-title"><span>Contacto</span></h1>
+    <p class="step-desc">Quem gere a escola e como os clientes (e a plataforma) chegam a vocês.</p>
+
+    <div class="section-card">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nome do Responsável <span class="req">*</span></label>
+          <input type="text" id="f-contact-name" placeholder="João Silva" />
+        </div>
+        <div class="form-group">
+          <label>Número WhatsApp <span class="req">*</span></label>
+          <input type="tel" id="f-wa" placeholder="351962800400" />
+          <div class="hint">Com indicativo, sem espaços nem símbolos: 351XXXXXXXXX</div>
+        </div>
+        <div class="form-group">
+          <label>Email <span class="req">*</span></label>
+          <input type="email" id="f-email" placeholder="escola@surfnazare.pt" />
+        </div>
+        <div class="form-group">
+          <label>Telefone Alternativo <span class="opt">(opcional)</span></label>
+          <input type="tel" id="f-phone" placeholder="351262XXXXXX" />
+        </div>
+        <div class="form-group span-2">
+          <label>Website <span class="opt">(opcional)</span></label>
+          <input type="url" id="f-website" placeholder="https://www.surfnazare.pt" />
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-secondary" onclick="goStep(2)">← Voltar</button>
+      <button class="btn btn-primary" onclick="goStep(4)">Continuar →</button>
+    </div>
+  </section>
+
+  <!-- ══ STEP 4: HORÁRIOS ════════════════════════════════════════ -->
+  <section class="step-panel" data-step="4">
+    <h1 class="step-title">Horários & <span>Disponibilidade</span></h1>
+    <p class="step-desc">Quando a escola funciona e quantos alunos aceita por horário.</p>
+
+    <div class="section-card">
+      <div class="section-card-title">📅 Dias da Semana</div>
+      <div class="days-grid">
+        <input type="checkbox" class="day-check" id="d1" value="1" checked /><label class="day-lbl" for="d1">Seg</label>
+        <input type="checkbox" class="day-check" id="d2" value="2" checked /><label class="day-lbl" for="d2">Ter</label>
+        <input type="checkbox" class="day-check" id="d3" value="3" checked /><label class="day-lbl" for="d3">Qua</label>
+        <input type="checkbox" class="day-check" id="d4" value="4" checked /><label class="day-lbl" for="d4">Qui</label>
+        <input type="checkbox" class="day-check" id="d5" value="5" checked /><label class="day-lbl" for="d5">Sex</label>
+        <input type="checkbox" class="day-check" id="d6" value="6" checked /><label class="day-lbl" for="d6">Sáb</label>
+        <input type="checkbox" class="day-check" id="d0" value="0" checked /><label class="day-lbl" for="d0">Dom</label>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-card-title">🕐 Horários Disponíveis <span class="req">*</span></div>
+      <div class="slots-list" id="slots-list"></div>
+      <div style="display:flex;gap:.6rem;align-items:center">
+        <input type="time" id="new-slot" style="width:130px" value="09:00" />
+        <button class="btn btn-add" onclick="addSlot()">+ Adicionar horário</button>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-card-title">👥 Capacidade</div>
+      <div class="form-grid cols-3">
+        <div class="form-group">
+          <label>Máx. alunos por horário <span class="req">*</span></label>
+          <input type="number" id="f-maxslot" value="6" min="1" max="100" />
+        </div>
+        <div class="form-group">
+          <label>Duração média (minutos)</label>
+          <input type="number" id="f-duration" value="90" min="30" max="360" />
+        </div>
+        <div class="form-group">
+          <label>Língua principal do admin</label>
+          <select id="f-lang">
+            <option value="pt" selected>Português</option>
+            <option value="en">English</option>
+            <option value="es">Español</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-secondary" onclick="goStep(3)">← Voltar</button>
+      <button class="btn btn-primary" onclick="goStep(5)">Continuar →</button>
+    </div>
+  </section>
+
+  <!-- ══ STEP 5: TIPOS DE AULA ═══════════════════════════════════ -->
+  <section class="step-panel" data-step="5">
+    <h1 class="step-title">Tipos de <span>Aula</span></h1>
+    <p class="step-desc">Todos os tipos de aula disponíveis — nome, preço e dimensão dos grupos.</p>
+
+    <div class="section-card" style="overflow-x:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+        <div class="section-card-title" style="margin-bottom:0">🏄 Aulas & Preços</div>
+        <button class="btn btn-add" onclick="addLessonRow()">+ Novo tipo</button>
+      </div>
+      <table class="lesson-table">
+        <thead>
+          <tr>
+            <th>Nome (PT) <span class="req">*</span></th>
+            <th>Nome (EN)</th>
+            <th>Preço €</th>
+            <th>Por pessoa?</th>
+            <th>Dur. min</th>
+            <th>Min pax</th>
+            <th>Max pax</th>
+            <th>Descrição</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="lesson-tbody"></tbody>
+      </table>
+      <div class="hint" style="margin-top:.75rem">Preço "por pessoa" = €X × nº de pessoas. Se desmarcado, é preço fixo total (ex: aula privada).</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-secondary" onclick="goStep(4)">← Voltar</button>
+      <button class="btn btn-primary" onclick="goStep(6)">Continuar →</button>
+    </div>
+  </section>
+
+  <!-- ══ STEP 6: INSTRUTORES ═════════════════════════════════════ -->
+  <section class="step-panel" data-step="6">
+    <h1 class="step-title"><span>Instrutores</span></h1>
+    <p class="step-desc">A equipa que vai ensinar os clientes. Pode deixar em branco e preencher depois.</p>
+
+    <div id="instr-grid" class="instr-grid"></div>
+    <button class="btn btn-add" onclick="addInstructor()" style="margin-bottom:1.5rem">+ Adicionar instrutor</button>
+
+    <div class="nav-row">
+      <button class="btn btn-secondary" onclick="goStep(5)">← Voltar</button>
+      <button class="btn btn-primary" onclick="goStep(7)">Continuar →</button>
+    </div>
+  </section>
+
+  <!-- ══ STEP 7: MENSAGENS ═══════════════════════════════════════ -->
+  <section class="step-panel" data-step="7">
+    <h1 class="step-title">Mensagens <span>Personalizadas</span></h1>
+    <p class="step-desc">As mensagens WhatsApp enviadas automaticamente aos clientes. Deixar em branco usa o template padrão da plataforma.</p>
+
+    <div class="info-box">
+      <strong>Variáveis disponíveis:</strong><br/>
+      <code>{{nome}}</code> · <code>{{data}}</code> · <code>{{hora}}</code> · <code>{{modalidade}}</code> · <code>{{pessoas}}</code> · <code>{{total}}</code> · <code>{{ponto}}</code> · <code>{{escola}}</code>
+    </div>
+
+    <div class="section-card">
+      <div class="section-card-title">✅ Confirmação de Reserva</div>
+      <div class="form-grid cols-1">
+        <div class="form-group">
+          <label>Mensagem em Português <span class="opt">(opcional)</span></label>
+          <textarea id="f-confirm-pt" rows="6" placeholder="*{{escola}} — Aula Confirmada* ✅&#10;&#10;Olá {{nome}},&#10;&#10;A sua aula está confirmada!&#10;📅 {{data}} às {{hora}}&#10;🏄 {{modalidade}} · {{pessoas}} pessoa(s)&#10;💶 Total: €{{total}}&#10;&#10;📍 Ponto de encontro:&#10;{{ponto}}&#10;&#10;Vista o fato de banho por baixo do fato de surf.&#10;Até já! 🤙"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Message in English <span class="opt">(optional)</span></label>
+          <textarea id="f-confirm-en" rows="6" placeholder="*{{escola}} — Lesson Confirmed* ✅&#10;&#10;Hi {{nome}},&#10;&#10;Your surf lesson is confirmed!&#10;📅 {{data}} at {{hora}}&#10;🏄 {{modalidade}} · {{pessoas}} person(s)&#10;💶 Total: €{{total}}&#10;&#10;📍 Meeting point:&#10;{{ponto}}&#10;&#10;Wear swimwear under your wetsuit.&#10;See you soon! 🤙"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-card-title">❌ Cancelamento</div>
+      <div class="form-grid cols-1">
+        <div class="form-group">
+          <label>Mensagem em Português <span class="opt">(opcional)</span></label>
+          <textarea id="f-cancel-pt" rows="4" placeholder="*{{escola}}*&#10;&#10;Olá {{nome}}, infelizmente a sua reserva para {{data}} às {{hora}} foi cancelada.&#10;&#10;Pedimos desculpa pelo inconveniente. Contacte-nos para remarcar."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Message in English <span class="opt">(optional)</span></label>
+          <textarea id="f-cancel-en" rows="4" placeholder="*{{escola}}*&#10;&#10;Hi {{nome}}, unfortunately your booking for {{data}} at {{hora}} has been cancelled.&#10;&#10;We apologise for the inconvenience. Contact us to reschedule."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-secondary" onclick="goStep(6)">← Voltar</button>
+      <button class="btn btn-primary" onclick="goStep(8)">Continuar →</button>
+    </div>
+  </section>
+
+  <!-- ══ STEP 8: LEGAL & POLÍTICAS ══════════════════════════════ -->
+  <section class="step-panel" data-step="8">
+    <h1 class="step-title">Legal & <span>Políticas</span></h1>
+    <p class="step-desc">Dados para faturação de comissões e políticas comunicadas aos clientes.</p>
+
+    <div class="section-card">
+      <div class="section-card-title">📄 Dados Legais & Bancários</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nome Comercial / Razão Social</label>
+          <input type="text" id="f-legal" placeholder="Surf Nazaré Unipessoal Lda" />
+        </div>
+        <div class="form-group">
+          <label>NIF</label>
+          <input type="text" id="f-nif" placeholder="501234567" maxlength="9" />
+        </div>
+        <div class="form-group span-2">
+          <label>IBAN <span class="opt">(para receber pagamentos)</span></label>
+          <input type="text" id="f-iban" placeholder="PT50 0001 0001 2345 6789 1 95" />
+        </div>
+        <div class="form-group span-2">
+          <label>Titular da Conta</label>
+          <input type="text" id="f-bank-holder" placeholder="João Silva / Surf Nazaré Lda" />
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-card-title">⚠️ Restrições & Políticas</div>
+      <div class="form-grid cols-3">
+        <div class="form-group">
+          <label>Idade Mínima (anos)</label>
+          <input type="number" id="f-age-min" value="6" min="0" max="99" />
+        </div>
+        <div class="form-group">
+          <label>Peso Máximo (kg)</label>
+          <input type="number" id="f-weight-max" placeholder="100" />
+          <div class="hint">Deixar vazio se não aplicável</div>
+        </div>
+        <div class="form-group">
+          <label>Altura Mínima (cm)</label>
+          <input type="number" id="f-height-min" placeholder="120" />
+          <div class="hint">Deixar vazio se não aplicável</div>
+        </div>
+        <div class="form-group span-3">
+          <label>Política de Cancelamento</label>
+          <textarea id="f-cancel-policy" rows="3" placeholder="Cancelamento gratuito até 24h antes da aula. Cancelamentos com menos de 24h de antecedência não são reembolsados."></textarea>
+        </div>
+        <div class="form-group span-3">
+          <label>Informações Adicionais para o Cliente</label>
+          <textarea id="f-notes" rows="3" placeholder="O que trazer, restrições médicas, parque de estacionamento, etc."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-secondary" onclick="goStep(7)">← Voltar</button>
+      <button class="btn btn-primary" onclick="goStep(9)">Continuar →</button>
+    </div>
+  </section>
+
+  <!-- ══ STEP 9: REVISÃO ═════════════════════════════════════════ -->
+  <section class="step-panel" data-step="9">
+    <h1 class="step-title">Revisão & <span>Confirmação</span></h1>
+    <p class="step-desc">Verifique todos os dados antes de submeter. Pode voltar atrás para corrigir qualquer campo.</p>
+
+    <div id="review-content"></div>
+
+    <div class="info-box" style="margin-bottom:1.5rem">
+      ℹ️ Após submeter, o administrador irá validar os dados e activar a escola. Será contactado em <strong id="review-email-show">—</strong>.
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-secondary" onclick="goStep(8)">← Voltar</button>
+      <button class="btn btn-primary" id="btn-submit" onclick="submitOnboarding()">✓ Submeter Configuração</button>
+    </div>
+  </section>
+
+</main>
+</div><!-- /wizard-wrap -->
+
+<!-- SUCCESS -->
+<div id="success-screen">
+  <div class="success-icon">🏄</div>
+  <h1 class="success-title">Configuração Enviada!</h1>
+  <p class="success-sub">Os dados da escola <strong id="success-name"></strong> foram submetidos com sucesso.<br>Será contactado em breve por <strong id="success-contact"></strong>.</p>
+  <div class="next-steps">
+    <div class="next-steps-title">Próximos passos</div>
+    <div class="next-step">✅ <span>Dados recebidos e guardados</span></div>
+    <div class="next-step">⏳ <span>Revisão pelo administrador da plataforma (24–48 h)</span></div>
+    <div class="next-step">📱 <span>Activação da escola e envio das credenciais de acesso ao painel</span></div>
+    <div class="next-step">🔑 <span>Acesso ao painel de administração da escola</span></div>
+    <div class="next-step">🌐 <span>Publicação da página de reservas</span></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const { createClient } = supabase;
+  const sb = createClient(
+    'https://ubeqidccuvsjhjphybxz.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InViZXFpZGNjdXZzamhqcGh5Ynh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDI0NTYsImV4cCI6MjA5NTkxODQ1Nn0.wyCBBMSuRfxrz935XifGa3Chgv64o4-ACvP5rCj7t1U'
+  );
+
+  // ── State ─────────────────────────────────────────────────
+  // ── Templates ─────────────────────────────────────────────
+  const TEMPLATES = {
+    classica: {
+      slots: ['08:00','10:30','14:00','16:30'], max_per_slot: 6,
+      lessons: [
+        { name:'Iniciante',    name_en:'Beginner',       price:35, per_person:true,  duration:90, min_pax:1, max_pax:6, description:'Para quem nunca surfou' },
+        { name:'Intermédio',   name_en:'Intermediate',   price:35, per_person:true,  duration:90, min_pax:1, max_pax:6, description:'' },
+        { name:'Aula Privada', name_en:'Private Lesson', price:65, per_person:false, duration:60, min_pax:1, max_pax:1, description:'' },
+        { name:'Bodyboard',    name_en:'Bodyboard',      price:30, per_person:true,  duration:90, min_pax:1, max_pax:6, description:'' },
+      ],
+    },
+    minima: {
+      slots: ['09:00','15:00'], max_per_slot: 8,
+      lessons: [
+        { name:'Aula de Surf', name_en:'Surf Lesson',    price:35, per_person:true,  duration:90, min_pax:1, max_pax:8, description:'' },
+        { name:'Aula Privada', name_en:'Private Lesson', price:60, per_person:false, duration:60, min_pax:1, max_pax:1, description:'' },
+      ],
+    },
+    premium: {
+      slots: ['08:00','11:00','15:00'], max_per_slot: 4,
+      lessons: [
+        { name:'Aula Privada',  name_en:'Private Lesson', price:90, per_person:false, duration:75, min_pax:1, max_pax:1, description:'Atenção total — só para si' },
+        { name:'Semi-privada',  name_en:'Semi-private',   price:60, per_person:true,  duration:75, min_pax:2, max_pax:2, description:'2 pessoas, preço por pessoa' },
+        { name:'Grupo Pequeno', name_en:'Small Group',    price:50, per_person:true,  duration:90, min_pax:2, max_pax:4, description:'Máximo 4 alunos' },
+      ],
+    },
+    multi: {
+      slots: ['08:00','10:30','13:30','15:30'], max_per_slot: 8,
+      lessons: [
+        { name:'Surf Iniciante',   name_en:'Surf Beginner',    price:35, per_person:true,  duration:90, min_pax:1, max_pax:6, description:'' },
+        { name:'Surf Intermédio',  name_en:'Surf Intermediate',price:35, per_person:true,  duration:90, min_pax:1, max_pax:6, description:'' },
+        { name:'Stand Up Paddle',  name_en:'Stand Up Paddle',  price:35, per_person:true,  duration:90, min_pax:1, max_pax:6, description:'' },
+        { name:'Bodyboard',        name_en:'Bodyboard',        price:30, per_person:true,  duration:90, min_pax:1, max_pax:6, description:'' },
+        { name:'Privada',          name_en:'Private',          price:65, per_person:false, duration:60, min_pax:1, max_pax:1, description:'' },
+      ],
+    },
+  };
+
+  let selectedTemplate = null;
+
+  function selectTemplate(key, cardEl) {
+    selectedTemplate = key;
+    document.querySelectorAll('.tpl-card').forEach(c => c.classList.remove('selected'));
+    cardEl.classList.add('selected');
+    document.getElementById('tpl-continue-btn').disabled = false;
+  }
+
+  function applyTemplateAndStart() {
+    if (!selectedTemplate) return;
+    const tpl = TEMPLATES[selectedTemplate];
+    // Apply template data
+    slots = [...tpl.slots];
+    lessonTypes = tpl.lessons.map(l => ({...l}));
+    document.getElementById('f-maxslot').value = tpl.max_per_slot;
+    // Show wizard
+    document.getElementById('templates-screen').style.display = 'none';
+    document.getElementById('wizard-wrap').style.display = 'block';
+    renderSlots();
+    renderLessonTable();
+  }
+
+  function startFromScratch() {
+    selectedTemplate = null;
+    lessonTypes = [];
+    slots = [];
+    document.getElementById('templates-screen').style.display = 'none';
+    document.getElementById('wizard-wrap').style.display = 'block';
+    renderSlots();
+    renderLessonTable();
+  }
+
+  // ── State ─────────────────────────────────────────────────
+  let currentStep = 1;
+  let slots = ['08:00', '10:30', '14:00', '16:30'];
+  let lessonTypes = [
+    { name:'Iniciante',    name_en:'Beginner',       price:35, per_person:true,  duration:90, min_pax:1, max_pax:6, description:'Para quem nunca surfou' },
+    { name:'Intermédio',   name_en:'Intermediate',   price:35, per_person:true,  duration:90, min_pax:1, max_pax:6, description:'' },
+    { name:'Aula Privada', name_en:'Private Lesson', price:65, per_person:false, duration:60, min_pax:1, max_pax:1, description:'' },
+    { name:'Bodyboard',    name_en:'Bodyboard',      price:30, per_person:true,  duration:90, min_pax:1, max_pax:6, description:'' },
+  ];
+  let instrId = 0;
+
+  // ── Init ──────────────────────────────────────────────────
+  window.addEventListener('DOMContentLoaded', () => {
+    renderSlots();
+    renderLessonTable();
+  });
+
+  // ── Navigation ────────────────────────────────────────────
+  function goStep(n) {
+    if (n > currentStep && !validateStep(currentStep)) return;
+    document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+    document.querySelector(`.step-panel[data-step="${n}"]`).classList.add('active');
+    document.querySelectorAll('.step-dot').forEach((d, i) => {
+      d.classList.remove('active', 'done');
+      if (i + 1 < n)  d.classList.add('done');
+      if (i + 1 === n) d.classList.add('active');
+    });
+    if (n === 9) buildReview();
+    currentStep = n;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function validateStep(n) {
+    const req = (id, msg) => {
+      if (!document.getElementById(id)?.value?.trim()) { showToast(msg, 'error'); return false; }
+      return true;
+    };
+    if (n === 1) {
+      if (!req('f-name', 'Insere o nome da escola')) return false;
+      if (!req('f-id',   'Insere o ID da escola'))   return false;
+      const id = document.getElementById('f-id').value.trim();
+      if (!/^[a-z0-9-]+$/.test(id)) { showToast('O ID só pode conter letras minúsculas, números e hífens', 'error'); return false; }
+    }
+    if (n === 2) {
+      if (!req('f-city',    'Insere a cidade'))           return false;
+      if (!req('f-meeting', 'Insere o ponto de encontro')) return false;
+    }
+    if (n === 3) {
+      if (!req('f-contact-name', 'Insere o nome do responsável')) return false;
+      if (!req('f-wa',           'Insere o número WhatsApp'))     return false;
+      if (!req('f-email',        'Insere o email'))               return false;
+    }
+    if (n === 4 && slots.length === 0) { showToast('Adiciona pelo menos um horário', 'error'); return false; }
+    if (n === 5) {
+      syncLessonTypes();
+      if (!lessonTypes.length)                          { showToast('Adiciona pelo menos um tipo de aula', 'error'); return false; }
+      if (lessonTypes.some(l => !l.name?.trim()))       { showToast('Preenche o nome de todas as aulas', 'error'); return false; }
+    }
+    return true;
+  }
+
+  // ── Auto Slug ─────────────────────────────────────────────
+  function autoSlug() {
+    const name = document.getElementById('f-name').value;
+    const slug = 'escola-' + name.toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    document.getElementById('f-id').value = slug;
+  }
+
+  // ── Photos ────────────────────────────────────────────────
+  function addPhotoField(val = '') {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:.45rem;align-items:center';
+    row.innerHTML = `<input type="url" placeholder="https://..." value="${val}" style="flex:1" />
+      <button type="button" onclick="this.parentElement.remove()" class="btn-remove" style="font-size:1.1rem">✕</button>`;
+    document.getElementById('photos-list').appendChild(row);
+  }
+  const getPhotos = () => [...document.querySelectorAll('#photos-list input')].map(i => i.value.trim()).filter(Boolean);
+
+  // ── Slots ─────────────────────────────────────────────────
+  function renderSlots() {
+    document.getElementById('slots-list').innerHTML = slots.map(s => `
+      <div class="slot-chip">
+        <span>${s}</span>
+        <button class="btn-remove" onclick="removeSlot('${s}')" title="Remover">✕</button>
+      </div>`).join('');
+  }
+  function addSlot() {
+    const v = document.getElementById('new-slot').value;
+    if (!v || slots.includes(v)) return;
+    slots.push(v); slots.sort(); renderSlots();
+  }
+  function removeSlot(s) { slots = slots.filter(x => x !== s); renderSlots(); }
+
+  // ── Lesson Types ──────────────────────────────────────────
+  function renderLessonTable() {
+    document.getElementById('lesson-tbody').innerHTML = lessonTypes.map((l, i) => `
+      <tr>
+        <td><input type="text" value="${escHtml(l.name)}" data-i="${i}" data-f="name" onchange="updateLesson(this)" style="min-width:120px" /></td>
+        <td><input type="text" value="${escHtml(l.name_en||'')}" data-i="${i}" data-f="name_en" onchange="updateLesson(this)" style="min-width:100px" /></td>
+        <td><input type="number" value="${l.price}" data-i="${i}" data-f="price" onchange="updateLesson(this)" min="0" /></td>
+        <td style="text-align:center"><input type="checkbox" ${l.per_person?'checked':''} data-i="${i}" data-f="per_person" onchange="updateLesson(this)" style="width:auto;accent-color:var(--cyan)" /></td>
+        <td><input type="number" value="${l.duration}" data-i="${i}" data-f="duration" onchange="updateLesson(this)" min="0" /></td>
+        <td><input type="number" value="${l.min_pax}" data-i="${i}" data-f="min_pax" onchange="updateLesson(this)" min="1" /></td>
+        <td><input type="number" value="${l.max_pax}" data-i="${i}" data-f="max_pax" onchange="updateLesson(this)" min="1" /></td>
+        <td><input type="text" value="${escHtml(l.description||'')}" data-i="${i}" data-f="description" onchange="updateLesson(this)" style="min-width:140px" placeholder="Opcional" /></td>
+        <td><button class="btn-remove" onclick="removeLesson(${i})" title="Remover">✕</button></td>
+      </tr>`).join('');
+  }
+  function updateLesson(el) {
+    const i = +el.dataset.i, f = el.dataset.f;
+    const numFields = ['price','duration','min_pax','max_pax'];
+    if (f === 'per_person') lessonTypes[i][f] = el.checked;
+    else if (numFields.includes(f)) lessonTypes[i][f] = parseFloat(el.value) || 0;
+    else lessonTypes[i][f] = el.value;
+  }
+  function addLessonRow() {
+    lessonTypes.push({ name:'', name_en:'', price:35, per_person:true, duration:90, min_pax:1, max_pax:6, description:'' });
+    renderLessonTable();
+  }
+  function removeLesson(i) { lessonTypes.splice(i, 1); renderLessonTable(); }
+  function syncLessonTypes() {
+    document.querySelectorAll('#lesson-tbody [data-f]').forEach(el => {
+      const i = +el.dataset.i, f = el.dataset.f;
+      if (!lessonTypes[i]) return;
+      if (f === 'per_person') lessonTypes[i][f] = el.checked;
+      else if (['price','duration','min_pax','max_pax'].includes(f)) lessonTypes[i][f] = parseFloat(el.value)||0;
+      else lessonTypes[i][f] = el.value;
+    });
+  }
+
+  // ── Instructors ───────────────────────────────────────────
+  function addInstructor() {
+    const id = 'instr-' + (instrId++);
+    const card = document.createElement('div');
+    card.className = 'instr-card'; card.id = id;
+    card.innerHTML = `
+      <button class="btn-remove" onclick="document.getElementById('${id}').remove()" style="position:absolute;top:.7rem;right:.7rem">✕ Remover</button>
+      <div class="form-group" style="margin-bottom:.65rem"><label>Nome</label><input type="text" placeholder="João Silva" /></div>
+      <div class="form-group" style="margin-bottom:.65rem"><label>Foto (URL)</label><input type="url" placeholder="https://..." /></div>
+      <div class="form-group" style="margin-bottom:.65rem"><label>Bio</label><textarea rows="2" placeholder="Instrutor certificado com 10 anos de experiência..."></textarea></div>
+      <div class="form-grid" style="margin-bottom:.65rem">
+        <div class="form-group"><label>Idiomas</label><input type="text" placeholder="PT, EN, ES" /></div>
+        <div class="form-group"><label>Certificações</label><input type="text" placeholder="ISA L1, FPS" /></div>
+      </div>`;
+    document.getElementById('instr-grid').appendChild(card);
+  }
+  function getInstructors() {
+    return [...document.querySelectorAll('.instr-card')].map(c => {
+      const inp = c.querySelectorAll('input, textarea');
+      return { name: inp[0]?.value||'', photo_url: inp[1]?.value||'', bio: inp[2]?.value||'', languages: inp[3]?.value||'', certifications: inp[4]?.value||'' };
+    }).filter(i => i.name.trim());
+  }
+
+  // ── Review ────────────────────────────────────────────────
+  function buildReview() {
+    syncLessonTypes();
+    const days = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+    const selDays = [...document.querySelectorAll('.day-check:checked')].map(c => days[+c.value]).join(', ');
+    const email = document.getElementById('f-email').value;
+    document.getElementById('review-email-show').textContent = email || '—';
+
+    const secs = [
+      { title:'Identidade', items:[
+        ['Nome',        document.getElementById('f-name').value],
+        ['ID',          document.getElementById('f-id').value],
+        ['Logótipo',    document.getElementById('f-logo').value ? '✓ Fornecido' : '—'],
+        ['Foto de capa',document.getElementById('f-cover').value ? '✓ Fornecida' : '—'],
+        ['Descrição PT',(document.getElementById('f-desc').value||'—').substring(0,60)+'...'],
+      ]},
+      { title:'Localização', items:[
+        ['Cidade',    document.getElementById('f-city').value],
+        ['Morada',    document.getElementById('f-address').value || '—'],
+        ['Maps',      document.getElementById('f-maps').value ? '✓ Link' : '—'],
+        ['Ponto de encontro', (document.getElementById('f-meeting').value||'').substring(0,70)+'...'],
+      ]},
+      { title:'Contacto', items:[
+        ['Responsável', document.getElementById('f-contact-name').value],
+        ['WhatsApp',    document.getElementById('f-wa').value],
+        ['Email',       email],
+        ['Telefone',    document.getElementById('f-phone').value || '—'],
+        ['Website',     document.getElementById('f-website').value || '—'],
+      ]},
+      { title:'Horários', items:[
+        ['Dias',         selDays || '—'],
+        ['Slots',        slots.join(', ')],
+        ['Máx./slot',    document.getElementById('f-maxslot').value],
+        ['Duração',      document.getElementById('f-duration').value + ' min'],
+      ]},
+      { title:`Tipos de Aula (${lessonTypes.length})`, items: lessonTypes.map(l => [l.name, `€${l.price}${l.per_person?' p.p.':' fixo'} · ${l.duration}min · ${l.min_pax}–${l.max_pax} pax`])},
+      { title:'Instrutores', items:[['Total', getInstructors().length + ' configurado(s)']]},
+      { title:'Mensagens WA', items:[
+        ['Confirmação PT', document.getElementById('f-confirm-pt').value ? '✓ Personalizada' : 'Padrão'],
+        ['Confirmação EN', document.getElementById('f-confirm-en').value ? '✓ Personalizada' : 'Padrão'],
+        ['Cancelamento PT',document.getElementById('f-cancel-pt').value  ? '✓ Personalizada' : 'Padrão'],
+        ['Cancelamento EN',document.getElementById('f-cancel-en').value  ? '✓ Personalizada' : 'Padrão'],
+      ]},
+      { title:'Legal', items:[
+        ['Nome comercial', document.getElementById('f-legal').value || '—'],
+        ['NIF',            document.getElementById('f-nif').value   || '—'],
+        ['IBAN',           document.getElementById('f-iban').value  ? '✓ Fornecido' : '—'],
+        ['Idade mín.',     document.getElementById('f-age-min').value + ' anos'],
+      ]},
+    ];
+
+    document.getElementById('review-content').innerHTML = secs.map(s => `
+      <div class="rev-section">
+        <div class="rev-title">${s.title}</div>
+        <div class="rev-grid">
+          ${s.items.map(([k,v]) => `<div class="rev-item"><span class="rev-k">${k}</span><span class="rev-v">${v||'—'}</span></div>`).join('')}
+        </div>
+      </div>`).join('');
+  }
+
+  // ── Submit ────────────────────────────────────────────────
+  async function submitOnboarding() {
+    syncLessonTypes();
+    const btn = document.getElementById('btn-submit');
+    btn.disabled = true; btn.textContent = 'A enviar...';
+
+    const days = [...document.querySelectorAll('.day-check:checked')].map(c => +c.value);
+    const payload = {
+      id:                  document.getElementById('f-id').value.trim(),
+      name:                document.getElementById('f-name').value.trim(),
+      description:         v('f-desc'),
+      description_en:      v('f-desc-en'),
+      logo_url:            v('f-logo'),
+      cover_photo_url:     v('f-cover'),
+      photos:              getPhotos(),
+      address:             v('f-address'),
+      city:                document.getElementById('f-city').value.trim(),
+      country:             document.getElementById('f-country').value.trim() || 'Portugal',
+      meeting_point:       document.getElementById('f-meeting').value.trim(),
+      google_maps_url:     v('f-maps'),
+      contact_name:        document.getElementById('f-contact-name').value.trim(),
+      wa_number:           document.getElementById('f-wa').value.trim().replace(/\D/g,''),
+      email:               document.getElementById('f-email').value.trim(),
+      phone:               v('f-phone'),
+      website:             v('f-website'),
+      available_days:      days,
+      time_slots:          slots,
+      max_per_slot:        parseInt(document.getElementById('f-maxslot').value) || 6,
+      lesson_types:        lessonTypes,
+      instructors:         getInstructors(),
+      wa_msg_confirm_pt:   v('f-confirm-pt'),
+      wa_msg_confirm_en:   v('f-confirm-en'),
+      wa_msg_cancel_pt:    v('f-cancel-pt'),
+      wa_msg_cancel_en:    v('f-cancel-en'),
+      age_min:             parseInt(document.getElementById('f-age-min').value) || 6,
+      weight_max:          num('f-weight-max'),
+      height_min:          num('f-height-min'),
+      cancellation_policy: v('f-cancel-policy'),
+      special_notes:       v('f-notes'),
+      legal_name:          v('f-legal'),
+      nif:                 v('f-nif'),
+      bank_iban:           v('f-iban'),
+      bank_holder:         v('f-bank-holder'),
+      status:              'onboarding',
+      onboarding_completed_at: new Date().toISOString(),
+    };
+
+    const { error } = await sb.from('schools').upsert(payload);
+    if (error) {
+      console.error(error);
+      if (error.message?.includes('does not exist') || error.code === '42P01') {
+        showToast('Tabela "schools" não existe ainda. Executa o SQL no Supabase primeiro.', 'error');
+      } else {
+        showToast('Erro ao guardar: ' + error.message, 'error');
+      }
+      btn.disabled = false; btn.textContent = '✓ Submeter Configuração';
+      return;
+    }
+
+    document.getElementById('main-content').style.display  = 'none';
+    document.querySelector('.progress-wrap').style.display = 'none';
+    document.getElementById('success-screen').style.display = 'block';
+    document.getElementById('success-name').textContent    = payload.name;
+    document.getElementById('success-contact').textContent = payload.email || payload.wa_number;
+  }
+
+  // ── Helpers ───────────────────────────────────────────────
+  const v   = id => document.getElementById(id)?.value?.trim() || null;
+  const num = id => { const n = parseInt(document.getElementById(id)?.value); return isNaN(n) ? null : n; };
+  const escHtml = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+
+  function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = `toast toast-${type} show`;
+    setTimeout(() => t.classList.remove('show'), 4000);
+  }
+</script>
+</body>
+</html>
