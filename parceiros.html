@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<!--
+  SQL para criar/atualizar a tabela leads no Supabase:
+
+  CREATE TABLE IF NOT EXISTS public.leads (
+    id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    school_name      TEXT NOT NULL,
+    contact_name     TEXT NOT NULL,
+    email            TEXT NOT NULL,
+    phone            TEXT NOT NULL,
+    wa_number        TEXT,
+    location         TEXT NOT NULL,
+    meeting_point    TEXT,
+    region           TEXT,
+    website          TEXT,
+    instagram        TEXT,
+    facebook         TEXT,
+    tripadvisor      TEXT,
+    google_maps      TEXT,
+    logo_url         TEXT,
+    photos           JSONB,
+    monthly_lessons  INTEGER,
+    lesson_details   JSONB,
+    lesson_types     JSONB,
+    avg_price        NUMERIC,
+    typical_hours    TEXT,
+    typical_slots    JSONB,
+    max_per_slot     INTEGER,
+    season           TEXT,
+    equipment        JSONB,
+    languages        JSONB,
+    features         JSONB,
+    how_found        TEXT,
+    special_requests TEXT,
+    notes            TEXT,
+    status           TEXT NOT NULL DEFAULT 'new',
+    created_at       TIMESTAMPTZ NOT NULL DEFAULT now()
+  );
+
+  ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
+  CREATE POLICY "allow_all_leads" ON public.leads FOR ALL USING (true) WITH CHECK (true);
+  GRANT ALL ON TABLE public.leads TO anon;
+  GRANT ALL ON TABLE public.leads TO authenticated;
+-->
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SurfBook — Torne-se Parceiro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:      #050D1A;
+      --navy-mid:  #0A1A30;
+      --navy-card: #0D2040;
+      --ocean:     #0070F3;
+      --cyan:      #00CFFD;
+      --white:     #FFFFFF;
+      --gray-200:  #CBD5E1;
+      --gray-400:  #94A3B8;
+      --gold:      #F59E0B;
+      --green:     #10B981;
+      --red:       #EF4444;
+      --radius:    12px;
+      color-scheme: dark;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--navy);
+      color: var(--white);
+      line-height: 1.65;
+      font-size: 15px;
+    }
+
+    /* TOP NAV */
+    #top-nav {
+      position: sticky; top: 0; z-index: 999;
+      background: rgba(5,13,26,0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0,207,253,0.15);
+      padding: 12px 40px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+    }
+    #top-nav .brand { font-weight: 900; font-size: 16px; color: var(--cyan); letter-spacing: .05em; text-decoration: none; }
+    .nav-links { display: flex; align-items: center; gap: 18px; }
+    .nav-links a { font-size: 13px; font-weight: 600; color: var(--gray-400); text-decoration: none; transition: color .2s; }
+    .nav-links a:hover { color: var(--white); }
+    .nav-links .cta-link { color: var(--cyan); border: 1px solid rgba(0,207,253,.35); padding: 6px 14px; border-radius: 8px; }
+    .nav-links .cta-link:hover { background: rgba(0,207,253,.12); color: var(--white); }
+
+    /* LAYOUT */
+    .wrapper { max-width: 900px; margin: 0 auto; padding: 0 28px 80px; }
+
+    /* HERO */
+    .hero {
+      text-align: center; padding: 72px 20px 60px;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,112,243,.22) 0%, transparent 70%);
+      border-bottom: 1px solid rgba(0,207,253,.10); margin-bottom: 56px;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(0,207,253,.10); border: 1px solid rgba(0,207,253,.30);
+      color: var(--cyan); font-size: 11px; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; padding: 6px 18px; border-radius: 999px; margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-size: clamp(28px,5.5vw,50px); font-weight: 900; line-height: 1.1;
+      background: linear-gradient(135deg,var(--white) 20%,var(--cyan) 80%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 14px; letter-spacing: -.02em;
+    }
+    .hero-sub { font-size: 16px; color: var(--gray-200); max-width: 560px; margin: 0 auto 36px; line-height: 1.75; }
+    .hero-pills { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+    .hero-pill {
+      background: rgba(0,207,253,.07); border: 1px solid rgba(0,207,253,.18);
+      color: var(--gray-200); font-size: 12.5px; font-weight: 500; padding: 6px 14px;
+      border-radius: 999px; display: flex; align-items: center; gap: 6px;
+    }
+    .hero-pill strong { color: var(--white); }
+
+    /* INFO CARDS */
+    .info-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 52px; }
+    @media (max-width:640px) { .info-cards { grid-template-columns: 1fr; } }
+    .info-card {
+      background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px; padding: 24px 20px; text-align: center; transition: border-color .2s, background .2s;
+    }
+    .info-card:hover { border-color: rgba(0,207,253,.25); background: rgba(0,207,253,.04); }
+    .info-card-icon { font-size: 30px; margin-bottom: 10px; }
+    .info-card-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .info-card-body { font-size: 13px; color: var(--gray-400); line-height: 1.55; }
+    .info-card-body strong { color: var(--cyan); }
+
+    /* SECTION */
+    .section { margin-bottom: 52px; }
+    .section-header {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 22px; padding-bottom: 14px; border-bottom: 1px solid rgba(0,207,253,.12);
+    }
+    .section-icon {
+      width: 36px; height: 36px; background: rgba(0,207,253,.12); border-radius: 9px;
+      display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0;
+    }
+    .section-title { font-size: 18px; font-weight: 800; letter-spacing: -.01em; }
+    .section-subtitle { font-size: 12px; color: var(--gray-400); margin-top: 1px; }
+
+    /* FORM */
+    #parceiros-form {
+      background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 20px; padding: 36px 40px;
+    }
+    @media (max-width:600px) {
+      #parceiros-form { padding: 22px 18px; }
+      #top-nav { padding: 12px 18px; }
+      .wrapper { padding: 0 14px 60px; }
+      .hero { padding: 48px 14px 44px; }
+    }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 22px; }
+    @media (max-width:600px) { .form-grid { grid-template-columns: 1fr; } }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1/-1; }
+    .form-label { font-size: 11.5px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: .07em; }
+    .form-label .req { color: var(--cyan); margin-left: 2px; }
+    .form-hint { font-size: 11px; color: #4a5a6e; margin-top: -2px; }
+    .form-input, .form-textarea, .form-select {
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.10);
+      border-radius: 10px; padding: 11px 14px; color: var(--white);
+      font-family: 'Inter',sans-serif; font-size: 14px; outline: none;
+      transition: border-color .2s, box-shadow .2s; width: 100%; color-scheme: dark;
+    }
+    .form-select { background-color: #0d1f3c; }
+    .form-select option { background: #0d1f3c; color: #fff; }
+    .form-input::placeholder, .form-textarea::placeholder { color: #4a5a6e; }
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,207,253,.10);
+    }
+
+    /* PHOTO UPLOAD */
+    .photo-upload-area {
+      border: 2px dashed rgba(0,207,253,.25); border-radius: 12px;
+      padding: 20px; text-align: center; cursor: pointer;
+      transition: border-color .2s, background .2s; position: relative;
+      background: rgba(0,207,253,.03);
+    }
+    .photo-upload-area:hover { border-color: rgba(0,207,253,.5); background: rgba(0,207,253,.06); }
+    .photo-upload-area input[type=file] { position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%; }
+    .photo-previews { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+    .photo-thumb {
+      width:90px; height:70px; border-radius:8px; object-fit:cover;
+      border:1px solid rgba(255,255,255,.15); position:relative;
+    }
+    .photo-thumb-wrap { position:relative; display:inline-block; }
+    .photo-thumb-wrap button {
+      position:absolute; top:-6px; right:-6px; width:18px; height:18px;
+      background:#ef4444; border:none; border-radius:50%; color:#fff;
+      font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+      font-family:'Inter',sans-serif; line-height:1;
+    }
+    .form-textarea { resize: vertical; min-height: 90px; }
+
+    /* DIVIDER */
+    .form-divider { grid-column:1/-1; border:none; border-top:1px solid rgba(255,255,255,.06); margin:10px 0 4px; }
+    .form-section-label {
+      grid-column:1/-1; font-size:11px; font-weight:700; text-transform:uppercase;
+      letter-spacing:.10em; color:var(--cyan); opacity:.8; margin-bottom:-4px;
+    }
+
+    /* CHECKBOX GRID */
+    .checkbox-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px 10px; margin-top:4px; }
+    .checkbox-grid.cols2 { grid-template-columns:repeat(2,1fr); }
+    .checkbox-grid.cols4 { grid-template-columns:repeat(4,1fr); }
+    @media (max-width:480px) { .checkbox-grid,.checkbox-grid.cols4 { grid-template-columns:repeat(2,1fr); } }
+    .checkbox-label {
+      display:flex; align-items:center; gap:7px; cursor:pointer; font-size:13px;
+      color:var(--gray-200); user-select:none; padding:8px 11px;
+      border-radius:8px; border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.03); transition:background .15s,border-color .15s;
+    }
+    .checkbox-label:hover { background:rgba(0,207,253,.07); border-color:rgba(0,207,253,.3); }
+    .checkbox-label input[type="checkbox"] { accent-color:var(--cyan); width:14px; height:14px; cursor:pointer; flex-shrink:0; }
+    .checkbox-label:has(input:checked) { background:rgba(0,207,253,.10); border-color:rgba(0,207,253,.35); color:var(--white); font-weight:600; }
+
+    /* LESSON TABLE */
+    .lesson-row {
+      display:grid; grid-template-columns:auto 1fr 80px 80px 100px 80px;
+      gap:8px; align-items:center; padding:10px 12px;
+      background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07);
+      border-radius:10px; margin-bottom:8px; transition:background .15s,border-color .15s;
+    }
+    .lesson-row.active { background:rgba(0,207,253,.06); border-color:rgba(0,207,253,.25); }
+    @media (max-width:700px) {
+      .lesson-row { grid-template-columns:auto 1fr; }
+      .lesson-row .lesson-price,.lesson-row .lesson-dur,.lesson-row .lesson-max,.lesson-row .lesson-desc { display:none; }
+      .lesson-row.active .lesson-price,.lesson-row.active .lesson-dur,.lesson-row.active .lesson-max { display:block; grid-column:2; }
+    }
+    .lesson-check { display:flex; align-items:center; }
+    .lesson-check input { accent-color:var(--cyan); width:16px; height:16px; cursor:pointer; }
+    .lesson-name-input {
+      background:transparent; border:none; border-bottom:1px solid rgba(255,255,255,.12);
+      color:var(--white); font-family:'Inter',sans-serif; font-size:13.5px; font-weight:600;
+      padding:3px 4px; outline:none; width:100%; color-scheme:dark;
+    }
+    .lesson-name-input:focus { border-bottom-color:var(--cyan); }
+    .lesson-mini-input {
+      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
+      border-radius:7px; padding:5px 8px; color:var(--white);
+      font-family:'Inter',sans-serif; font-size:12px; outline:none; width:100%;
+      text-align:center; color-scheme:dark;
+    }
+    .lesson-mini-input:focus { border-color:var(--cyan); }
+    .lesson-col-header {
+      font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em;
+      color:var(--gray-400); text-align:center; padding:0 0 4px 0;
+    }
+
+    /* EQUIPMENT TABLE */
+    .equip-row {
+      display:flex; align-items:center; gap:10px; padding:8px 12px;
+      background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:9px;
+      margin-bottom:6px;
+    }
+    .equip-label { flex:1; font-size:13px; color:var(--gray-200); }
+    .equip-input {
+      width:70px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12);
+      border-radius:7px; padding:5px 8px; color:var(--white); font-family:'Inter',sans-serif;
+      font-size:13px; text-align:center; outline:none; color-scheme:dark;
+    }
+    .equip-input:focus { border-color:var(--cyan); }
+    .equip-unit { font-size:11px; color:var(--gray-400); white-space:nowrap; }
+
+    /* PROGRESS BAR */
+    #progress-wrap { margin-bottom: 24px; }
+    #progress-bar {
+      height: 4px; background: rgba(255,255,255,.08); border-radius: 99px; overflow: hidden;
+    }
+    #progress-fill { height: 100%; background: linear-gradient(90deg,var(--ocean),var(--cyan)); border-radius: 99px; transition: width .4s; width: 0%; }
+    #progress-label { font-size: 11px; color: var(--gray-400); margin-top: 5px; text-align: right; }
+
+    /* SUBMIT */
+    .btn-submit {
+      width:100%; padding:15px; margin-top:28px;
+      background:linear-gradient(135deg,var(--ocean),var(--cyan));
+      border:none; border-radius:12px; color:var(--white); font-family:'Inter',sans-serif;
+      font-size:15px; font-weight:700; cursor:pointer; transition:transform .2s,box-shadow .2s,opacity .2s;
+      box-shadow:0 4px 24px rgba(0,112,243,.35); display:flex; align-items:center; justify-content:center; gap:8px;
+    }
+    .btn-submit:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 8px 32px rgba(0,112,243,.50); }
+    .btn-submit:disabled { opacity:.6; cursor:not-allowed; }
+
+    /* STATUS */
+    #form-status { display:none; margin-top:18px; padding:14px 18px; border-radius:12px; font-size:14px; line-height:1.55; }
+    #form-status.success { display:block; background:rgba(16,185,129,.12); border:1px solid rgba(16,185,129,.35); color:#6ee7b7; }
+    #form-status.error { display:block; background:rgba(239,68,68,.10); border:1px solid rgba(239,68,68,.30); color:#fca5a5; }
+
+    /* FOOTER */
+    .footer { text-align:center; padding:32px 20px; border-top:1px solid rgba(255,255,255,.06); font-size:12px; color:var(--gray-400); }
+    .footer a { color:var(--cyan); text-decoration:none; }
+    .footer a:hover { text-decoration:underline; }
+  </style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav id="top-nav">
+  <a class="brand" href="/proposta">🏄 SurfBook</a>
+  <div class="nav-links">
+    <a href="/super-admin" style="font-size:.8rem;opacity:.65">← Super Admin</a>
+    <a href="/proposta">← Proposta</a>
+    <a href="/admin" class="cta-link">Já é parceiro? Entrar →</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="wrapper">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-badge">🌊 Programa de Parceiros 2025</div>
+    <h1>A sua escola de surf<br>no digital — sem esforço</h1>
+    <p class="hero-sub">
+      Preencha este formulário com o máximo de detalhe possível.
+      Usamos esta informação para configurar a plataforma à medida da sua escola —
+      sem precisar de contactos adicionais para o básico.
+    </p>
+    <div class="hero-pills">
+      <div class="hero-pill">✅ <strong>Sem mensalidade</strong></div>
+      <div class="hero-pill">📱 <strong>Reservas 24h</strong> via WhatsApp</div>
+      <div class="hero-pill">📊 <strong>Painel de gestão</strong> completo</div>
+      <div class="hero-pill">🌍 <strong>7 idiomas</strong> automáticos</div>
+      <div class="hero-pill">⚡ <strong>Ativo em 48h</strong></div>
+    </div>
+  </div>
+
+  <!-- INFO CARDS -->
+  <div class="info-cards">
+    <div class="info-card">
+      <div class="info-card-icon">💶</div>
+      <div class="info-card-title">Sem custos fixos</div>
+      <div class="info-card-body">Comissão de apenas <strong>3%</strong> por aula concluída. Se não vender, não paga nada.</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">📲</div>
+      <div class="info-card-title">Reservas automáticas</div>
+      <div class="info-card-body">Clientes reservam online e recebem <strong>confirmação por WhatsApp</strong> automaticamente.</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">📊</div>
+      <div class="info-card-title">Gestão total</div>
+      <div class="info-card-body">Calendário, equipamento, fatos, relatórios e análise — tudo num <strong>painel simples</strong>.</div>
+    </div>
+  </div>
+
+  <!-- FORM -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">📋</div>
+      <div>
+        <div class="section-title">Candidatura de Parceiro</div>
+        <div class="section-subtitle">Preencha com o máximo de detalhe — respondemos em menos de 24h</div>
+      </div>
+    </div>
+
+    <form id="parceiros-form" onsubmit="submitForm(event)" novalidate>
+
+      <!-- PROGRESS -->
+      <div id="progress-wrap">
+        <div id="progress-bar"><div id="progress-fill"></div></div>
+        <div id="progress-label">0% preenchido</div>
+      </div>
+
+      <div class="form-grid">
+
+        <!-- ═══ 1. ESCOLA ═══ -->
+        <div class="form-section-label">📍 Dados da Escola</div>
+
+        <div class="form-group">
+          <label class="form-label" for="f-school-name">Nome da Escola <span class="req">*</span></label>
+          <input class="form-input" id="f-school-name" type="text" placeholder="ex: Surf Arrifana" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="f-location">Praia / Localização <span class="req">*</span></label>
+          <input class="form-input" id="f-location" type="text" placeholder="ex: Praia de Arrifana, Aljezur" required />
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label" for="f-meeting-point">Ponto de Encontro (texto para clientes) <span class="req">*</span></label>
+          <input class="form-input" id="f-meeting-point" type="text" placeholder="ex: Praia de Arrifana — junto ao acesso principal, ao lado do parque de estacionamento" required />
+          <span class="form-hint">Este texto aparece na mensagem de confirmação enviada ao cliente via WhatsApp</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="f-region">Distrito / Região</label>
+          <select class="form-select" id="f-region">
+            <option value="">— Selecionar —</option>
+            <option>Viana do Castelo</option><option>Braga</option><option>Vila Real</option>
+            <option>Bragança</option><option>Porto</option><option>Aveiro</option>
+            <option>Coimbra</option><option>Leiria</option><option>Lisboa</option>
+            <option>Setúbal</option><option>Évora</option><option>Beja</option>
+            <option>Faro (Algarve)</option><option>Alentejo Litoral</option>
+            <option>Comporta / Grândola</option><option>Ericeira</option>
+            <option>Peniche</option><option>Nazaré</option><option>Figueira da Foz</option>
+            <option>Açores</option><option>Madeira</option><option>Outro</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="f-years">Anos de Atividade</label>
+          <input class="form-input" id="f-years" type="number" min="0" max="50" placeholder="ex: 5" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="f-nif">NIF da Empresa (opcional)</label>
+          <input class="form-input" id="f-nif" type="text" placeholder="ex: 512345678" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="f-monthly-lessons">Aulas por mês (média)</label>
+          <input class="form-input" id="f-monthly-lessons" type="number" min="0" placeholder="ex: 80" />
+        </div>
+
+        <!-- ═══ 2. PRESENÇA ONLINE ═══ -->
+        <div class="form-divider"></div>
+        <div class="form-section-label">🌐 Presença Online</div>
+
+        <div class="form-group">
+          <label class="form-label" for="f-website">Website</label>
+          <input class="form-input" id="f-website" type="url" placeholder="https://www.minhaescola.pt" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="f-instagram">Instagram</label>
+          <input class="form-input" id="f-instagram" type="text" placeholder="@minhaescolasurf" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="f-facebook">Facebook</label>
+          <input class="form-input" id="f-facebook" type="text" placeholder="facebook.com/minhaescola" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="f-tripadvisor">TripAdvisor</label>
+          <input class="form-input" id="f-tripadvisor" type="text" placeholder="tripadvisor.com/..." />
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label" for="f-gmaps">Google Maps (link da escola)</label>
+          <input class="form-input" id="f-gmaps" type="text" placeholder="maps.app.goo.gl/..." />
+          <span class="form-hint">Ajuda os clientes a encontrar a escola e melhora o SEO</span>
+        </div>
+
+        <!-- ═══ 3. FOTOS E IDENTIDADE ═══ -->
+        <div class="form-divider"></div>
+        <div class="form-section-label">🖼️ Fotos e Identidade</div>
+
+        <div class="form-group full">
+          <label class="form-label">Fotos da Escola (até 8 fotos do dispositivo)</label>
+          <div class="photo-upload-area" id="photo-drop-area">
+            <input type="file" id="f-photos-upload" accept="image/*" multiple onchange="handlePhotoUpload(this)" />
+            <div style="pointer-events:none">
+              <div style="font-size:28px;margin-bottom:8px">📸</div>
+              <div style="font-size:13px;font-weight:600;color:var(--white)">Clique ou arraste fotos aqui</div>
+              <div style="font-size:11.5px;color:var(--gray-400);margin-top:4px">JPEG, PNG, WEBP · Máx. 8 fotos · 5 MB por foto</div>
+            </div>
+          </div>
+          <div class="photo-previews" id="photo-previews"></div>
+          <span class="form-hint" style="margin-top:6px;display:block">Fotos de: escola, praia, aulas, equipamento, equipa — usadas para personalizar a página</span>
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label" for="f-photos-link">Ou partilhe link de pasta (Google Drive / Dropbox / WeTransfer)</label>
+          <input class="form-input" id="f-photos-link" type="text" placeholder="https://drive.google.com/drive/folders/..." />
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label" for="f-logo-url">Logo da Escola (URL pública, se tiver)</label>
+          <input class="form-input" id="f-logo-url" type="url" placeholder="https://... (link direto para imagem .png/.jpg)" />
+          <span class="form-hint">Ou envie o logo como foto acima</span>
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label" for="f-branding">Identidade Visual / Cores / Estilo</label>
+          <textarea class="form-textarea" id="f-branding" placeholder="ex: Tons azuis e brancos, estilo descontraído/oceano. Preferimos sem emojis. Texto formal/informal..."></textarea>
+        </div>
+
+        <!-- ═══ 4. RESPONSÁVEL ═══ -->
+        <div class="form-divider"></div>
+        <div class="form-section-label">👤 Dados do Responsável</div>
+
+        <div class="form-group">
+          <label class="form-label" for="f-contact-name">Nome <span class="req">*</span></label>
+          <input class="form-input" id="f-contact-name" type="text" placeholder="ex: João Silva" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="f-role">Cargo / Função</label>
+          <select class="form-select" id="f-role">
+            <option value="">— Selecionar —</option>
+            <option>Dono / Proprietário</option>
+            <option>Gerente</option>
+            <option>Instrutor Principal</option>
+            <option>Diretor Técnico</option>
+            <option>Outro</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="f-email">Email <span class="req">*</span></label>
+          <input class="form-input" id="f-email" type="email" placeholder="joao@minhaescola.pt" required />
+          <span class="form-hint">Receberá notificações de novas reservas e avaliações</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="f-phone">Telemóvel <span class="req">*</span></label>
+          <input class="form-input" id="f-phone" type="tel" placeholder="+351 912 345 678" required />
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label" for="f-wa-number">Número WhatsApp para Reservas <span class="req">*</span></label>
+          <input class="form-input" id="f-wa-number" type="tel" placeholder="351912345678 (sem espaços, com indicativo)" required />
+          <span class="form-hint">É para este número que chegam os pedidos de reserva dos clientes. Formato: 351XXXXXXXXX</span>
+        </div>
+
+        <!-- ═══ 5. AULAS E PREÇOS ═══ -->
+        <div class="form-divider"></div>
+        <div class="form-section-label">🏄 Aulas e Preços</div>
+
+        <div class="form-group full">
+          <label class="form-label">Modalidades Oferecidas — Preços e Detalhes</label>
+          <span class="form-hint" style="margin-bottom:8px;display:block">Ative as modalidades que oferece e ajuste os valores. Pode editar os nomes.</span>
+          <!-- Header -->
+          <div style="display:grid;grid-template-columns:auto 1fr 80px 80px 100px 80px;gap:8px;padding:0 12px 4px;margin-bottom:2px">
+            <div></div>
+            <div class="lesson-col-header" style="text-align:left">Modalidade</div>
+            <div class="lesson-col-header">€/pessoa</div>
+            <div class="lesson-col-header">Duração</div>
+            <div class="lesson-col-header">Máx. grupo</div>
+            <div class="lesson-col-header">Min. grupo</div>
+          </div>
+          <div id="lessons-container"></div>
+          <button type="button" onclick="addCustomLesson()" style="margin-top:8px;padding:8px 16px;background:rgba(0,207,253,.08);border:1px dashed rgba(0,207,253,.3);border-radius:8px;color:var(--cyan);font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer">+ Adicionar modalidade personalizada</button>
+        </div>
+
+        <!-- ═══ 6. HORÁRIOS ═══ -->
+        <div class="form-divider"></div>
+        <div class="form-section-label">⏰ Horários e Disponibilidade</div>
+
+        <div class="form-group full">
+          <label class="form-label">Horários de Aula (selecione todos os que pratica)</label>
+          <div class="checkbox-grid cols4" id="slots-grid" style="margin-top:6px"></div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
+            <input class="form-input" id="f-custom-slot" type="text" placeholder="Horário personalizado, ex: 13:00" style="max-width:220px" />
+            <button type="button" onclick="addCustomSlot()" style="padding:10px 16px;background:rgba(0,207,253,.1);border:1px solid rgba(0,207,253,.3);border-radius:9px;color:var(--cyan);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer">+ Adicionar</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="f-max-slot">Máx. alunos por horário</label>
+          <input class="form-input" id="f-max-slot" type="number" min="1" max="50" placeholder="ex: 8" />
+          <span class="form-hint">Total de alunos que cabem num slot</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="f-lesson-duration">Duração habitual (minutos)</label>
+          <input class="form-input" id="f-lesson-duration" type="number" min="30" max="300" step="15" placeholder="ex: 90" />
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label">Dias da Semana</label>
+          <div class="checkbox-grid cols4">
+            <label class="checkbox-label"><input type="checkbox" name="day" value="Seg" checked /><span>Segunda</span></label>
+            <label class="checkbox-label"><input type="checkbox" name="day" value="Ter" checked /><span>Terça</span></label>
+            <label class="checkbox-label"><input type="checkbox" name="day" value="Qua" checked /><span>Quarta</span></label>
+            <label class="checkbox-label"><input type="checkbox" name="day" value="Qui" checked /><span>Quinta</span></label>
+            <label class="checkbox-label"><input type="checkbox" name="day" value="Sex" checked /><span>Sexta</span></label>
+            <label class="checkbox-label"><input type="checkbox" name="day" value="Sáb" checked /><span>Sábado</span></label>
+            <label class="checkbox-label"><input type="checkbox" name="day" value="Dom" checked /><span>Domingo</span></label>
+          </div>
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label" for="f-season">Época / Meses de Atividade</label>
+          <input class="form-input" id="f-season" type="text" placeholder="ex: Abril a Outubro (época alta: Junho–Setembro)" />
+        </div>
+
+        <!-- ═══ 7. EQUIPAMENTO ═══ -->
+        <div class="form-divider"></div>
+        <div class="form-section-label">🏋️ Inventário de Equipamento</div>
+
+        <div class="form-group full">
+          <label class="form-label" style="margin-bottom:8px">Fatos de Surf — Quantidade por tamanho</label>
+          <div id="wetsuits-container">
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px">
+              <!-- generated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label" style="margin-bottom:8px">Pranchas — Quantidade por tipo</label>
+          <div id="boards-container">
+            <!-- generated by JS -->
+          </div>
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label" for="f-other-equip">Outro Equipamento</label>
+          <textarea class="form-textarea" id="f-other-equip" placeholder="ex: 10 leashes, 5 capacetes infantis, 20 colete salva-vidas, remos de SUP..."></textarea>
+        </div>
+
+        <!-- ═══ 8. IDIOMAS ═══ -->
+        <div class="form-divider"></div>
+        <div class="form-section-label">🌍 Idiomas para os Clientes</div>
+
+        <div class="form-group full">
+          <label class="form-label">Idiomas que pretende ativar na plataforma</label>
+          <div class="checkbox-grid cols4" style="margin-top:6px">
+            <label class="checkbox-label"><input type="checkbox" name="lang" value="pt" checked /><span>🇵🇹 Português</span></label>
+            <label class="checkbox-label"><input type="checkbox" name="lang" value="en" checked /><span>🇬🇧 English</span></label>
+            <label class="checkbox-label"><input type="checkbox" name="lang" value="fr" /><span>🇫🇷 Français</span></label>
+            <label class="checkbox-label"><input type="checkbox" name="lang" value="de" /><span>🇩🇪 Deutsch</span></label>
+            <label class="checkbox-label"><input type="checkbox" name="lang" value="es" /><span>🇪🇸 Español</span></label>
+            <label class="checkbox-label"><input type="checkbox" name="lang" value="nl" /><span>🇳🇱 Nederlands</span></label>
+            <label class="checkbox-label"><input type="checkbox" name="lang" value="pt-br" /><span>🇧🇷 Português BR</span></label>
+          </div>
+          <span class="form-hint" style="margin-top:6px;display:block">A deteção de idioma é automática pelo país do cliente. Todos os idiomas estão disponíveis sem custo adicional.</span>
+        </div>
+
+        <!-- ═══ 9. FUNCIONALIDADES ═══ -->
+        <div class="form-divider"></div>
+        <div class="form-section-label">⚙️ Funcionalidades da Plataforma</div>
+
+        <div class="form-group full">
+          <label class="form-label">Funcionalidades incluídas (desmarque o que não quer)</label>
+          <div class="checkbox-grid cols2" style="margin-top:6px">
+            <label class="checkbox-label"><input type="checkbox" name="feat" value="wa_confirm" checked /><span>✅ Confirmação automática via WhatsApp</span></label>
+            <label class="checkbox-label"><input type="checkbox" name="feat" value="wa_notify_admin" checked /><span>🔔 Notificação de nova reserva (admin)</span></label>
+            <label class="checkbox-label"><input type="checkbox" name="feat" value="reviews" checked /><span>⭐ Sistema de avaliações de clientes</span></label>
+            <label class="checkbox-label"><input type="checkbox" name="feat" value="qr_card" checked /><span>📇 Cartão QR para promoção</span></label>
+            <label class="checkbox-label"><input type="checkbox" name="feat" value="multilang" checked /><span>🌍 Multi-idioma automático</span></label>
+            <label class="checkbox-label"><input type="checkbox" name="feat" value="analytics" checked /><span>📊 Relatórios e análise mensal</span></label>
+            <label class="checkbox-label"><input type="checkbox" name="feat" value="equipment_calc" checked /><span>🏊 Cálculo automático de fato de surf</span></label>
+            <label class="checkbox-label"><input type="checkbox" name="feat" value="availability" checked /><span>📅 Disponibilidade em tempo real</span></label>
+          </div>
+          <span class="form-hint" style="margin-top:8px;display:block">Todas incluídas na comissão — sem custo adicional</span>
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label" for="f-no-features">O que NÃO quer ou prefere remover</label>
+          <textarea class="form-textarea" id="f-no-features" placeholder="ex: Não quero sistema de avaliações. Prefiro sem o ecrã de equipamento (não tenho fatos para oferecer). Quero formulário simplificado..." style="min-height:70px"></textarea>
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label" for="f-feature-requests">Funcionalidades adicionais que gostaria de ter</label>
+          <textarea class="form-textarea" id="f-feature-requests" placeholder="ex: Gostaria de pagamento online, lembretes automáticos por email, sistema de vouchers de desconto, app para o telemóvel, integração com Google Calendar, lista de espera para aulas cheias..." style="min-height:90px"></textarea>
+          <span class="form-hint">Descreva o que imagina — avaliamos a viabilidade caso a caso</span>
+        </div>
+
+        <!-- ═══ 10. PEDIDOS ESPECIAIS ═══ -->
+        <div class="form-divider"></div>
+        <div class="form-section-label">💬 Pedidos Especiais e Informação Adicional</div>
+
+        <div class="form-group full">
+          <label class="form-label" for="f-special">Personalização / Pedidos Especiais</label>
+          <textarea class="form-textarea" id="f-special" placeholder="ex: Quero que os clientes possam escolher instrutor. Tenho pacotes de 5 aulas com desconto. Preciso de campo para nível de surf do cliente. Quero lista de espera..."></textarea>
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label" for="f-pricing-notes">Notas sobre Preços / Pacotes Especiais</label>
+          <textarea class="form-textarea" id="f-pricing-notes" placeholder="ex: Pack 5 aulas = €150 (20% desconto). Aulas de manhã com desconto de 10%. Grupo acima de 6 pessoas = preço negociável..." style="min-height:70px"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="f-how-found">Como nos encontrou?</label>
+          <select class="form-select" id="f-how-found">
+            <option value="">— Selecionar —</option>
+            <option>Google</option>
+            <option>Instagram</option>
+            <option>Facebook</option>
+            <option>Indicação de colega / amigo</option>
+            <option>Proposta direta (email/WhatsApp)</option>
+            <option>Evento / Conferência</option>
+            <option>Outro</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="f-availability">Disponibilidade para reunião</label>
+          <input class="form-input" id="f-availability" type="text" placeholder="ex: Qualquer dia entre 9h-18h, ou fins de semana de manhã" />
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label" for="f-notes">Notas Finais / Mensagem Livre</label>
+          <textarea class="form-textarea" id="f-notes" placeholder="Qualquer informação adicional sobre a escola, dúvidas sobre a plataforma, ou condições especiais que gostaria de negociar..."></textarea>
+        </div>
+
+      </div><!-- /form-grid -->
+
+      <button type="submit" class="btn-submit" id="btn-submit">
+        <span id="btn-text">🚀 Enviar Candidatura</span>
+      </button>
+      <div id="form-status"></div>
+
+    </form>
+  </div>
+
+</div><!-- /wrapper -->
+
+<footer class="footer">
+  <p>SurfBook · <a href="/proposta">Ver Proposta Comercial</a> · <a href="/admin">Acesso Admin</a></p>
+  <p style="margin-top:6px">Dúvidas? <a href="mailto:ivocasimiro@gmail.com">ivocasimiro@gmail.com</a> · <a href="https://wa.me/351962800400">WhatsApp</a></p>
+</footer>
+
+<script>
+  const SUPABASE_URL  = 'https://ubeqidccuvsjhjphybxz.supabase.co';
+  const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InViZXFpZGNjdXZzamhqcGh5Ynh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDI0NTYsImV4cCI6MjA5NTkxODQ1Nn0.wyCBBMSuRfxrz935XifGa3Chgv64o4-ACvP5rCj7t1U';
+  const ADMIN_EMAIL   = 'ivocasimiro@gmail.com';
+
+  const { createClient } = supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // ─── LESSON ROWS ──────────────────────────────────────────────────────────
+  const DEFAULT_LESSONS = [
+    { name:'Iniciante',    price:35,  dur:90, max:8, min:1,  active:true  },
+    { name:'Intermédio',   price:35,  dur:90, max:8, min:1,  active:false },
+    { name:'Avançado',     price:45,  dur:90, max:6, min:1,  active:false },
+    { name:'Privada',      price:65,  dur:60, max:2, min:1,  active:true  },
+    { name:'Semi-Privada', price:50,  dur:60, max:4, min:3,  active:false },
+    { name:'Bodyboard',    price:30,  dur:90, max:8, min:1,  active:false },
+    { name:'SUP',          price:35,  dur:60, max:6, min:1,  active:false },
+    { name:'Kids (−12)',   price:28,  dur:60, max:6, min:1,  active:false },
+  ];
+  let lessons = DEFAULT_LESSONS.map(l => ({ ...l }));
+
+  function renderLessons() {
+    const c = document.getElementById('lessons-container');
+    c.innerHTML = lessons.map((l, i) => `
+      <div class="lesson-row ${l.active?'active':''}" id="lr-${i}">
+        <div class="lesson-check">
+          <input type="checkbox" ${l.active?'checked':''} onchange="toggleLesson(${i},this.checked)" />
+        </div>
+        <input class="lesson-name-input" value="${l.name}" oninput="lessons[${i}].name=this.value" placeholder="Nome da modalidade" />
+        <input class="lesson-mini-input" type="number" value="${l.price}" min="0" step="0.5" oninput="lessons[${i}].price=parseFloat(this.value)||0" placeholder="€" />
+        <input class="lesson-mini-input" type="number" value="${l.dur}" min="30" step="15" oninput="lessons[${i}].dur=parseInt(this.value)||90" placeholder="min" />
+        <input class="lesson-mini-input" type="number" value="${l.max}" min="1" oninput="lessons[${i}].max=parseInt(this.value)||1" placeholder="pax" />
+        <input class="lesson-mini-input" type="number" value="${l.min}" min="1" oninput="lessons[${i}].min=parseInt(this.value)||1" placeholder="min" />
+      </div>`).join('');
+  }
+
+  function toggleLesson(i, checked) {
+    lessons[i].active = checked;
+    const row = document.getElementById(`lr-${i}`);
+    if (row) row.classList.toggle('active', checked);
+    updateProgress();
+  }
+
+  function addCustomLesson() {
+    lessons.push({ name:'Personalizada', price:40, dur:90, max:6, min:1, active:true });
+    renderLessons();
+  }
+
+  // ─── TIME SLOTS ──────────────────────────────────────────────────────────
+  const STANDARD_SLOTS = ['07:30','08:00','09:00','09:30','10:00','10:30','11:00','12:00','13:00','14:00','15:00','16:00','16:30','17:00','18:00'];
+  let customSlots = [];
+
+  function renderSlots() {
+    const grid = document.getElementById('slots-grid');
+    const all = [...STANDARD_SLOTS, ...customSlots];
+    grid.innerHTML = all.map(s => `
+      <label class="checkbox-label">
+        <input type="checkbox" name="slot" value="${s}" ${['08:00','10:30','14:00','16:30'].includes(s)?'checked':''} />
+        <span>${s}</span>
+      </label>`).join('');
+  }
+
+  function addCustomSlot() {
+    const v = document.getElementById('f-custom-slot').value.trim();
+    if (!v) return;
+    customSlots.push(v);
+    renderSlots();
+    document.getElementById('f-custom-slot').value = '';
+  }
+
+  // ─── EQUIPMENT ───────────────────────────────────────────────────────────
+  const WETSUIT_SIZES = ['XS','S','S/M','M','M/L','L','L/XL','XL','XXL'];
+  const BOARD_TYPES   = [
+    { key:'foam',    label:'Foam / Malibu (iniciantes)' },
+    { key:'mid',     label:'Mid-length / Funboard' },
+    { key:'longboard',label:'Longboard' },
+    { key:'shortboard',label:'Shortboard' },
+    { key:'fish',    label:'Fish' },
+    { key:'bodyboard',label:'Bodyboard' },
+    { key:'sup',     label:'SUP' },
+  ];
+
+  function renderEquipment() {
+    // Wetsuits
+    const wsGrid = document.querySelector('#wetsuits-container div');
+    if (wsGrid) wsGrid.innerHTML = WETSUIT_SIZES.map(s => `
+      <div style="text-align:center">
+        <div style="font-size:11px;font-weight:700;color:var(--gray-400);margin-bottom:4px;text-transform:uppercase">${s}</div>
+        <input class="equip-input" type="number" id="ws-${s.replace('/','_')}" min="0" placeholder="0" />
+        <div style="font-size:10px;color:#4a5a6e;margin-top:2px">fatos</div>
+      </div>`).join('');
+
+    // Boards
+    const bc = document.getElementById('boards-container');
+    bc.innerHTML = BOARD_TYPES.map(b => `
+      <div class="equip-row">
+        <div class="equip-label">${b.label}</div>
+        <input class="equip-input" type="number" id="bd-${b.key}" min="0" placeholder="0" />
+        <div class="equip-unit">pranchas</div>
+      </div>`).join('');
+  }
+
+  function getEquipment() {
+    const wetsuits = {};
+    WETSUIT_SIZES.forEach(s => {
+      const val = parseInt(document.getElementById(`ws-${s.replace('/','_')}`)?.value) || 0;
+      if (val > 0) wetsuits[s] = val;
+    });
+    const boards = {};
+    BOARD_TYPES.forEach(b => {
+      const val = parseInt(document.getElementById(`bd-${b.key}`)?.value) || 0;
+      if (val > 0) boards[b.key] = val;
+    });
+    return { wetsuits, boards, other: document.getElementById('f-other-equip').value.trim() };
+  }
+
+  // ─── PROGRESS ────────────────────────────────────────────────────────────
+  const TRACKED = ['f-school-name','f-location','f-meeting-point','f-contact-name','f-email','f-phone','f-wa-number','f-instagram','f-season','f-max-slot','f-branding'];
+
+  function updateProgress() {
+    let filled = 0;
+    TRACKED.forEach(id => { if (document.getElementById(id)?.value.trim()) filled++; });
+    const activeLessons = lessons.filter(l => l.active).length;
+    if (activeLessons > 0) filled++;
+    const selectedSlots = document.querySelectorAll('input[name="slot"]:checked').length;
+    if (selectedSlots > 0) filled++;
+    const pct = Math.round((filled / (TRACKED.length + 2)) * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-label').textContent = pct + '% preenchido';
+  }
+
+  // ─── PHOTO UPLOAD ─────────────────────────────────────────────────────────
+  let uploadedPhotos = []; // array of { name, dataUrl }
+
+  function handlePhotoUpload(input) {
+    const files = Array.from(input.files).slice(0, 8 - uploadedPhotos.length);
+    files.forEach(file => {
+      if (file.size > 5 * 1024 * 1024) { alert(`"${file.name}" é maior que 5 MB — ignorado.`); return; }
+      const reader = new FileReader();
+      reader.onload = e => {
+        // Compress via canvas to max 1200px wide
+        const img = new Image();
+        img.onload = () => {
+          const MAX = 1200;
+          const scale = img.width > MAX ? MAX / img.width : 1;
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width * scale;
+          canvas.height = img.height * scale;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+          uploadedPhotos.push({ name: file.name, dataUrl });
+          renderPhotoPreviews();
+          updateProgress();
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+    input.value = ''; // reset so same file can be re-added
+  }
+
+  function removePhoto(i) {
+    uploadedPhotos.splice(i, 1);
+    renderPhotoPreviews();
+    updateProgress();
+  }
+
+  function renderPhotoPreviews() {
+    const container = document.getElementById('photo-previews');
+    container.innerHTML = uploadedPhotos.map((p, i) => `
+      <div class="photo-thumb-wrap">
+        <img class="photo-thumb" src="${p.dataUrl}" title="${p.name}" />
+        <button type="button" onclick="removePhoto(${i})" title="Remover">✕</button>
+      </div>`).join('');
+    const drop = document.getElementById('photo-drop-area');
+    if (drop) drop.style.display = uploadedPhotos.length >= 8 ? 'none' : '';
+  }
+
+  // Drag-and-drop support
+  document.addEventListener('DOMContentLoaded', () => {
+    const area = document.getElementById('photo-drop-area');
+    if (!area) return;
+    area.addEventListener('dragover', e => { e.preventDefault(); area.style.borderColor='var(--cyan)'; });
+    area.addEventListener('dragleave', () => { area.style.borderColor=''; });
+    area.addEventListener('drop', e => {
+      e.preventDefault(); area.style.borderColor='';
+      const fakeInput = { files: e.dataTransfer.files };
+      handlePhotoUpload(fakeInput);
+    });
+  });
+
+  // ─── INIT ─────────────────────────────────────────────────────────────────
+  renderLessons();
+  renderSlots();
+  renderEquipment();
+
+  document.getElementById('parceiros-form').addEventListener('input', updateProgress);
+  updateProgress();
+
+  // ─── SUBMIT ───────────────────────────────────────────────────────────────
+  async function submitForm(e) {
+    e.preventDefault();
+
+    const btn     = document.getElementById('btn-submit');
+    const btnText = document.getElementById('btn-text');
+    const status  = document.getElementById('form-status');
+
+    // Collect
+    const v = id => document.getElementById(id)?.value.trim() || null;
+    const schoolName    = v('f-school-name');
+    const contactName   = v('f-contact-name');
+    const email         = v('f-email');
+    const phone         = v('f-phone');
+    const location      = v('f-location');
+    const meetingPoint  = v('f-meeting-point');
+    const waNumber      = v('f-wa-number');
+    const region        = v('f-region');
+    const years         = v('f-years');
+    const nif           = v('f-nif');
+    const monthlyRaw    = v('f-monthly-lessons');
+    const website       = v('f-website');
+    const instagram     = v('f-instagram');
+    const facebook      = v('f-facebook');
+    const tripadvisor   = v('f-tripadvisor');
+    const gmaps         = v('f-gmaps');
+    const logoUrl       = v('f-logo-url');
+    const photosLink    = v('f-photos-link');
+    const photo1        = v('f-photo1');
+    const photo2        = v('f-photo2');
+    const photo3        = v('f-photo3');
+    const photo4        = v('f-photo4');
+    const branding      = v('f-branding');
+    const role          = v('f-role');
+    const maxSlot       = v('f-max-slot');
+    const lessonDur     = v('f-lesson-duration');
+    const season        = v('f-season');
+    const otherEquip     = v('f-other-equip');
+    const noFeatures     = v('f-no-features');
+    const featureReqs    = v('f-feature-requests');
+    const special        = v('f-special');
+    const pricingNotes   = v('f-pricing-notes');
+    const howFound       = v('f-how-found');
+    const availability   = v('f-availability');
+    const notes          = v('f-notes');
+
+    const activeLessons = lessons.filter(l => l.active);
+    const lessonTypes   = activeLessons.map(l => l.name);
+    const avgPrice      = activeLessons.length ? Math.round(activeLessons.reduce((a,l)=>a+l.price,0)/activeLessons.length) : null;
+
+    const selectedSlots = Array.from(document.querySelectorAll('input[name="slot"]:checked')).map(c => c.value);
+    const selectedDays  = Array.from(document.querySelectorAll('input[name="day"]:checked')).map(c => c.value);
+    const selectedLangs = Array.from(document.querySelectorAll('input[name="lang"]:checked')).map(c => c.value);
+    const selectedFeats = Array.from(document.querySelectorAll('input[name="feat"]:checked')).map(c => c.value);
+    const equip         = getEquipment();
+
+    const photoLinks    = [v('f-photos-link'), v('f-logo-url')].filter(Boolean);
+    // uploaded photos stored as base64 (compressed)
+    const photoData     = uploadedPhotos.map(p => ({ name: p.name, data: p.dataUrl }));
+
+    // Validate
+    if (!schoolName || !contactName || !email || !phone || !location || !meetingPoint || !waNumber) {
+      status.className = 'error';
+      status.style.display = 'block';
+      status.textContent = '❌ Por favor preencha todos os campos obrigatórios (marcados com *).';
+      status.scrollIntoView({ behavior:'smooth', block:'nearest' });
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      status.className = 'error';
+      status.style.display = 'block';
+      status.textContent = '❌ Por favor introduza um email válido.';
+      return;
+    }
+
+    btn.disabled = true;
+    btnText.textContent = '⏳ A enviar...';
+    status.style.display = 'none';
+
+    // Build full notes text
+    const notesText = [
+      `=== CANDIDATURA SURFBOOK — ${schoolName} ===`,
+      ``,
+      `ESCOLA:`,
+      `  Nome: ${schoolName}`, `  Praia/Local: ${location}`,
+      `  Ponto de encontro: ${meetingPoint}`, `  Região: ${region||'—'}`,
+      `  Anos atividade: ${years||'—'}`, `  NIF: ${nif||'—'}`,
+      `  Aulas/mês: ${monthlyRaw||'—'}`, `  Época: ${season||'—'}`,
+      ``,
+      `ONLINE:`,
+      `  Website: ${website||'—'}`, `  Instagram: ${instagram||'—'}`,
+      `  Facebook: ${facebook||'—'}`, `  TripAdvisor: ${tripadvisor||'—'}`,
+      `  Google Maps: ${gmaps||'—'}`,
+      photoLinks.length ? `  Links de fotos/logo: ${photoLinks.join(' | ')}` : '',
+      `  Fotos enviadas: ${photoData.length ? photoData.map(p=>p.name).join(', ') : '—'}`,
+      `  Branding: ${branding||'—'}`,
+      ``,
+      `RESPONSÁVEL:`,
+      `  Nome: ${contactName}`, `  Cargo: ${role||'—'}`,
+      `  Email: ${email}`, `  Tel: ${phone}`,
+      `  WA reservas: ${waNumber}`,
+      ``,
+      `AULAS ATIVAS:`,
+      ...activeLessons.map(l => `  ${l.name}: €${l.price}/pax · ${l.dur}min · máx ${l.max} · mín ${l.min}`),
+      `  Notas preços: ${pricingNotes||'—'}`,
+      ``,
+      `HORÁRIOS:`,
+      `  Slots: ${selectedSlots.join(', ')||'—'}`,
+      `  Máx/slot: ${maxSlot||'—'}`, `  Duração: ${lessonDur||'—'} min`,
+      `  Dias: ${selectedDays.join(', ')||'—'}`,
+      ``,
+      `EQUIPAMENTO:`,
+      `  Fatos: ${Object.entries(equip.wetsuits).map(([k,v])=>`${k}:${v}`).join(', ')||'não indicado'}`,
+      `  Pranchas: ${Object.entries(equip.boards).map(([k,v])=>`${k}:${v}`).join(', ')||'não indicado'}`,
+      `  Outro: ${otherEquip||'—'}`,
+      ``,
+      `IDIOMAS: ${selectedLangs.join(', ')||'—'}`,
+      `FUNCIONALIDADES ATIVAS: ${selectedFeats.join(', ')||'—'}`,
+      `NÃO QUER: ${noFeatures||'—'}`,
+      `PEDIDOS DE NOVAS FUNCIONALIDADES: ${featureReqs||'—'}`,
+      `PEDIDOS ESPECIAIS: ${special||'—'}`,
+      `COMO ENCONTROU: ${howFound||'—'}`,
+      `DISPONIBILIDADE: ${availability||'—'}`,
+      `NOTAS: ${notes||'—'}`,
+      ``,
+      `Data: ${new Date().toLocaleString('pt-PT',{timeZone:'Europe/Lisbon'})}`,
+    ].filter(l => l !== '').join('\n');
+
+    // Supabase payload
+    const payload = {
+      school_name:     schoolName,
+      contact_name:    contactName,
+      email, phone,
+      wa_number:       waNumber,
+      location,
+      meeting_point:   meetingPoint,
+      region,
+      website,
+      instagram,
+      facebook,
+      tripadvisor,
+      google_maps:     gmaps,
+      logo_url:        v('f-logo-url'),
+      photos:          photoLinks.length ? photoLinks : null,
+      monthly_lessons: monthlyRaw ? parseInt(monthlyRaw) : null,
+      lesson_types:    lessonTypes.length ? lessonTypes : null,
+      lesson_details:  activeLessons.length ? activeLessons : null,
+      avg_price:       avgPrice,
+      typical_hours:   selectedSlots.join(', ') || null,
+      typical_slots:   selectedSlots.length ? selectedSlots : null,
+      max_per_slot:    maxSlot ? parseInt(maxSlot) : null,
+      season,
+      equipment:       equip,
+      languages:       selectedLangs.length ? selectedLangs : null,
+      features:        selectedFeats.length ? selectedFeats : null,
+      how_found:       howFound,
+      special_requests: [featureReqs, special, noFeatures, pricingNotes].filter(Boolean).join('\n---\n') || null,
+      notes:           notesText,
+      status:          'new',
+    };
+
+    let sbOk = false;
+    try {
+      const { error } = await sb.from('leads').insert([payload]);
+      if (!error) sbOk = true;
+      else console.warn('Supabase leads error:', error.message);
+    } catch(err) { console.warn('Supabase exception:', err); }
+
+    // FormSubmit email
+    let emailOk = false;
+    try {
+      const resp = await fetch(`https://formsubmit.co/ajax/${ADMIN_EMAIL}`, {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json', Accept:'application/json' },
+        body: JSON.stringify({
+          _subject: `🏄 Nova candidatura SurfBook — ${schoolName}`,
+          _template: 'box', _captcha: 'false',
+          escola: schoolName, praia: location, ponto_encontro: meetingPoint,
+          regiao: region||'—', wa_reservas: waNumber,
+          responsavel: `${contactName} (${role||'—'})`,
+          email, telemovel: phone,
+          website: website||'—', instagram: instagram||'—',
+          aulas_mes: monthlyRaw||'—', epoca: season||'—',
+          modalidades: activeLessons.map(l=>`${l.name} €${l.price}`).join(', ')||'—',
+          horarios: selectedSlots.join(', ')||'—',
+          max_slot: maxSlot||'—',
+          fatos: Object.entries(equip.wetsuits).map(([k,v])=>`${k}:${v}`).join(' ')||'—',
+          idiomas: selectedLangs.join(', ')||'—',
+          funcionalidades: selectedFeats.join(', ')||'—',
+          pedidos_funcionalidades: featureReqs||'—',
+          pedidos_especiais: special||'—',
+          como_encontrou: howFound||'—',
+          fotos_upload: photoData.length ? `${photoData.length} foto(s) enviadas: ${photoData.map(p=>p.name).join(', ')}` : '—',
+          fotos_link: photoLinks.join(', ')||'—',
+          supabase_ok: sbOk ? 'SIM' : 'NÃO',
+          message: notesText,
+        }),
+      });
+      const rj = await resp.json().catch(()=>({}));
+      emailOk = resp.ok && rj.success !== false;
+    } catch(err) { console.warn('FormSubmit error:', err); }
+
+    btn.disabled = false;
+    btnText.textContent = '🚀 Enviar Candidatura';
+
+    if (sbOk || emailOk) {
+      status.className = 'success';
+      status.style.display = 'block';
+      status.innerHTML = `
+        <strong>✅ Candidatura enviada com sucesso!</strong><br>
+        Obrigado, <strong>${contactName}</strong>! Recebemos a candidatura da <strong>${schoolName}</strong>
+        e entraremos em contacto em menos de 24 horas.<br><br>
+        Enquanto espera, pode consultar a nossa <a href="/proposta" style="color:var(--cyan)">proposta comercial</a>
+        ou falar diretamente pelo <a href="https://wa.me/351962800400?text=${encodeURIComponent('Olá! Acabei de enviar a candidatura da '+schoolName+' para a plataforma SurfBook.')}" style="color:var(--cyan)" target="_blank">WhatsApp</a>.
+      `;
+      document.getElementById('parceiros-form').reset();
+      lessons = DEFAULT_LESSONS.map(l => ({...l}));
+      renderLessons();
+      renderSlots();
+      updateProgress();
+    } else {
+      status.className = 'error';
+      status.style.display = 'block';
+      status.innerHTML = `❌ Erro ao enviar. Tente novamente ou contacte diretamente: <a href="mailto:${ADMIN_EMAIL}" style="color:var(--cyan)">${ADMIN_EMAIL}</a>`;
+    }
+
+    status.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+</script>
+</body>
+</html>
