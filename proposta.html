@@ -1,0 +1,1956 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SurfBook — Proposta Comercial</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:      #050D1A;
+      --navy-mid:  #0A1A30;
+      --navy-card: #0D2040;
+      --ocean:     #0070F3;
+      --cyan:      #00CFFD;
+      --cyan-soft: #00b4d8;
+      --white:     #FFFFFF;
+      --gray-100:  #F0F4F8;
+      --gray-200:  #CBD5E1;
+      --gray-400:  #94A3B8;
+      --gold:      #F59E0B;
+      --green:     #10B981;
+      --radius:    12px;
+      --shadow:    0 4px 24px rgba(0,0,0,0.35);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                   Helvetica, Arial, sans-serif;
+      background: var(--navy);
+      color: var(--white);
+      line-height: 1.65;
+      font-size: 15px;
+    }
+
+    /* PRINT BAR */
+    #print-bar {
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      background: rgba(5,13,26,0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(0,207,253,0.2);
+      padding: 10px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    #print-bar .brand { font-weight: 700; font-size: 14px; color: var(--cyan); letter-spacing: 0.05em; }
+    #print-bar button {
+      background: linear-gradient(135deg, var(--ocean), var(--cyan));
+      color: var(--white);
+      border: none;
+      border-radius: 8px;
+      padding: 9px 22px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity .2s;
+    }
+    #print-bar button:hover { opacity: 0.85; }
+
+    /* LAYOUT */
+    .wrapper { max-width: 920px; margin: 0 auto; padding: 0 32px 80px; }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      padding: 80px 20px 64px;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,112,243,0.25) 0%, transparent 70%);
+      border-bottom: 1px solid rgba(0,207,253,0.12);
+      margin-bottom: 60px;
+      position: relative;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(0,207,253,0.12);
+      border: 1px solid rgba(0,207,253,0.35);
+      color: var(--cyan);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 5px 16px;
+      border-radius: 999px;
+      margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-size: clamp(32px, 6vw, 52px);
+      font-weight: 900;
+      line-height: 1.1;
+      background: linear-gradient(135deg, var(--white) 20%, var(--cyan) 80%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+      letter-spacing: -0.02em;
+    }
+    .hero-tagline {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--cyan);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .hero-sub {
+      font-size: 17px;
+      color: var(--gray-200);
+      max-width: 580px;
+      margin: 0 auto 36px;
+      line-height: 1.7;
+    }
+    .hero-meta { font-size: 12px; color: var(--gray-400); letter-spacing: 0.04em; }
+    .hero-meta span { color: var(--cyan); font-weight: 600; }
+
+    /* VALUE PILLS */
+    .hero-pills {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+    .hero-pill {
+      background: rgba(0,207,253,0.08);
+      border: 1px solid rgba(0,207,253,0.2);
+      color: var(--gray-200);
+      font-size: 12.5px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .hero-pill strong { color: var(--white); }
+
+    /* SECTION HEADERS */
+    .section { margin-bottom: 56px; }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 24px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(0,207,253,0.18);
+    }
+    .section-num {
+      background: linear-gradient(135deg, var(--ocean), var(--cyan));
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 800;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .section-title { font-size: 19px; font-weight: 700; color: var(--white); }
+
+    /* CARD */
+    .card {
+      background: var(--navy-card);
+      border: 1px solid rgba(0,207,253,0.12);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      box-shadow: var(--shadow);
+    }
+    .card p { color: var(--gray-200); font-size: 15px; }
+    .card p + p { margin-top: 10px; }
+
+    /* HIGHLIGHT BOX */
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(0,112,243,0.15) 0%, rgba(0,207,253,0.08) 100%);
+      border-left: 4px solid var(--cyan);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 18px 24px;
+      color: var(--gray-100);
+      margin-top: 16px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* SUCCESS BOX */
+    .success-box {
+      background: linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(0,207,253,0.06) 100%);
+      border-left: 4px solid var(--green);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 18px 24px;
+      color: var(--gray-100);
+      margin-top: 16px;
+      font-size: 14px;
+    }
+
+    /* PLATFORMS — 2 columns */
+    .platforms-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .platform-card {
+      background: var(--navy-card);
+      border: 1px solid rgba(0,207,253,0.15);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .platform-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--ocean), var(--cyan));
+    }
+    .platform-card.green::before { background: linear-gradient(90deg, var(--green), #34d399); }
+    .platform-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .platform-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--ocean), var(--cyan));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .platform-card.green .platform-icon { background: linear-gradient(135deg, var(--green), #34d399); }
+    .platform-name { font-size: 15px; font-weight: 700; color: var(--white); }
+    .platform-sub { font-size: 11px; color: var(--cyan); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+    .platform-card.green .platform-sub { color: var(--green); }
+    .platform-desc { font-size: 13px; color: var(--gray-400); line-height: 1.55; margin-bottom: 14px; }
+    .platform-bullets { display: flex; flex-direction: column; gap: 6px; }
+    .platform-bullet {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 12.5px;
+      color: var(--gray-200);
+      line-height: 1.4;
+    }
+    .bullet-dot { width: 6px; height: 6px; background: var(--cyan); border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+    .platform-card.green .bullet-dot { background: var(--green); }
+
+    /* FLOW STEPS */
+    .flow { display: flex; flex-direction: column; gap: 16px; }
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+      background: var(--navy-card);
+      border: 1px solid rgba(0,207,253,0.10);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      transition: border-color .2s;
+    }
+    .flow-step:hover { border-color: rgba(0,207,253,0.3); }
+    .flow-icon {
+      width: 42px; height: 42px;
+      background: linear-gradient(135deg, var(--ocean), var(--cyan));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .flow-body { flex: 1; }
+    .flow-step-num { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--cyan); margin-bottom: 4px; }
+    .flow-step-title { font-size: 14px; font-weight: 600; color: var(--white); margin-bottom: 4px; }
+    .flow-step-desc { font-size: 13px; color: var(--gray-400); line-height: 1.5; }
+    .flow-connector { display: flex; justify-content: flex-start; padding-left: 39px; }
+    .flow-connector-line { width: 2px; height: 14px; background: linear-gradient(to bottom, var(--ocean), transparent); border-radius: 2px; }
+
+    /* FEATURES GRID */
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+    .feature-item {
+      background: var(--navy-card);
+      border: 1px solid rgba(0,207,253,0.10);
+      border-radius: 10px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      transition: border-color .2s;
+    }
+    .feature-item:hover { border-color: rgba(0,207,253,0.25); }
+    .feature-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+    .feature-text { font-size: 13.5px; color: var(--gray-200); line-height: 1.45; }
+    .feature-text strong { display: block; color: var(--white); font-size: 14px; margin-bottom: 2px; }
+
+    /* TWO COL LIST */
+    .two-col-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; }
+    .list-item { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--gray-200); line-height: 1.45; }
+    .list-dot { width: 8px; height: 8px; background: var(--cyan); border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+
+    /* DELIVERABLES */
+    .deliverables { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+    .deliverable-card {
+      background: linear-gradient(135deg, rgba(0,112,243,0.12) 0%, rgba(0,207,253,0.06) 100%);
+      border: 1px solid rgba(0,207,253,0.20);
+      border-radius: 10px;
+      padding: 22px 18px;
+      text-align: center;
+    }
+    .deliverable-icon { font-size: 28px; margin-bottom: 10px; }
+    .deliverable-title { font-size: 13px; font-weight: 600; color: var(--white); line-height: 1.4; }
+
+    /* PRICING */
+    .pricing-intro {
+      background: var(--navy-card);
+      border: 1px solid rgba(0,207,253,0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin-bottom: 24px;
+    }
+    .pricing-intro p { color: var(--gray-200); font-size: 15px; line-height: 1.7; }
+    .pricing-intro p + p { margin-top: 10px; }
+    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .plan-card {
+      background: var(--navy-card);
+      border: 1px solid rgba(0,207,253,0.14);
+      border-radius: var(--radius);
+      padding: 28px 22px;
+      text-align: center;
+      position: relative;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .plan-card:hover { transform: translateY(-4px); box-shadow: 0 8px 32px rgba(0,112,243,0.2); }
+    .plan-card.featured { border-color: var(--ocean); background: linear-gradient(180deg, rgba(0,112,243,0.18) 0%, var(--navy-card) 60%); }
+    .plan-badge {
+      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--ocean), var(--cyan));
+      color: var(--white); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 4px 14px; border-radius: 999px; white-space: nowrap;
+    }
+    .plan-name { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--cyan); margin-bottom: 16px; }
+    .plan-setup { font-size: 30px; font-weight: 800; color: var(--white); line-height: 1; margin-bottom: 4px; }
+    .plan-setup-label { font-size: 11px; color: var(--gray-400); margin-bottom: 18px; }
+    .plan-commission { background: rgba(0,207,253,0.1); border-radius: 8px; padding: 10px 12px; margin-bottom: 18px; }
+    .plan-commission-pct { font-size: 24px; font-weight: 800; color: var(--cyan); }
+    .plan-commission-label { font-size: 11px; color: var(--gray-400); }
+    .plan-ideal { font-size: 12.5px; color: var(--gray-400); line-height: 1.45; font-style: italic; }
+    .pricing-note { margin-top: 20px; text-align: center; font-size: 13px; color: var(--gray-400); }
+    .pricing-note strong { color: var(--green); }
+
+    /* INTAKE FORM */
+    .intake-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .intake-field {
+      background: var(--navy-card);
+      border: 1px solid rgba(0,207,253,0.12);
+      border-radius: 10px;
+      padding: 16px 20px;
+    }
+    .intake-field.full { grid-column: 1 / -1; }
+    .intake-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--cyan); margin-bottom: 6px; }
+    .intake-value {
+      font-size: 14px;
+      color: var(--gray-400);
+      border-bottom: 1px dashed rgba(0,207,253,0.2);
+      padding-bottom: 4px;
+      min-height: 22px;
+    }
+    .intake-hint { font-size: 11px; color: rgba(148,163,184,0.5); margin-top: 4px; }
+
+    /* DEMO LINKS */
+    .demo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+    .demo-card {
+      background: var(--navy-card);
+      border: 1px solid rgba(0,207,253,0.12);
+      border-radius: 10px;
+      padding: 20px 22px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .demo-card-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gray-400); }
+    .demo-card-title { font-size: 14px; font-weight: 600; color: var(--white); }
+    .demo-card-desc { font-size: 12px; color: var(--gray-400); margin-bottom: 4px; }
+    .demo-card a { font-size: 12px; color: var(--cyan); text-decoration: none; word-break: break-all; transition: opacity .2s; }
+    .demo-card a:hover { opacity: 0.75; text-decoration: underline; }
+    .demo-credentials {
+      margin-top: 16px;
+      background: rgba(0,207,253,0.06); border: 1px solid rgba(0,207,253,0.18);
+      border-radius: 10px; padding: 16px 24px; display: flex; gap: 32px; flex-wrap: wrap;
+    }
+    .cred-item { display: flex; flex-direction: column; gap: 3px; }
+    .cred-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-400); }
+    .cred-value { font-size: 13px; font-weight: 600; color: var(--cyan); font-family: monospace; }
+
+    /* SHOWCASE */
+    .showcase-block {
+      margin-bottom: 56px;
+      background: rgba(255,255,255,.02);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    .showcase-header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 22px 28px; border-bottom: 1px solid rgba(255,255,255,.07);
+      background: rgba(255,255,255,.025);
+    }
+    .showcase-header-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
+    }
+    .showcase-header-icon.blue { background: rgba(0,112,243,.2); }
+    .showcase-header-icon.green { background: rgba(16,185,129,.2); }
+    .showcase-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--gray-400); }
+    .showcase-title { font-size: 16px; font-weight: 800; color: var(--white); }
+    .showcase-desc { font-size: 12.5px; color: var(--gray-400); margin-top: 1px; }
+    .showcase-body {
+      display: grid; grid-template-columns: 1fr 280px; gap: 0;
+    }
+    .showcase-body.reverse { grid-template-columns: 280px 1fr; }
+    @media (max-width: 760px) {
+      .showcase-body, .showcase-body.reverse { grid-template-columns: 1fr; }
+    }
+    .showcase-features-col {
+      padding: 28px 28px; display: flex; flex-direction: column; gap: 16px;
+    }
+    .showcase-feature {
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .sf-icon {
+      width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 15px;
+      background: rgba(0,207,253,.1);
+    }
+    .sf-title { font-size: 13px; font-weight: 700; color: var(--white); margin-bottom: 2px; }
+    .sf-desc { font-size: 11.5px; color: var(--gray-400); line-height: 1.5; }
+
+    /* Device: phone */
+    .device-phone-col {
+      background: linear-gradient(160deg, rgba(0,112,243,.1) 0%, rgba(0,207,253,.06) 100%);
+      display: flex; align-items: center; justify-content: center; padding: 28px 20px;
+      border-left: 1px solid rgba(255,255,255,.06);
+    }
+    .showcase-body.reverse .device-phone-col {
+      border-left: none; border-right: 1px solid rgba(255,255,255,.06);
+    }
+    .phone-frame {
+      width: 236px;
+      background: #111827;
+      border-radius: 36px;
+      border: 7px solid #1f2937;
+      box-shadow: 0 20px 60px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.06);
+      overflow: hidden;
+      position: relative;
+    }
+    .phone-notch {
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 80px; height: 22px; background: #111827; border-radius: 0 0 14px 14px; z-index: 2;
+    }
+    .phone-screen {
+      width: 100%; height: 460px; overflow: hidden; position: relative;
+    }
+    .phone-screen iframe {
+      width: 390px; height: 780px;
+      transform: scale(0.606); transform-origin: top left;
+      border: none; pointer-events: none;
+    }
+    .phone-open-btn {
+      display: block; text-align: center; padding: 8px 0; font-size: 11.5px; font-weight: 700;
+      color: var(--cyan); text-decoration: none; background: rgba(0,207,253,.08);
+      border-top: 1px solid rgba(0,207,253,.15); transition: background .15s;
+    }
+    .phone-open-btn:hover { background: rgba(0,207,253,.15); }
+
+    /* Device: browser */
+    .browser-frame {
+      width: 100%; background: #111827;
+      border-radius: 10px; border: 1px solid #1f2937;
+      box-shadow: 0 12px 40px rgba(0,0,0,.5);
+      overflow: hidden;
+    }
+    .browser-bar {
+      background: #1a2535; padding: 8px 12px;
+      display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .browser-dots { display: flex; gap: 5px; }
+    .browser-dot { width: 9px; height: 9px; border-radius: 50%; }
+    .browser-dot:nth-child(1) { background: #ef4444; }
+    .browser-dot:nth-child(2) { background: #f59e0b; }
+    .browser-dot:nth-child(3) { background: #10b981; }
+    .browser-url {
+      flex: 1; background: rgba(255,255,255,.07); border-radius: 5px;
+      padding: 4px 10px; font-size: 10.5px; color: var(--gray-400); font-family: monospace;
+    }
+    .browser-screen { width: 100%; height: 340px; overflow: hidden; }
+    .browser-screen iframe { width: 1200px; height: 800px; transform: scale(0.42); transform-origin: top left; border: none; pointer-events: none; }
+    .showcase-browser-col {
+      padding: 24px 28px; display: flex; flex-direction: column; justify-content: center;
+    }
+    .personalized-note {
+      margin-top: 28px; padding: 18px 22px;
+      background: linear-gradient(135deg, rgba(0,207,253,.08), rgba(0,112,243,.06));
+      border: 1px solid rgba(0,207,253,.2); border-radius: 12px;
+      font-size: 13px; line-height: 1.65; color: var(--gray-200);
+    }
+    .personalized-note strong { color: var(--cyan); }
+    @media print {
+      .showcase-block { break-inside: avoid; }
+      .phone-screen iframe, .browser-screen iframe { display: none; }
+      .phone-screen::after { content: '[Site de Reservas — demo ao vivo em auditoria-25b.pages.dev/surf]'; display:flex; align-items:center; justify-content:center; height:100%; font-size:11px; color:#64748b; }
+      .browser-screen::after { content: '[Painel Admin — demo ao vivo em auditoria-25b.pages.dev/admin]'; display:flex; align-items:center; justify-content:center; height:100%; font-size:11px; color:#64748b; }
+    }
+
+    /* TIMELINE */
+    .steps-timeline { display: flex; flex-direction: column; gap: 0; }
+    .timeline-item { display: flex; gap: 20px; }
+    .timeline-left { display: flex; flex-direction: column; align-items: center; }
+    .timeline-circle {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--ocean), var(--cyan));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 800; color: var(--white); flex-shrink: 0;
+    }
+    .timeline-line { width: 2px; flex: 1; min-height: 20px; background: linear-gradient(to bottom, rgba(0,112,243,0.5), rgba(0,207,253,0.1)); margin: 4px 0; }
+    .timeline-item:last-child .timeline-line { display: none; }
+    .timeline-body { padding: 6px 0 24px; flex: 1; }
+    .timeline-title { font-size: 14.5px; font-weight: 600; color: var(--white); margin-bottom: 3px; }
+    .timeline-desc { font-size: 13px; color: var(--gray-400); line-height: 1.5; }
+
+    /* CTA BLOCK */
+    .cta-block {
+      background: linear-gradient(135deg, rgba(0,112,243,0.2) 0%, rgba(0,207,253,0.1) 100%);
+      border: 1px solid rgba(0,207,253,0.25);
+      border-radius: var(--radius);
+      padding: 36px 40px;
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .cta-block h3 { font-size: 20px; font-weight: 700; color: var(--white); margin-bottom: 12px; }
+    .cta-block p { font-size: 14px; color: var(--gray-200); max-width: 520px; margin: 0 auto 24px; line-height: 1.6; }
+    .cta-contacts { display: flex; justify-content: center; gap: 28px; flex-wrap: wrap; }
+    .cta-contact { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .cta-contact-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-400); }
+    .cta-contact-value { font-size: 15px; font-weight: 600; color: var(--cyan); }
+
+    /* FOOTER */
+    .footer {
+      border-top: 1px solid rgba(0,207,253,0.15);
+      margin-top: 20px;
+      padding-top: 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .footer-brand {
+      font-size: 22px; font-weight: 900;
+      background: linear-gradient(135deg, var(--white), var(--cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .footer-tagline { font-size: 12px; color: var(--gray-400); margin-top: 4px; }
+    .contact-grid { display: flex; gap: 28px; flex-wrap: wrap; }
+    .contact-item { display: flex; flex-direction: column; gap: 3px; }
+    .contact-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-400); }
+    .contact-value { font-size: 13.5px; color: var(--cyan); font-weight: 600; }
+    .footer-copy { margin-top: 28px; text-align: center; font-size: 11px; color: rgba(148,163,184,0.5); letter-spacing: 0.03em; }
+
+    /* PRINT */
+    @media print {
+      @page { size: A4; margin: 16mm 18mm; }
+      #print-bar { display: none !important; }
+      body { background: #fff !important; color: #111 !important; font-size: 10.5pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .wrapper { max-width: 100%; padding: 0; }
+      .hero { background: none !important; border-bottom: 2px solid #0070F3; padding: 20px 0 18px; margin-bottom: 28px; }
+      .hero h1 { background: none !important; -webkit-text-fill-color: #050D1A !important; color: #050D1A !important; font-size: 24pt; }
+      .hero-sub { color: #333 !important; }
+      .hero-meta, .hero-tagline { color: #555 !important; }
+      .hero-badge { background: #e0f2fe !important; border-color: #0070F3 !important; color: #0070F3 !important; }
+      .hero-pill { background: #f0f9ff !important; border-color: #0070F3 !important; color: #334155 !important; }
+      .card, .flow-step, .feature-item, .plan-card, .demo-card, .deliverable-card, .platform-card, .intake-field, .pricing-intro { background: #f8fafc !important; border: 1px solid #cbd5e1 !important; box-shadow: none !important; }
+      .card p, .flow-step-desc, .feature-text, .list-item, .timeline-desc, .platform-desc, .platform-bullet, .pricing-intro p { color: #334155 !important; }
+      .section-title, .flow-step-title, .feature-text strong, .deliverable-title, .plan-setup, .timeline-title, .platform-name, .cta-block h3 { color: #050D1A !important; }
+      .section-num, .flow-icon, .timeline-circle, .platform-icon { background: #0070F3 !important; color: #fff !important; }
+      .flow-step-num, .demo-card-label, .cred-label, .contact-label, .plan-commission-label, .intake-label, .platform-sub, .cta-contact-label { color: #64748b !important; }
+      .plan-commission { background: #e0f2fe !important; }
+      .plan-commission-pct, .plan-name { color: #0070F3 !important; }
+      .plan-ideal, .pricing-note, .plan-setup-label { color: #475569 !important; }
+      .demo-credentials { background: #f0f9ff !important; border-color: #0070F3 !important; }
+      .cred-value, .demo-card a, .contact-value, .cta-contact-value { color: #0070F3 !important; }
+      .section-header { border-bottom-color: #0070F3; }
+      .list-dot, .bullet-dot { background: #0070F3 !important; }
+      .highlight-box { background: #f0f9ff !important; border-left-color: #0070F3 !important; color: #334155 !important; }
+      .success-box { background: #f0fdf4 !important; border-left-color: #10B981 !important; color: #334155 !important; }
+      .cta-block { background: #f0f9ff !important; border-color: #0070F3 !important; }
+      .intake-value { color: #64748b !important; border-bottom-color: #0070F3 !important; }
+      .footer { border-top-color: #0070F3; margin-top: 24px; padding-top: 18px; }
+      .footer-brand { background: none !important; -webkit-text-fill-color: #050D1A !important; }
+      .footer-tagline, .footer-copy { color: #64748b !important; }
+      .plan-card.featured { background: #f0f9ff !important; }
+      a { color: #0070F3 !important; text-decoration: underline; }
+      .platform-card::before { background: #0070F3 !important; }
+      .section { page-break-inside: avoid; }
+      .pricing-grid, .platforms-grid, .intake-grid { page-break-inside: avoid; }
+    }
+
+    @media screen and (max-width: 700px) {
+      .wrapper { padding: 0 18px 60px; }
+      .pricing-grid { grid-template-columns: 1fr; }
+      .two-col-list { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr; }
+      .platforms-grid { grid-template-columns: 1fr; }
+      .intake-grid { grid-template-columns: 1fr; }
+      .intake-field.full { grid-column: 1; }
+      .footer { flex-direction: column; align-items: flex-start; }
+      #print-bar { padding: 10px 18px; }
+      .cta-contacts { flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="print-bar">
+  <span class="brand">SurfBook — Proposta Comercial</span>
+  <button onclick="window.print()">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 6 2 18 2 18 9"/>
+      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+      <rect x="6" y="14" width="12" height="8"/>
+    </svg>
+    Imprimir / Guardar PDF
+  </button>
+</div>
+
+<div class="wrapper">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">Proposta Comercial · Confidencial · Junho 2026</div>
+    <h1>SurfBook</h1>
+    <p class="hero-tagline">Reservas Online para Escolas de Surf</p>
+    <p class="hero-sub">
+      A plataforma que transforma o seu WhatsApp numa maquina de reservas automatica —
+      clientes marcam aulas 24h por dia, a escola gere tudo num dashboard profissional,
+      sem mensalidades fixas.
+    </p>
+    <div class="hero-pills">
+      <span class="hero-pill">Reservas online <strong>24/7</strong></span>
+      <span class="hero-pill">WhatsApp <strong>automatico</strong></span>
+      <span class="hero-pill">Dashboard <strong>em tempo real</strong></span>
+      <span class="hero-pill">Sem mensalidades. <strong>So paga quando vende.</strong></span>
+    </div>
+    <div class="hero-meta" id="hero-meta">
+      Preparado para: <span id="hero-escola">Escolas de Surf · Portugal</span>
+      &nbsp;|&nbsp;
+      Contacto: <span>Ivo Casimiro · +351 962 800 400</span>
+    </div>
+  </section>
+
+  <!-- 01 — O QUE E -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <div class="section-title">O que e o SurfBook</div>
+    </div>
+    <div class="card">
+      <p>
+        O <strong>SurfBook</strong> e um sistema de gestao de marcacoes online desenvolvido
+        especificamente para escolas de surf. O cliente entra no link da sua escola,
+        escolhe a aula, data e hora, e envia a reserva diretamente para o
+        <strong>WhatsApp da escola</strong> — tudo pre-preenchido, sem perguntas.
+      </p>
+      <p>
+        O dono gere tudo num <strong>dashboard profissional e exclusivo</strong>: confirma
+        reservas com um clique, ve o briefing das proximas aulas, sabe que equipamento
+        preparar para cada aluno e acompanha o negocio em tempo real, em qualquer dispositivo.
+      </p>
+      <div class="highlight-box">
+        <strong>O objetivo e simples:</strong> a sua escola parece maior e mais profissional,
+        poupa horas de mensagens manuais, nao perde nenhuma reserva por falta de resposta
+        e o cliente tem uma experiencia moderna — tudo sem alterar o que ja faz bem.
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 — AS DUAS PLATAFORMAS -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <div class="section-title">As Duas Plataformas da sua Escola</div>
+    </div>
+    <div class="platforms-grid">
+
+      <div class="platform-card">
+        <div class="platform-header">
+          <div class="platform-icon">🏄</div>
+          <div>
+            <div class="platform-sub">Para os seus clientes</div>
+            <div class="platform-name">Site de Reservas</div>
+          </div>
+        </div>
+        <p class="platform-desc">
+          Um site limpo e rapido, com o nome e identidade da sua escola,
+          que os seus clientes usam para marcar aulas a qualquer hora, em qualquer idioma.
+          Este e o link que partilha nas redes sociais, Google e boca-a-boca.
+        </p>
+        <div class="platform-bullets">
+          <div class="platform-bullet"><div class="bullet-dot"></div>Escolha de aula, data e horario disponivel</div>
+          <div class="platform-bullet"><div class="bullet-dot"></div>Dados dos participantes: peso, altura, nivel</div>
+          <div class="platform-bullet"><div class="bullet-dot"></div>Calculo automatico do fato de surf por pessoa</div>
+          <div class="platform-bullet"><div class="bullet-dot"></div>Reserva enviada via WhatsApp com 1 clique</div>
+          <div class="platform-bullet"><div class="bullet-dot"></div>Confirmacao por email enviada automaticamente ao cliente</div>
+          <div class="platform-bullet"><div class="bullet-dot"></div>Disponivel em 7 idiomas: PT, EN, FR, DE, ES, NL e PT-BR</div>
+          <div class="platform-bullet"><div class="bullet-dot"></div>Calendario com disponibilidade em tempo real</div>
+        </div>
+      </div>
+
+      <div class="platform-card green">
+        <div class="platform-header">
+          <div class="platform-icon">📊</div>
+          <div>
+            <div class="platform-sub">Para o dono da escola</div>
+            <div class="platform-name">Painel de Administracao</div>
+          </div>
+        </div>
+        <p class="platform-desc">
+          O seu centro de comando privado. Ve todas as reservas, confirma ou cancela
+          com um clique, prepara o dia e comunica com clientes — tudo num so lugar,
+          acessivel do telemovel ou computador.
+        </p>
+        <div class="platform-bullets">
+          <div class="platform-bullet"><div class="bullet-dot"></div>Notificacao imediata de cada nova reserva</div>
+          <div class="platform-bullet"><div class="bullet-dot"></div>Confirmar / cancelar com resposta automatica ao cliente</div>
+          <div class="platform-bullet"><div class="bullet-dot"></div>Briefing diario com alunos e equipamento a preparar</div>
+          <div class="platform-bullet"><div class="bullet-dot"></div>Calendario mensal com mapa de ocupacao</div>
+          <div class="platform-bullet"><div class="bullet-dot"></div>Estado de preenchimento por hora e por dia</div>
+          <div class="platform-bullet"><div class="bullet-dot"></div>Marcacao manual pelo admin com verificacao de disponibilidade</div>
+          <div class="platform-bullet"><div class="bullet-dot"></div>Calculo automatico do preco e equipamento por reserva</div>
+          <div class="platform-bullet"><div class="bullet-dot"></div>Analise historica com graficos mensais e anuais</div>
+          <div class="platform-bullet"><div class="bullet-dot"></div>Botao WhatsApp direto para contactar cada cliente</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 03 — COMO FUNCIONA -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <div class="section-title">Como Funciona — Passo a Passo</div>
+    </div>
+    <div class="flow">
+
+      <div class="flow-step">
+        <div class="flow-icon">🔗</div>
+        <div class="flow-body">
+          <div class="flow-step-num">Passo 1 — Cliente</div>
+          <div class="flow-step-title">Acede ao link da escola</div>
+          <div class="flow-step-desc">
+            O cliente clica no link que a escola partilha (Instagram, Google, site, etc.).
+            Ve as aulas disponiveis, o calendario com os horarios livres e escolhe o que pretende.
+          </div>
+        </div>
+      </div>
+      <div class="flow-connector"><div class="flow-connector-line"></div></div>
+
+      <div class="flow-step">
+        <div class="flow-icon">📋</div>
+        <div class="flow-body">
+          <div class="flow-step-num">Passo 2 — Cliente</div>
+          <div class="flow-step-title">Preenche os dados dos participantes</div>
+          <div class="flow-step-desc">
+            Indica o numero de pessoas, o peso, altura e nivel de experiencia de cada uma.
+            O sistema calcula o tamanho de fato de surf automaticamente — a escola ja sabe
+            o que preparar antes de atender a chamada.
+          </div>
+        </div>
+      </div>
+      <div class="flow-connector"><div class="flow-connector-line"></div></div>
+
+      <div class="flow-step">
+        <div class="flow-icon">💬</div>
+        <div class="flow-body">
+          <div class="flow-step-num">Passo 3 — Cliente</div>
+          <div class="flow-step-title">Envia a reserva via WhatsApp (1 clique)</div>
+          <div class="flow-step-desc">
+            O site gera automaticamente uma mensagem com todos os detalhes da aula e dos
+            participantes. O cliente carrega em "Enviar" no WhatsApp — a escola recebe
+            tudo organizado, sem precisar perguntar mais nada. O cliente recebe tambem
+            uma confirmacao por email automaticamente.
+          </div>
+        </div>
+      </div>
+      <div class="flow-connector"><div class="flow-connector-line"></div></div>
+
+      <div class="flow-step">
+        <div class="flow-icon">🔔</div>
+        <div class="flow-body">
+          <div class="flow-step-num">Passo 4 — Escola</div>
+          <div class="flow-step-title">Recebe notificacao instantanea no dashboard</div>
+          <div class="flow-step-desc">
+            Ao mesmo tempo que chega ao WhatsApp, a marcacao aparece no painel de administracao
+            com todos os detalhes: cliente, aula, data, hora, equipamento necessario.
+            Nada se perde. Nada e esquecido.
+          </div>
+        </div>
+      </div>
+      <div class="flow-connector"><div class="flow-connector-line"></div></div>
+
+      <div class="flow-step">
+        <div class="flow-icon">✅</div>
+        <div class="flow-body">
+          <div class="flow-step-num">Passo 5 — Escola</div>
+          <div class="flow-step-title">Confirma ou cancela com 1 clique</div>
+          <div class="flow-step-desc">
+            No painel, o dono clica em "Confirmar". O sistema envia automaticamente uma
+            mensagem WhatsApp ao cliente com a confirmacao, o ponto de encontro e todas
+            as instrucoes — sem escrever nada manualmente.
+          </div>
+        </div>
+      </div>
+      <div class="flow-connector"><div class="flow-connector-line"></div></div>
+
+      <div class="flow-step">
+        <div class="flow-icon">📲</div>
+        <div class="flow-body">
+          <div class="flow-step-num">Passo 6 — Cliente</div>
+          <div class="flow-step-title">Recebe confirmacao profissional no WhatsApp</div>
+          <div class="flow-step-desc">
+            O cliente recebe uma mensagem completa com: confirmacao da aula, ponto de encontro,
+            hora de chegada sugerida, lista do que trazer e uma nota de boas-vindas da escola.
+            Experiencia profissional, sem esforco adicional.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 04 — FUNCIONALIDADES -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <div class="section-title">O que o Dashboard da Escola Inclui</div>
+    </div>
+    <div class="features-grid">
+
+      <div class="feature-item">
+        <div class="feature-icon">📅</div>
+        <div class="feature-text">
+          <strong>Calendario Mensal</strong>
+          Visao geral de todos os dias com indicacao visual de ocupacao — de um relance percebe o mes.
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">📊</div>
+        <div class="feature-text">
+          <strong>Estado das Vagas por Hora</strong>
+          Para cada dia ve quantas vagas estao livres, em confirmacao e preenchidas em cada horario.
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">📋</div>
+        <div class="feature-text">
+          <strong>Briefing dos Proximos Dias</strong>
+          Lista detalhada das proximas aulas: alunos, equipamento a preparar, horarios — comeca o dia organizado.
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">🔔</div>
+        <div class="feature-text">
+          <strong>Notificacoes em Tempo Real</strong>
+          Cada nova reserva aparece no ecra imediatamente, sem precisar atualizar a pagina.
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">💬</div>
+        <div class="feature-text">
+          <strong>WhatsApp Direto para o Cliente</strong>
+          Qualquer marcacao tem um botao de contacto rapido para o cliente via WhatsApp.
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">✔️</div>
+        <div class="feature-text">
+          <strong>Gerir Marcacoes com 1 Clique</strong>
+          Confirmar, cancelar, marcar concluido ou reverter — tudo simples, tudo rapido.
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">🩱</div>
+        <div class="feature-text">
+          <strong>Equipamento Calculado Automaticamente</strong>
+          Fato de surf, prancha e acessorios indicados por pessoa com base no perfil do cliente.
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">🌍</div>
+        <div class="feature-text">
+          <strong>Site do Cliente em 7 Idiomas</strong>
+          PT, EN, FR, DE, ES, NL e PT-BR — detecao automatica por pais, sem configuracao manual.
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">➕</div>
+        <div class="feature-text">
+          <strong>Marcacao Manual pelo Admin</strong>
+          O dono regista reservas por telefone com verificacao de disponibilidade e calculo automatico de preco e equipamento.
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">📈</div>
+        <div class="feature-text">
+          <strong>Analise Historica com Graficos</strong>
+          Evolucao mensal e anual de reservas e receita, com breakdown por tipo de aula e por escola.
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">📧</div>
+        <div class="feature-text">
+          <strong>Email de Confirmacao ao Cliente</strong>
+          O cliente recebe automaticamente uma copia da reserva por email — alem do WhatsApp.
+        </div>
+      </div>
+
+    </div>
+    <div class="success-box" style="margin-top:16px;">
+      <strong>Tudo pensado para o dono da escola:</strong> sem conhecimentos tecnicos necessarios,
+      acessivel do telemovel durante uma aula, em qualquer rede movel ou Wi-Fi.
+    </div>
+  </section>
+
+  <!-- 05 — O QUE SE AJUSTA -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-num">05</div>
+      <div class="section-title">Tudo se Ajusta a Realidade da sua Escola</div>
+    </div>
+    <div class="card">
+      <p>Cada escola e diferente. Por isso, antes de lancar a plataforma, configuramos tudo
+         ao detalhe para que o sistema fale por si — sem que o cliente sinta que esta
+         a usar uma solucao generica.</p>
+      <div class="two-col-list" style="margin-top:20px;">
+        <div class="list-item"><div class="list-dot"></div>Nome, logo e identidade visual da escola</div>
+        <div class="list-item"><div class="list-dot"></div>Numero de WhatsApp exclusivo da escola</div>
+        <div class="list-item"><div class="list-dot"></div>Tipos de aulas e precos (individual, grupo, SUP...)</div>
+        <div class="list-item"><div class="list-dot"></div>Horarios disponiveis em cada dia</div>
+        <div class="list-item"><div class="list-dot"></div>Capacidade maxima por horario (ex: 6 alunos/aula)</div>
+        <div class="list-item"><div class="list-dot"></div>Ponto de encontro e instrucoes de chegada</div>
+        <div class="list-item"><div class="list-dot"></div>Mensagem de confirmacao personalizada</div>
+        <div class="list-item"><div class="list-dot"></div>Idiomas a apresentar no site do cliente</div>
+      </div>
+      <div class="highlight-box">
+        Qualquer alteracao futura — novo horario, nova aula, nova epoca — e feita de forma simples,
+        sem custos adicionais e sem tirar o sistema do ar.
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 — O QUE RECEBE -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-num">06</div>
+      <div class="section-title">O que a Escola Recebe</div>
+    </div>
+    <div class="deliverables">
+
+      <div class="deliverable-card">
+        <div class="deliverable-icon">🔗</div>
+        <div class="deliverable-title">Link unico de reservas para partilhar com clientes</div>
+      </div>
+
+      <div class="deliverable-card">
+        <div class="deliverable-icon">🖥️</div>
+        <div class="deliverable-title">Painel de administracao exclusivo com acesso privado</div>
+      </div>
+
+      <div class="deliverable-card">
+        <div class="deliverable-icon">📱</div>
+        <div class="deliverable-title">Funciona em telemovel, tablet e computador</div>
+      </div>
+
+      <div class="deliverable-card">
+        <div class="deliverable-icon">🛠️</div>
+        <div class="deliverable-title">Configuracao inicial completa e personalizada</div>
+      </div>
+
+      <div class="deliverable-card">
+        <div class="deliverable-icon">🎓</div>
+        <div class="deliverable-title">Formacao ao dono e ao staff incluida</div>
+      </div>
+
+      <div class="deliverable-card">
+        <div class="deliverable-icon">🔧</div>
+        <div class="deliverable-title">Manutencao e suporte continuo incluidos</div>
+      </div>
+
+      <div class="deliverable-card">
+        <div class="deliverable-icon">💬</div>
+        <div class="deliverable-title">Suporte direto via WhatsApp nos primeiros 30 dias</div>
+      </div>
+
+      <div class="deliverable-card">
+        <div class="deliverable-icon">📧</div>
+        <div class="deliverable-title">Email de confirmacao automatico para o cliente e para a escola</div>
+      </div>
+
+      <div class="deliverable-card">
+        <div class="deliverable-icon">⚡</div>
+        <div class="deliverable-title">Melhorias e novas funcionalidades sem custo extra</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 07 — PRECO -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-num">07</div>
+      <div class="section-title">Modelo de Pagamento — Simples e Justo</div>
+    </div>
+    <div class="pricing-intro">
+      <p>
+        O SurfBook nao cobra mensalidades fixas. Nao ha contratos de longo prazo. Nao ha custos
+        em meses de epoca baixa. O modelo assenta num principio simples e alinhado:
+      </p>
+      <p>
+        <strong>A escola paga apenas uma comissao sobre as aulas efetivamente realizadas.</strong>
+        Se nao ha aulas, nao ha custos. O nosso sucesso depende diretamente do sucesso da escola.
+      </p>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem;margin-bottom:1.5rem">
+        <div>
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--cyan);margin-bottom:.5rem">O que inclui</div>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:.4rem;font-size:.88rem;color:var(--gray)">
+            <li>✅ Plataforma de reservas online configurada</li>
+            <li>✅ Painel de gestao exclusivo da escola</li>
+            <li>✅ Confirmacoes automaticas por WhatsApp e email</li>
+            <li>✅ Suporte e atualizacoes continuas</li>
+            <li>✅ Sem custos fixos — so paga quando vende</li>
+          </ul>
+        </div>
+        <div>
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);margin-bottom:.5rem">Modelo por Patamares</div>
+          <div style="font-size:.85rem;color:var(--gray);line-height:1.6">A taxa de comissao ajusta-se automaticamente ao volume de aulas do mes. Mais aulas = taxa menor. O sistema calcula sem intervencao.</div>
+          <div style="margin-top:.8rem;font-size:.8rem;color:var(--cyan)">▸ Calculado mensalmente, de forma transparente no painel do super-admin.</div>
+        </div>
+        <div>
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#a78bfa;margin-bottom:.5rem">Regras</div>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:.4rem;font-size:.88rem;color:var(--gray)">
+            <li>📌 So sobre aulas <strong style="color:var(--white)">concluidas</strong></li>
+            <li>📌 Cancelamentos e pendentes nao contam</li>
+            <li>📌 Faturacao mensal — sem letra pequena</li>
+            <li>📌 Revisao conjunta em cada nova epoca</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Tier table -->
+      <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:1.2rem" id="pricing-tiers-wrap">
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);margin-bottom:.9rem" id="pricing-tiers-title">Os 3 Patamares</div>
+        <div id="pricing-tiers-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.8rem">
+
+          <div style="background:linear-gradient(135deg,rgba(34,197,94,.1),rgba(0,207,253,.05));border:1px solid rgba(34,197,94,.25);border-radius:12px;padding:1.2rem 1rem;text-align:center">
+            <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#86efac;margin-bottom:.6rem">Patamar 1 — Inicio</div>
+            <div style="font-size:2rem;font-weight:800;color:var(--white);line-height:1" id="tier1-val">4<span style="font-size:1.1rem">%</span></div>
+            <div style="font-size:.78rem;color:var(--gray);margin-top:.4rem">ate 25 aulas/mes</div>
+            <div style="font-size:.72rem;color:#86efac;margin-top:.5rem">Arranque e epoca baixa</div>
+          </div>
+
+          <div style="background:linear-gradient(135deg,rgba(0,112,243,.15),rgba(0,207,253,.08));border:1px solid rgba(0,207,253,.3);border-radius:12px;padding:1.2rem 1rem;text-align:center;position:relative">
+            <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--ocean),var(--cyan));color:#fff;font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:999px;white-space:nowrap">Mais comum</div>
+            <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--cyan);margin-bottom:.6rem">Patamar 2 — Crescimento</div>
+            <div style="font-size:2rem;font-weight:800;color:var(--white);line-height:1" id="tier2-val">3<span style="font-size:1.1rem">%</span></div>
+            <div style="font-size:.78rem;color:var(--gray);margin-top:.4rem">26 a 60 aulas/mes</div>
+            <div style="font-size:.72rem;color:var(--cyan);margin-top:.5rem">Escola em pleno funcionamento</div>
+          </div>
+
+          <div style="background:linear-gradient(135deg,rgba(201,168,76,.1),rgba(249,115,22,.05));border:1px solid rgba(201,168,76,.25);border-radius:12px;padding:1.2rem 1rem;text-align:center">
+            <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:.6rem">Patamar 3 — Volume</div>
+            <div style="font-size:2rem;font-weight:800;color:var(--white);line-height:1" id="tier3-val">2.5<span style="font-size:1.1rem">%</span></div>
+            <div style="font-size:.78rem;color:var(--gray);margin-top:.4rem">61+ aulas/mes</div>
+            <div style="font-size:.72rem;color:var(--gold);margin-top:.5rem">Alta produtividade — recompensa fidelidade</div>
+          </div>
+
+        </div>
+        <div style="margin-top:1rem;font-size:.78rem;color:var(--gray);text-align:center;line-height:1.6" id="pricing-example">
+          Exemplo de agosto (alta epoca): 80 aulas × €35 med × 2.5% = <strong style="color:var(--white)">€70 de comissao</strong> — escola poupa vs. taxa fixa, plataforma beneficia de volume.
+        </div>
+      </div>
+    </div>
+
+    <p class="pricing-note">
+      <strong>Transparencia total.</strong>
+      A comissao e acordada antes do arranque e visivel em tempo real no painel de administracao.
+      Cada escola conhece exatamente o que paga e porquê.
+    </p>
+  </section>
+
+  <!-- 08 — DADOS DA ESCOLA -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-num">08</div>
+      <div class="section-title">Dados Necessarios para Arrancar</div>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <p>
+        Para configurar a plataforma ao detalhe, precisamos apenas que a escola nos
+        forneça as seguintes informacoes. Com estes dados, a plataforma fica operacional
+        em <strong>1 a 2 dias uteis</strong>.
+      </p>
+    </div>
+    <div class="intake-grid">
+
+      <div class="intake-field">
+        <div class="intake-label">Nome da Escola</div>
+        <div class="intake-value">&nbsp;</div>
+        <div class="intake-hint">Ex: Arrifana Surf School</div>
+      </div>
+
+      <div class="intake-field">
+        <div class="intake-label">Numero de WhatsApp</div>
+        <div class="intake-value">&nbsp;</div>
+        <div class="intake-hint">Numero que recebe as reservas dos clientes</div>
+      </div>
+
+      <div class="intake-field">
+        <div class="intake-label">Tipos de Aulas Oferecidas</div>
+        <div class="intake-value">&nbsp;</div>
+        <div class="intake-hint">Ex: Surf Iniciacao, Surf Avancado, SUP, Bodyboard, Aula Privada</div>
+      </div>
+
+      <div class="intake-field">
+        <div class="intake-label">Precos por Tipo de Aula</div>
+        <div class="intake-value">&nbsp;</div>
+        <div class="intake-hint">Ex: Iniciacao €35/pessoa · Privada €80</div>
+      </div>
+
+      <div class="intake-field">
+        <div class="intake-label">Horarios Disponiveis (Slots)</div>
+        <div class="intake-value">&nbsp;</div>
+        <div class="intake-hint">Ex: 09:00 · 11:00 · 14:00 · 16:00</div>
+      </div>
+
+      <div class="intake-field">
+        <div class="intake-label">Capacidade Maxima por Aula</div>
+        <div class="intake-value">&nbsp;</div>
+        <div class="intake-hint">Ex: 6 alunos por horario</div>
+      </div>
+
+      <div class="intake-field full">
+        <div class="intake-label">Ponto de Encontro e Instrucoes de Chegada</div>
+        <div class="intake-value">&nbsp;</div>
+        <div class="intake-hint">Texto que e enviado automaticamente ao cliente apos confirmacao — onde se encontram, a que horas chegar, o que trazer</div>
+      </div>
+
+      <div class="intake-field">
+        <div class="intake-label">Idiomas Pretendidos</div>
+        <div class="intake-value">&nbsp;</div>
+        <div class="intake-hint">7 idiomas disponiveis: PT · EN · FR · DE · ES · NL · PT-BR (detecao automatica por pais)</div>
+      </div>
+
+      <div class="intake-field">
+        <div class="intake-label">Logo da Escola (ficheiro)</div>
+        <div class="intake-value">&nbsp;</div>
+        <div class="intake-hint">PNG ou SVG, fundo transparente preferencial</div>
+      </div>
+
+      <div class="intake-field full">
+        <div class="intake-label">Plano Escolhido</div>
+        <div class="intake-value">&nbsp;</div>
+        <div class="intake-hint">3% de arranque · Sem custos fixos · Apenas sobre aulas concluidas · Revisao anual conjunta</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 09 — DEMONSTRACAO -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-num">09</div>
+      <div class="section-title">O Modelo Atual — Veja Como Fica</div>
+    </div>
+
+    <div class="card" style="margin-bottom:28px;font-size:13.5px;line-height:1.7">
+      Abaixo pode explorar as <strong style="color:var(--white)">duas plataformas reais</strong> que a sua escola recebe.
+      O modelo de demonstracao usa o nome <em>Escola Surf Teste</em> — a sua escola teria o seu proprio nome,
+      cores, fotos, precos e ponto de encontro. Tudo configurado antes do lancamento.
+    </div>
+
+    <!-- SHOWCASE 1: Site de Reservas -->
+    <div class="showcase-block">
+      <div class="showcase-header">
+        <div class="showcase-header-icon blue">🏄</div>
+        <div>
+          <div class="showcase-label">Interface do cliente</div>
+          <div class="showcase-title">Site de Reservas — O que os seus clientes veem</div>
+          <div class="showcase-desc">Acessivel por link, QR code, Instagram ou Google. Sem app para instalar.</div>
+        </div>
+      </div>
+      <div class="showcase-body">
+        <div class="showcase-features-col">
+          <div class="showcase-feature">
+            <div class="sf-icon">🗓️</div>
+            <div>
+              <div class="sf-title">Calendario com disponibilidade real</div>
+              <div class="sf-desc">O cliente ve apenas os dias e horas com vagas — nunca marca uma aula cheia. Disponibilidade atualizada em tempo real.</div>
+            </div>
+          </div>
+          <div class="showcase-feature">
+            <div class="sf-icon">🌍</div>
+            <div>
+              <div class="sf-title">7 idiomas automaticos</div>
+              <div class="sf-desc">Deteçao pelo pais do cliente. Ingles, Frances, Alemao, Espanhol, Holandes, Portugues BR — sem selecionar nada.</div>
+            </div>
+          </div>
+          <div class="showcase-feature">
+            <div class="sf-icon">🏊</div>
+            <div>
+              <div class="sf-title">Equipamento calculado por pessoa</div>
+              <div class="sf-desc">O sistema calcula o tamanho do fato de surf de cada participante com base em peso, altura e sexo.</div>
+            </div>
+          </div>
+          <div class="showcase-feature">
+            <div class="sf-icon">📱</div>
+            <div>
+              <div class="sf-title">Reserva via WhatsApp (1 clique)</div>
+              <div class="sf-desc">A mensagem chega ao seu WhatsApp ja com todos os detalhes: data, hora, participantes, fatos e preco.</div>
+            </div>
+          </div>
+          <div class="showcase-feature">
+            <div class="sf-icon">⭐</div>
+            <div>
+              <div class="sf-title">Avaliacoes de clientes</div>
+              <div class="sf-desc">As avaliacoes verificadas aparecem na pagina — so podem avaliar clientes que fizeram reserva.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap">
+            <a href="https://auditoria-25b.pages.dev/surf" target="_blank" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;background:linear-gradient(135deg,#0070F3,#00CFFD);color:#fff;font-size:12.5px;font-weight:700;border-radius:9px;text-decoration:none;transition:opacity .2s">🔗 Abrir Site de Reservas</a>
+            <span style="display:inline-flex;align-items:center;font-size:11px;color:var(--gray-400);gap:4px">Tudo personalizado à sua escola</span>
+          </div>
+        </div>
+        <div class="device-phone-col">
+          <div>
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <iframe src="https://auditoria-25b.pages.dev/surf" loading="lazy" title="Site de Reservas Demo"></iframe>
+              </div>
+              <a class="phone-open-btn" href="https://auditoria-25b.pages.dev/surf" target="_blank">↗ Abrir em ecrã completo</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SHOWCASE 2: Admin Dashboard -->
+    <div class="showcase-block">
+      <div class="showcase-header">
+        <div class="showcase-header-icon green">📊</div>
+        <div>
+          <div class="showcase-label">Interface do dono da escola</div>
+          <div class="showcase-title">Painel de Administracao — O que a escola gere</div>
+          <div class="showcase-desc">Acesso privado por password. Funciona no telemovel e no computador.</div>
+        </div>
+      </div>
+      <div class="showcase-body reverse">
+        <div class="device-phone-col">
+          <div style="width:100%">
+            <div class="browser-frame">
+              <div class="browser-bar">
+                <div class="browser-dots">
+                  <div class="browser-dot"></div>
+                  <div class="browser-dot"></div>
+                  <div class="browser-dot"></div>
+                </div>
+                <div class="browser-url">auditoria-25b.pages.dev/admin</div>
+              </div>
+              <div class="browser-screen">
+                <iframe src="https://auditoria-25b.pages.dev/admin" loading="lazy" title="Painel Admin Demo"></iframe>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+              <a href="https://auditoria-25b.pages.dev/admin" target="_blank" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;background:linear-gradient(135deg,#059669,#10B981);color:#fff;font-size:12.5px;font-weight:700;border-radius:9px;text-decoration:none;transition:opacity .2s">🔗 Abrir Painel Admin</a>
+            </div>
+            <div class="demo-credentials" style="margin-top:12px">
+              <div class="cred-item">
+                <div class="cred-label">Email Demo</div>
+                <div class="cred-value">ivocasimiro@gmail.com</div>
+              </div>
+              <div class="cred-item">
+                <div class="cred-label">Password Demo</div>
+                <div class="cred-value">Teste2025!</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="showcase-features-col">
+          <div class="showcase-feature">
+            <div class="sf-icon" style="background:rgba(16,185,129,.12)">📅</div>
+            <div>
+              <div class="sf-title">Briefing diario por horario</div>
+              <div class="sf-desc">Ve quantos alunos tem em cada slot do dia, com lista de nomes, equipamento e nivel de cada um — tudo pronto antes de chegar a praia.</div>
+            </div>
+          </div>
+          <div class="showcase-feature">
+            <div class="sf-icon" style="background:rgba(16,185,129,.12)">✅</div>
+            <div>
+              <div class="sf-title">Confirmar / cancelar com 1 clique</div>
+              <div class="sf-desc">O cliente recebe uma mensagem automatica no WhatsApp com a confirmacao ou alternativa — sem ter que escrever nada.</div>
+            </div>
+          </div>
+          <div class="showcase-feature">
+            <div class="sf-icon" style="background:rgba(16,185,129,.12)">📊</div>
+            <div>
+              <div class="sf-title">Analise historica com graficos</div>
+              <div class="sf-desc">Revenue por mes, bookings por tipo de aula, ranking de nacionalidades — dados para tomar melhores decisoes.</div>
+            </div>
+          </div>
+          <div class="showcase-feature">
+            <div class="sf-icon" style="background:rgba(16,185,129,.12)">📇</div>
+            <div>
+              <div class="sf-title">Cartao QR pronto a imprimir</div>
+              <div class="sf-desc">Gere um cartao com o QR code da sua escola para colocar na praia, restaurantes e parceiros — clientes escaneiam e reservam.</div>
+            </div>
+          </div>
+          <div class="showcase-feature">
+            <div class="sf-icon" style="background:rgba(16,185,129,.12)">🔔</div>
+            <div>
+              <div class="sf-title">Notificacoes em tempo real</div>
+              <div class="sf-desc">Cada nova reserva aparece instantaneamente no painel. Notificacao visual + WhatsApp — nunca perde uma marcacao.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="personalized-note">
+      <strong>Tudo isto e personalizado exclusivamente para a sua escola.</strong>
+      O nome, logo, cores, preco das aulas, horarios, ponto de encontro e mensagem WhatsApp
+      sao configurados antes do lancamento. Nenhuma outra escola partilha o seu painel ou o seu link de reservas.
+      A plataforma e totalmente isolada por escola — os seus dados sao exclusivamente seus.
+    </div>
+  </section>
+
+  <!-- 10 — PROXIMOS PASSOS -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-num">10</div>
+      <div class="section-title">Como Comecar — Proximos Passos</div>
+    </div>
+    <div class="card">
+      <div class="steps-timeline">
+
+        <div class="timeline-item">
+          <div class="timeline-left">
+            <div class="timeline-circle">1</div>
+            <div class="timeline-line"></div>
+          </div>
+          <div class="timeline-body">
+            <div class="timeline-title">Reuniao de apresentacao (30 min)</div>
+            <div class="timeline-desc">
+              Vemos a plataforma juntos, esclarecem-se todas as duvidas e percebemos
+              as necessidades especificas da escola. Presencial ou por videochamada.
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-left">
+            <div class="timeline-circle">2</div>
+            <div class="timeline-line"></div>
+          </div>
+          <div class="timeline-body">
+            <div class="timeline-title">Recolha de informacoes da escola (1 dia)</div>
+            <div class="timeline-desc">
+              A escola fornece os dados do formulario acima — aulas, precos, horarios,
+              logotipo e ponto de encontro. Nao precisa de saber nada de tecnologia.
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-left">
+            <div class="timeline-circle">3</div>
+            <div class="timeline-line"></div>
+          </div>
+          <div class="timeline-body">
+            <div class="timeline-title">Configuracao completa (1 a 2 dias uteis)</div>
+            <div class="timeline-desc">
+              Criamos o site de reservas personalizado, configuramos o painel de administracao
+              e testamos todo o fluxo de ponta a ponta.
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-left">
+            <div class="timeline-circle">4</div>
+            <div class="timeline-line"></div>
+          </div>
+          <div class="timeline-body">
+            <div class="timeline-title">Formacao ao dono e staff (1 hora)</div>
+            <div class="timeline-desc">
+              Sessao pratica para dominar o dashboard, confirmar marcacoes, usar o briefing
+              diario e tirar o maximo da plataforma desde o primeiro dia.
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-left">
+            <div class="timeline-circle">5</div>
+            <div class="timeline-line"></div>
+          </div>
+          <div class="timeline-body">
+            <div class="timeline-title">Lançamento — a escola fica online</div>
+            <div class="timeline-desc">
+              O link de reservas fica disponivel. Partilhamos nos canais da escola.
+              A partir daqui, comecam a chegar reservas automaticas — 24h por dia.
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-left">
+            <div class="timeline-circle">6</div>
+            <div class="timeline-line"></div>
+          </div>
+          <div class="timeline-body">
+            <div class="timeline-title">Acompanhamento nos primeiros 30 dias (incluido)</div>
+            <div class="timeline-desc">
+              Suporte direto via WhatsApp. Ajustes, otimizacoes e resposta rapida
+              a qualquer questao. A escola nunca esta sozinha.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 — CONDICOES & RESCISAO -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-num">11</div>
+      <div class="section-title">Condicoes de Servico, Rescisao e Garantias</div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.25rem">
+      <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--cyan);margin-bottom:.9rem">Acesso a Plataforma</div>
+      <p style="font-size:.88rem;line-height:1.65;color:#cbd5e1;margin-bottom:.7rem">
+        O acesso a plataforma SurfBook e concedido a escola enquanto o acordo comercial estiver activo e as comissoes
+        estiverem em dia. A plataforma inclui o site de reservas publico, o painel de administracao e suporte tecnico continuo.
+      </p>
+      <p style="font-size:.88rem;line-height:1.65;color:#cbd5e1">
+        Nao existe qualquer custo fixo mensal — a escola so paga comissao sobre aulas efectivamente realizadas e registadas como <em>Concluidas</em> no sistema.
+      </p>
+    </div>
+
+    <div class="card" style="margin-bottom:1.25rem">
+      <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--cyan);margin-bottom:.9rem">Comissoes & Pagamentos</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:.9rem">
+          <div style="font-size:.75rem;font-weight:700;color:var(--white);margin-bottom:.4rem">Apuracao</div>
+          <div style="font-size:.82rem;color:#94a3b8;line-height:1.55">As comissoes sao calculadas automaticamente no final de cada mes com base nas aulas marcadas como <em>Concluidas</em>.</div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:.9rem">
+          <div style="font-size:.75rem;font-weight:700;color:var(--white);margin-bottom:.4rem">Prazo de Pagamento</div>
+          <div style="font-size:.82rem;color:#94a3b8;line-height:1.55">Pagamento ate ao dia 10 do mes seguinte. Apos 30 dias de incumprimento, o acesso e automaticamente suspenso ate regularizacao.</div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:.9rem">
+          <div style="font-size:.75rem;font-weight:700;color:var(--white);margin-bottom:.4rem">Auditoria</div>
+          <div style="font-size:.82rem;color:#94a3b8;line-height:1.55">Cada aula tem registo imutavel com timestamp. Aulas marcadas como Concluidas nao podem ser revertidas pela escola — garantindo integridade total do historico.</div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:.9rem">
+          <div style="font-size:.75rem;font-weight:700;color:var(--white);margin-bottom:.4rem">Transparencia</div>
+          <div style="font-size:.82rem;color:#94a3b8;line-height:1.55">A escola ve em tempo real as comissoes acumuladas no seu painel. O super-administrador tem visao global e historico completo de todas as escolas.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.25rem">
+      <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#ef4444;margin-bottom:1rem">Rescisao do Servico</div>
+      <div style="display:flex;flex-direction:column;gap:.8rem">
+
+        <div style="display:flex;gap:1rem;align-items:flex-start;padding:.85rem;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.18);border-radius:10px">
+          <div style="background:#ef4444;color:#fff;border-radius:8px;padding:.3rem .6rem;font-size:.72rem;font-weight:700;white-space:nowrap;flex-shrink:0">Imediata</div>
+          <div>
+            <div style="font-size:.82rem;font-weight:600;color:var(--white);margin-bottom:.2rem">Rescisao imediata sem aviso previo</div>
+            <div style="font-size:.8rem;color:#94a3b8;line-height:1.5">Fraude comprovada (ex: manipulacao de registos), falsificacao de dados, atividade ilegal, danos graves a reputacao da plataforma ou de clientes. O acesso e bloqueado instantaneamente e os dados ficam retidos para auditoria.</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:1rem;align-items:flex-start;padding:.85rem;background:rgba(234,179,8,.06);border:1px solid rgba(234,179,8,.18);border-radius:10px">
+          <div style="background:#eab308;color:#fff;border-radius:8px;padding:.3rem .6rem;font-size:.72rem;font-weight:700;white-space:nowrap;flex-shrink:0">7 dias</div>
+          <div>
+            <div style="font-size:.82rem;font-weight:600;color:var(--white);margin-bottom:.2rem">Incumprimento de pagamento</div>
+            <div style="font-size:.8rem;color:#94a3b8;line-height:1.5">Comissoes em atraso ha mais de 30 dias apos 2 avisos escritos (WhatsApp/email). O acesso e suspenso apos 7 dias de aviso final. Retomado apos regularizacao integral da divida.</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:1rem;align-items:flex-start;padding:.85rem;background:rgba(0,207,253,.05);border:1px solid rgba(0,207,253,.15);border-radius:10px">
+          <div style="background:var(--cyan);color:#05101e;border-radius:8px;padding:.3rem .6rem;font-size:.72rem;font-weight:700;white-space:nowrap;flex-shrink:0">30 dias</div>
+          <div>
+            <div style="font-size:.82rem;font-weight:600;color:var(--white);margin-bottom:.2rem">Rescisao unilateral por razoes comerciais</div>
+            <div style="font-size:.8rem;color:#94a3b8;line-height:1.5">Qualquer das partes pode encerrar o acordo com 30 dias de aviso escrito, sem penalizacao. As reservas futuras existentes devem ser honradas ou os clientes reembolsados pela escola. As comissoes em divida mantem-se exigiveis.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.25rem">
+      <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:.9rem">Dados Apos Rescisao</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem">
+        <div style="text-align:center;padding:.85rem .5rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px">
+          <div style="font-size:1.5rem;margin-bottom:.35rem">📦</div>
+          <div style="font-size:.75rem;font-weight:700;color:var(--white);margin-bottom:.25rem">Exportacao</div>
+          <div style="font-size:.75rem;color:#94a3b8;line-height:1.4">Historico completo de reservas disponivel para download em CSV durante 30 dias</div>
+        </div>
+        <div style="text-align:center;padding:.85rem .5rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px">
+          <div style="font-size:1.5rem;margin-bottom:.35rem">🔒</div>
+          <div style="font-size:.75rem;font-weight:700;color:var(--white);margin-bottom:.25rem">Retencao</div>
+          <div style="font-size:.75rem;color:#94a3b8;line-height:1.4">Dados retidos por 2 anos para cumprimento legal (RGPD), depois eliminados</div>
+        </div>
+        <div style="text-align:center;padding:.85rem .5rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px">
+          <div style="font-size:1.5rem;margin-bottom:.35rem">🌐</div>
+          <div style="font-size:.75rem;font-weight:700;color:var(--white);margin-bottom:.25rem">Site</div>
+          <div style="font-size:.75rem;color:#94a3b8;line-height:1.4">Site de reservas e painel desativados imediatamente apos rescisao efectiva</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray);margin-bottom:.9rem">Garantias & Limitacao de Responsabilidade</div>
+      <div style="font-size:.83rem;color:#94a3b8;line-height:1.65">
+        A plataforma SurfBook compromete-se a disponibilidade continua do servico com objetivo de 99% uptime.
+        Eventuais interrupcoes de manutencao sao comunicadas com 24h de antecedencia sempre que possivel.
+        A plataforma nao e responsavel por disputas comerciais entre a escola e os seus clientes, nem por
+        conteudo inserido pela escola. A escola e responsavel pela veracidade dos seus dados e pelo cumprimento
+        das obrigacoes legais com os seus clientes (seguros, certidoes, legislacao aplicavel).
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 12: Custos de Infraestrutura -->
+  <section class="section wrapper">
+    <div class="section-header">
+      <div class="section-num">12</div>
+      <div class="section-title">Custos de Infraestrutura & Opcoes de Crescimento</div>
+    </div>
+
+    <!-- Intro -->
+    <div class="card" style="margin-bottom:1.25rem">
+      <p style="font-size:.88rem;line-height:1.7;color:#cbd5e1;margin-bottom:.65rem">
+        A plataforma SurfBook funciona sobre infraestrutura cloud de terceiros (Cloudflare + Supabase). Estes custos sao absorvidos pela plataforma no plano de arranque, mas e importante que perceba o que existe por baixo — para que possa tomar decisoes informadas se quiser crescer ou ter mais independencia no futuro.
+      </p>
+    </div>
+
+    <!-- Supabase free vs pro -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:1.25rem">
+
+      <!-- Free -->
+      <div style="background:var(--navy-card);border:1px solid rgba(239,68,68,.3);border-radius:var(--radius);padding:24px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#ef4444,#f97316)"></div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <div style="width:38px;height:38px;background:rgba(239,68,68,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0">🆓</div>
+          <div>
+            <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#f87171">Supabase Free</div>
+            <div style="font-size:1.1rem;font-weight:800;color:var(--white)">€0 / mes</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.55rem">
+          <div style="display:flex;gap:.6rem;align-items:flex-start">
+            <span style="color:#10b981;flex-shrink:0;font-size:.85rem">✓</span>
+            <span style="font-size:.82rem;color:#94a3b8">500 MB base de dados · 1 GB armazenamento</span>
+          </div>
+          <div style="display:flex;gap:.6rem;align-items:flex-start">
+            <span style="color:#10b981;flex-shrink:0;font-size:.85rem">✓</span>
+            <span style="font-size:.82rem;color:#94a3b8">Funcional para fase de arranque</span>
+          </div>
+          <div style="display:flex;gap:.6rem;align-items:flex-start;margin-top:.25rem">
+            <span style="color:#ef4444;flex-shrink:0;font-size:.85rem">⚠</span>
+            <span style="font-size:.82rem;color:#f87171;line-height:1.5"><strong>Pausa automatica apos 7 dias sem actividade</strong> — se ninguem aceder ao site ou painel durante 1 semana, a base de dados hiberna e as reservas param de funcionar ate reactivacao manual.</span>
+          </div>
+          <div style="display:flex;gap:.6rem;align-items:flex-start">
+            <span style="color:#ef4444;flex-shrink:0;font-size:.85rem">⚠</span>
+            <span style="font-size:.82rem;color:#f87171">Sem backups automaticos diarios</span>
+          </div>
+          <div style="display:flex;gap:.6rem;align-items:flex-start">
+            <span style="color:#ef4444;flex-shrink:0;font-size:.85rem">⚠</span>
+            <span style="font-size:.82rem;color:#f87171">Sem SLA de disponibilidade garantido</span>
+          </div>
+        </div>
+        <div style="margin-top:14px;padding:.6rem .85rem;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;font-size:.78rem;color:#fca5a5;line-height:1.5">
+          <strong>Risco real:</strong> Em periodos de epoca baixa ou fecho da escola, o sistema pode pausar mesmo com reservas futuras pendentes.
+        </div>
+      </div>
+
+      <!-- Pro -->
+      <div style="background:var(--navy-card);border:1px solid rgba(16,185,129,.3);border-radius:var(--radius);padding:24px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--green),#34d399)"></div>
+        <div style="position:absolute;top:12px;right:12px;background:linear-gradient(135deg,var(--green),#34d399);color:#fff;font-size:.65rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:3px 10px;border-radius:999px">Recomendado</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <div style="width:38px;height:38px;background:rgba(16,185,129,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0">🔒</div>
+          <div>
+            <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--green)">Supabase Pro</div>
+            <div style="font-size:1.1rem;font-weight:800;color:var(--white)">~€23 / mes</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.55rem">
+          <div style="display:flex;gap:.6rem;align-items:flex-start">
+            <span style="color:#10b981;flex-shrink:0;font-size:.85rem">✓</span>
+            <span style="font-size:.82rem;color:#cbd5e1"><strong>Sem pausas</strong> — base de dados sempre activa, 24/7/365</span>
+          </div>
+          <div style="display:flex;gap:.6rem;align-items:flex-start">
+            <span style="color:#10b981;flex-shrink:0;font-size:.85rem">✓</span>
+            <span style="font-size:.82rem;color:#cbd5e1">Backups diarios automaticos com restauro em 1 clique</span>
+          </div>
+          <div style="display:flex;gap:.6rem;align-items:flex-start">
+            <span style="color:#10b981;flex-shrink:0;font-size:.85rem">✓</span>
+            <span style="font-size:.82rem;color:#cbd5e1">8 GB base de dados · 100 GB armazenamento</span>
+          </div>
+          <div style="display:flex;gap:.6rem;align-items:flex-start">
+            <span style="color:#10b981;flex-shrink:0;font-size:.85rem">✓</span>
+            <span style="font-size:.82rem;color:#cbd5e1">Suporte prioritario com SLA</span>
+          </div>
+          <div style="display:flex;gap:.6rem;align-items:flex-start">
+            <span style="color:#10b981;flex-shrink:0;font-size:.85rem">✓</span>
+            <span style="font-size:.82rem;color:#cbd5e1">Logs de auditoria e autenticacao avancada</span>
+          </div>
+        </div>
+        <div style="margin-top:14px;padding:.6rem .85rem;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:8px;font-size:.78rem;color:#6ee7b7;line-height:1.5">
+          Com 10 aulas/mes a €35 = €350 facturado → comissao de 3% = €10,50. O Pro paga-se com ~22 aulas/mes.
+        </div>
+      </div>
+    </div>
+
+    <!-- Quando faz sentido actualizar -->
+    <div class="card" style="margin-bottom:1.25rem">
+      <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--cyan);margin-bottom:.9rem">Quando Faz Sentido Actualizar para Pro</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem">
+        <div style="text-align:center;padding:.85rem .6rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px">
+          <div style="font-size:1.4rem;margin-bottom:.35rem">📅</div>
+          <div style="font-size:.78rem;font-weight:700;color:var(--white);margin-bottom:.25rem">Escola ativa todo o ano</div>
+          <div style="font-size:.75rem;color:#94a3b8;line-height:1.4">Se fechar temporada, o Free pausa. Com o Pro, o calendario e reservas funcionam sempre.</div>
+        </div>
+        <div style="text-align:center;padding:.85rem .6rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px">
+          <div style="font-size:1.4rem;margin-bottom:.35rem">🔑</div>
+          <div style="font-size:.78rem;font-weight:700;color:var(--white);margin-bottom:.25rem">Mais de 20 aulas/mes</div>
+          <div style="font-size:.75rem;color:#94a3b8;line-height:1.4">A partir deste volume, o custo do Pro e diluido e a fiabilidade justifica completamente.</div>
+        </div>
+        <div style="text-align:center;padding:.85rem .6rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px">
+          <div style="font-size:1.4rem;margin-bottom:.35rem">🛡️</div>
+          <div style="font-size:.78rem;font-weight:700;color:var(--white);margin-bottom:.25rem">Dados criticos</div>
+          <div style="font-size:.75rem;color:#94a3b8;line-height:1.4">Se nao quer arriscar perder historico de reservas, os backups diarios do Pro dao essa tranquilidade.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Opcoes de branding -->
+    <div class="card" style="margin-bottom:1.25rem">
+      <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:.9rem">Opcoes de Branding & Personalizacao</div>
+      <div style="display:flex;flex-direction:column;gap:.75rem">
+
+        <div style="display:flex;gap:1rem;align-items:flex-start;padding:.85rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:10px">
+          <div style="background:rgba(0,207,253,.15);border-radius:8px;padding:.35rem .7rem;font-size:.72rem;font-weight:700;color:var(--cyan);white-space:nowrap;flex-shrink:0;min-width:80px;text-align:center">Incluido</div>
+          <div>
+            <div style="font-size:.84rem;font-weight:600;color:var(--white);margin-bottom:.2rem">URL partilhado — surfbook.pt/escola</div>
+            <div style="font-size:.8rem;color:#94a3b8;line-height:1.5">Cada escola tem a sua sub-pagina dentro da plataforma SurfBook. Ex: <code style="color:var(--cyan);background:rgba(0,207,253,.08);padding:1px 5px;border-radius:4px">auditoria-25b.pages.dev/arrifana</code>. Sem custos adicionais.</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:1rem;align-items:flex-start;padding:.85rem;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:10px">
+          <div style="background:rgba(245,158,11,.2);border-radius:8px;padding:.35rem .7rem;font-size:.72rem;font-weight:700;color:var(--gold);white-space:nowrap;flex-shrink:0;min-width:80px;text-align:center">Opcional</div>
+          <div>
+            <div style="font-size:.84rem;font-weight:600;color:var(--white);margin-bottom:.2rem">Dominio proprio — reservas.minhaescola.pt</div>
+            <div style="font-size:.8rem;color:#94a3b8;line-height:1.5">A escola regista o seu proprio dominio (~€10-15/ano) e apontamos o site de reservas para ele via DNS. O painel e sistema continuam centralizados. <strong style="color:var(--gold)">Custo: dominio a cargo da escola + configuracao tecnica gratuita pela SurfBook.</strong></div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:1rem;align-items:flex-start;padding:.85rem;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:10px">
+          <div style="background:rgba(245,158,11,.2);border-radius:8px;padding:.35rem .7rem;font-size:.72rem;font-weight:700;color:var(--gold);white-space:nowrap;flex-shrink:0;min-width:80px;text-align:center">Opcional</div>
+          <div>
+            <div style="font-size:.84rem;font-weight:600;color:var(--white);margin-bottom:.2rem">Logotipo & cores da escola</div>
+            <div style="font-size:.8rem;color:#94a3b8;line-height:1.5">Site de reservas com as cores e logotipo da escola em vez da identidade SurfBook. Ideal para escolas com marca forte. <strong style="color:var(--gold)">Custo: a combinar (trabalho de personalizacao pontual).</strong></div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:1rem;align-items:flex-start;padding:.85rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:10px">
+          <div style="background:rgba(167,139,250,.2);border-radius:8px;padding:.35rem .7rem;font-size:.72rem;font-weight:700;color:#a78bfa;white-space:nowrap;flex-shrink:0;min-width:80px;text-align:center">Futuro</div>
+          <div>
+            <div style="font-size:.84rem;font-weight:600;color:var(--white);margin-bottom:.2rem">App iOS / Android (PWA)</div>
+            <div style="font-size:.8rem;color:#94a3b8;line-height:1.5">Versao instalavel no telemovel para o admin gerir reservas em movimento. No roadmap para 2026/27. Sem custo adicional previsto para escolas parceiras.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Resumo tabela custos -->
+    <div class="card">
+      <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray-400);margin-bottom:1rem">Resumo de Custos de Infraestrutura</div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:.82rem">
+          <thead>
+            <tr style="border-bottom:1px solid rgba(0,207,253,.2)">
+              <th style="text-align:left;padding:.6rem .75rem;color:var(--gray-400);font-weight:600;font-size:.75rem">Item</th>
+              <th style="text-align:center;padding:.6rem .75rem;color:var(--gray-400);font-weight:600;font-size:.75rem">Fase Arranque</th>
+              <th style="text-align:center;padding:.6rem .75rem;color:var(--gray-400);font-weight:600;font-size:.75rem">Opcao Pro</th>
+              <th style="text-align:left;padding:.6rem .75rem;color:var(--gray-400);font-weight:600;font-size:.75rem">Responsavel</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.05)">
+              <td style="padding:.6rem .75rem;color:#cbd5e1">Hosting (Cloudflare Pages)</td>
+              <td style="padding:.6rem .75rem;text-align:center;color:#10b981;font-weight:600">Gratuito</td>
+              <td style="padding:.6rem .75rem;text-align:center;color:#10b981;font-weight:600">Gratuito</td>
+              <td style="padding:.6rem .75rem;color:#94a3b8">SurfBook</td>
+            </tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.05)">
+              <td style="padding:.6rem .75rem;color:#cbd5e1">Base de dados (Supabase Free)</td>
+              <td style="padding:.6rem .75rem;text-align:center;color:#10b981;font-weight:600">€0 / mes</td>
+              <td style="padding:.6rem .75rem;text-align:center;color:#94a3b8">—</td>
+              <td style="padding:.6rem .75rem;color:#94a3b8">SurfBook</td>
+            </tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.05)">
+              <td style="padding:.6rem .75rem;color:#cbd5e1">Base de dados (Supabase Pro)</td>
+              <td style="padding:.6rem .75rem;text-align:center;color:#94a3b8">—</td>
+              <td style="padding:.6rem .75rem;text-align:center;color:var(--gold);font-weight:600">~€23 / mes</td>
+              <td style="padding:.6rem .75rem;color:#94a3b8">SurfBook (partilhado)</td>
+            </tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.05)">
+              <td style="padding:.6rem .75rem;color:#cbd5e1">Dominio proprio da escola</td>
+              <td style="padding:.6rem .75rem;text-align:center;color:#94a3b8">—</td>
+              <td style="padding:.6rem .75rem;text-align:center;color:var(--gold);font-weight:600">€10–15 / ano</td>
+              <td style="padding:.6rem .75rem;color:#94a3b8">Escola</td>
+            </tr>
+            <tr style="border-bottom:1px solid rgba(255,255,255,.05)">
+              <td style="padding:.6rem .75rem;color:#cbd5e1">Personalizacao visual (logo/cores)</td>
+              <td style="padding:.6rem .75rem;text-align:center;color:#94a3b8">—</td>
+              <td style="padding:.6rem .75rem;text-align:center;color:var(--gold);font-weight:600">A combinar</td>
+              <td style="padding:.6rem .75rem;color:#94a3b8">SurfBook</td>
+            </tr>
+            <tr>
+              <td style="padding:.6rem .75rem;color:#cbd5e1">Notificacoes WhatsApp</td>
+              <td style="padding:.6rem .75rem;text-align:center;color:#10b981;font-weight:600">Gratuito (wa.me)</td>
+              <td style="padding:.6rem .75rem;text-align:center;color:#10b981;font-weight:600">Gratuito (wa.me)</td>
+              <td style="padding:.6rem .75rem;color:#94a3b8">SurfBook</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:1rem;padding:.7rem 1rem;background:rgba(0,207,253,.06);border:1px solid rgba(0,207,253,.15);border-radius:8px;font-size:.8rem;color:#a0c4d4;line-height:1.55">
+        <strong style="color:var(--cyan)">Nota:</strong> Na fase actual, todos os custos de infraestrutura sao suportados pela SurfBook. Se e quando a plataforma escalar para o plano Pro, esses custos sao partilhados entre as escolas activas — o que significa que cada escola contribui centimos por mes para uma infraestrutura mais robusta. Sem surpresas.
+      </div>
+    </div>
+
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-block">
+    <h3>Pronto para transformar as reservas da sua escola?</h3>
+    <p>
+      Nao precisa de experiencia em tecnologia. Nao precisa de mudar o que ja funciona.
+      Precisamos apenas de uma conversa de 30 minutos para ver se faz sentido para si.
+    </p>
+    <div style="margin-bottom:2rem">
+      <a href="/parceiros" style="display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#0070F3,#00CFFD);color:#fff;font-size:1rem;font-weight:700;padding:14px 36px;border-radius:12px;text-decoration:none;letter-spacing:.02em;transition:opacity .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        🏄 Quero Aderir — Submeter Candidatura
+      </a>
+      <div style="margin-top:.9rem;font-size:.78rem;color:var(--gray-400)">Sem custos de adesão · Resposta em 24h · Começa em menos de 1 semana</div>
+    </div>
+    <div class="cta-contacts">
+      <div class="cta-contact">
+        <span class="cta-contact-label">Contacto</span>
+        <span class="cta-contact-value">Ivo Casimiro</span>
+      </div>
+      <div class="cta-contact">
+        <span class="cta-contact-label">WhatsApp / Telefone</span>
+        <span class="cta-contact-value">+351 962 800 400</span>
+      </div>
+      <div class="cta-contact">
+        <span class="cta-contact-label">Email</span>
+        <span class="cta-contact-value">ivocasimiro@gmail.com</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer">
+      <div>
+        <div class="footer-brand">SurfBook</div>
+        <div class="footer-tagline">Plataforma Digital de Marcacoes para Escolas de Surf</div>
+      </div>
+      <div class="contact-grid">
+        <div class="contact-item">
+          <div class="contact-label">Responsavel</div>
+          <div class="contact-value">Ivo Casimiro</div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-label">Email</div>
+          <div class="contact-value">ivocasimiro@gmail.com</div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-label">Telefone / WhatsApp</div>
+          <div class="contact-value">+351 962 800 400</div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-copy">
+      Documento confidencial — Proposta comercial SurfBook · Junho 2026
+    </div>
+  </footer>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(async function() {
+  const p      = new URLSearchParams(location.search);
+  const escola = p.get('escola');
+  const nomeP  = p.get('nome');
+
+  // Tiers encoded directly in the URL (from super-admin modal link)
+  const tiersEncoded = p.get('t');
+  if (tiersEncoded) {
+    try {
+      const tiers = JSON.parse(atob(tiersEncoded));
+      if (tiers?.length) renderTiers(tiers, nomeP);
+    } catch(_) {}
+  }
+
+  // Personalise hero name (from URL param first, will be overridden by Supabase if available)
+  function setHeroName(n) {
+    const el = document.getElementById('hero-escola');
+    if (el && n) { el.textContent = n + ' · Portugal'; document.title = 'SurfBook — Proposta para ' + n; }
+  }
+  if (nomeP) setHeroName(nomeP);
+
+  // Back button to super-admin when accessed from there
+  if (escola) {
+    const bar = document.getElementById('print-bar');
+    if (bar) {
+      const backBtn = document.createElement('a');
+      backBtn.href = '/super-admin';
+      backBtn.style.cssText = 'display:flex;align-items:center;gap:6px;color:#94a3b8;font-size:.8rem;font-weight:600;text-decoration:none;padding:6px 12px;border:1px solid rgba(255,255,255,.12);border-radius:7px;background:rgba(255,255,255,.05)';
+      backBtn.innerHTML = '← Super Admin';
+      bar.insertBefore(backBtn, bar.firstChild);
+    }
+  }
+
+  function renderTiers(tiers, nomeEscola) {
+    const grid  = document.getElementById('pricing-tiers-grid');
+    const title = document.getElementById('pricing-tiers-title');
+    const ex    = document.getElementById('pricing-example');
+    if (!grid || !tiers?.length) return;
+
+    const colors = [
+      { bg:'rgba(34,197,94,.1)',  border:'rgba(34,197,94,.25)',  text:'#86efac'  },
+      { bg:'rgba(0,112,243,.15)', border:'rgba(0,207,253,.3)',   text:'#00CFFD'  },
+      { bg:'rgba(201,168,76,.1)', border:'rgba(201,168,76,.25)', text:'#F59E0B'  },
+      { bg:'rgba(167,139,250,.1)',border:'rgba(167,139,250,.3)', text:'#a78bfa'  },
+    ];
+
+    if (title) title.textContent = 'Patamares acordados' + (nomeEscola ? ' — ' + nomeEscola : '');
+
+    if (tiers.length === 1) {
+      // Single fixed rate
+      const rate = (tiers[0].rate * 100);
+      grid.innerHTML = `
+        <div style="grid-column:1/-1;background:linear-gradient(135deg,rgba(0,112,243,.18),rgba(0,207,253,.1));border:2px solid rgba(0,207,253,.45);border-radius:16px;padding:2rem;text-align:center;position:relative">
+          <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--ocean),var(--cyan));color:#fff;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 12px;border-radius:999px;white-space:nowrap">Taxa personalizada</div>
+          <div style="font-size:3.5rem;font-weight:900;color:var(--white);line-height:1;margin-bottom:.5rem">${rate.toFixed(1)}<span style="font-size:1.8rem">%</span></div>
+          <div style="font-size:.9rem;color:var(--cyan);font-weight:600">Comissao fixa sobre aulas concluidas</div>
+          <div style="font-size:.8rem;color:var(--gray);margin-top:.5rem">Sem mensalidades · So paga quando vende · Revisao anual conjunta</div>
+        </div>`;
+      if (ex) { const e=(rate/100*35*80).toFixed(0); ex.innerHTML=`Exemplo agosto: 80 aulas × €35 × ${rate.toFixed(1)}% = <strong style="color:var(--white)">€${e} de comissao</strong>.`; }
+    } else {
+      // Multi-tier
+      grid.innerHTML = tiers.map((t, i) => {
+        const c    = colors[i % colors.length];
+        const prev = tiers[i-1];
+        const rangeLabel = t.max == null
+          ? `${prev ? (prev.max+1)+'+ aulas/mês' : '61+ aulas/mês'}`
+          : `${prev ? (prev.max+1) : 1} – ${t.max} aulas/mês`;
+        const isMiddle = i > 0 && i < tiers.length - 1;
+        const rate = (t.rate * 100).toFixed(1);
+        return `
+          <div style="background:${c.bg};border:1px solid ${c.border};border-radius:12px;padding:1.2rem 1rem;text-align:center;position:relative">
+            ${isMiddle ? `<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--ocean),var(--cyan));color:#fff;font-size:.62rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 9px;border-radius:999px;white-space:nowrap">Mais comum</div>` : ''}
+            <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:${c.text};margin-bottom:.6rem">${t.label || 'Patamar '+(i+1)}</div>
+            <div style="font-size:2rem;font-weight:800;color:var(--white);line-height:1">${rate}<span style="font-size:1.1rem">%</span></div>
+            <div style="font-size:.78rem;color:var(--gray);margin-top:.4rem">${rangeLabel}</div>
+          </div>`;
+      }).join('');
+      // Example uses last tier rate
+      const lastRate = (tiers[tiers.length-1].rate * 100).toFixed(1);
+      if (ex) { const e=(tiers[tiers.length-1].rate*35*80).toFixed(0); ex.innerHTML=`Exemplo agosto (alta epoca): 80 aulas × €35 × ${lastRate}% = <strong style="color:var(--white)">€${e} de comissao</strong> — volume premiado, modelo justo.`; }
+    }
+  }
+
+  // Try to load from Supabase
+  if (escola) {
+    try {
+      const { createClient } = supabase;
+      const sb = createClient(
+        'https://ubeqidccuvsjhjphybxz.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InViZXFpZGNjdXZzamhqcGh5Ynh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDI0NTYsImV4cCI6MjA5NTkxODQ1Nn0.wyCBBMSuRfxrz935XifGa3Chgv64o4-ACvP5rCj7t1U'
+      );
+      const { data } = await sb.from('schools').select('name,commission_tiers,commission_rate').eq('id', escola).single();
+      if (data) {
+        const nome = data.name || nomeP;
+        if (nome) setHeroName(nome);
+        if (data.commission_tiers?.length) {
+          renderTiers(data.commission_tiers, nome);
+        } else if (data.commission_rate) {
+          renderTiers([{ label: 'Taxa Acordada', max: null, rate: data.commission_rate }], nome);
+        }
+      }
+    } catch(_) {}
+  }
+
+  // URL param fallback (comissao=3.5 with no escola in DB)
+  const comissaoP = p.get('comissao');
+  if (comissaoP && !escola) {
+    const rate = parseFloat(comissaoP);
+    if (!isNaN(rate) && rate > 0) renderTiers([{ label: 'Taxa Acordada', max: null, rate: rate / 100 }], nomeP);
+  }
+})();
+</script>
+</body>
+</html>
