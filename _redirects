@@ -1,0 +1,6 @@
+# Aliases de URL limpos — Cloudflare Pages
+/surf           /index.html     200
+/reservar       /index.html     200
+/avaliar        /review.html    200
+/configurar     /onboarding.html 200
+/candidatura    /parceiros.html 200
